@@ -467,4 +467,329 @@ function DateField({ value, onChange }) {
   }
 
   return (
-    <div style={
+    <div style={{ position: "relative" }}>
+      <button
+        type="button"
+        className="no-press"
+        onClick={() => setOpen((o) => !o)}
+        style={{
+          width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
+          borderRadius: 12, padding: "12px 14px", color: C.inputText, fontFamily: SANS, fontSize: 15,
+          textAlign: "left", cursor: "pointer",
+        }}
+      >
+        {value ? fmtDateDisplay(value) : "Select date"}
+      </button>
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
+          <div style={{
+            position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: 272,
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: 14,
+            boxShadow: "0 10px 28px rgba(0,0,0,0.16)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <button type="button" onClick={prevMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
+                <ChevronLeft size={16} />
+              </button>
+              <div style={{ fontWeight: 700, fontSize: 13.5, fontFamily: SANS }}>{MONTHS[viewMonth]} {viewYear}</div>
+              <button type="button" onClick={nextMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
+                <ChevronRight size={16} />
+              </button>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 2 }}>
+              {WEEKDAYS.map((w, i) => (
+                <div key={i} style={{ textAlign: "center", fontSize: 11, color: C.muted, fontWeight: 600, padding: "3px 0" }}>{w}</div>
+              ))}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
+              {cells.map((d, i) => {
+                if (!d) return <div key={i} />;
+                const iso = `${viewYear}-${pad(viewMonth + 1)}-${pad(d)}`;
+                const isSelected = iso === value;
+                return (
+                  <button
+                    type="button"
+                    key={i}
+                    onClick={() => selectDay(d)}
+                    style={{
+                      aspectRatio: "1", border: "none", borderRadius: 8, cursor: "pointer",
+                      background: isSelected ? C.clay : "transparent",
+                      color: isSelected ? C.paper : C.ink,
+                      fontSize: 13, fontFamily: SANS,
+                    }}
+                  >{d}</button>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) {
+  const C = useTheme();
+  const inputStyle = useInputStyle();
+  return (
+    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 20, padding: 26, maxWidth: 560 }}>
+      <Field label="Date">
+        <DateField value={form.date} onChange={(d) => updateForm("date", d)} />
+      </Field>
+      <Field label="Symbol">
+        <input type="text" placeholder="EURUSD, XAUUSD, ..." value={form.symbol} onChange={(e) => updateForm("symbol", e.target.value.toUpperCase())} style={{ ...inputStyle, textTransform: "uppercase" }} />
+      </Field>
+      <Field label="Direction">
+        <div style={{ display: "flex", gap: 10 }}>
+          {["Long", "Short"].map((d) => {
+            const active = form.direction === d;
+            return (
+              <button key={d} onClick={() => updateForm("direction", d)} style={{
+                flex: 1, padding: "12px 0", borderRadius: 12,
+                border: `1px solid ${active ? C.clay : C.line}`,
+                background: active ? C.clayWash : C.paperSoft,
+                color: active ? C.clayOnWhite : C.inkSoft, fontWeight: 700, fontSize: 15, cursor: "pointer",
+              }}>{d}</button>
+            );
+          })}
+        </div>
+      </Field>
+      <Field label="Reason / Setup">
+        <input type="text" placeholder="Breakout retest, reversal, ..." value={form.reason} onChange={(e) => updateForm("reason", e.target.value)} style={inputStyle} />
+      </Field>
+      <div style={{ display: "flex", gap: 14 }}>
+        <div style={{ flex: 1 }}>
+          <Field label="Risk %">
+            <input type="number" inputMode="decimal" placeholder="1" value={form.riskPct} onChange={(e) => updateForm("riskPct", e.target.value)} style={inputStyle} />
+          </Field>
+        </div>
+        <div style={{ flex: 1 }}>
+          <Field label="R Planned">
+            <input type="number" inputMode="decimal" placeholder="2" value={form.rPlanned} onChange={(e) => updateForm("rPlanned", e.target.value)} style={inputStyle} />
+          </Field>
+        </div>
+      </div>
+      <Field label="R Actual">
+        <input type="number" inputMode="decimal" placeholder="2.3 or -1" value={form.rActual} onChange={(e) => updateForm("rActual", e.target.value)} style={inputStyle} />
+      </Field>
+      <Field label="Rules Compliance">
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {["Yes", "Partial", "No"].map((r) => (
+            <Chip key={r} label={r} active={form.rules === r} onClick={() => updateForm("rules", r)}
+              activeColor={r === "Yes" ? C.sageOnWhite : r === "No" ? C.rustOnWhite : C.amberOnWhite}
+              activeBg={r === "Yes" ? C.sageWash : r === "No" ? C.rustWash : C.amberWash} />
+          ))}
+        </div>
+      </Field>
+      <Field label="Emotions">
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {EMOTIONS.map((e) => (
+            <Chip key={e} label={e} active={form.emotions.includes(e)} onClick={() => toggleEmotion(e)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
+          ))}
+        </div>
+      </Field>
+      <Field label="Notes">
+        <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
+      </Field>
+      <button onClick={handleSave} disabled={!canSave} style={{
+        width: "100%", padding: "14px 0", borderRadius: 12, border: "none",
+        background: canSave ? C.clay : C.lineSoft, color: canSave ? C.paper : C.faint,
+        fontWeight: 700, fontSize: 15.5, cursor: canSave ? "pointer" : "not-allowed",
+      }}>Save Trade</button>
+    </div>
+  );
+}
+
+// ---- Journal ----
+function JournalList({ trades, onDelete, onGoLog }) {
+  const C = useTheme();
+  const [confirmId, setConfirmId] = useState(null);
+  const confirmTrade = trades.find((t) => t.id === confirmId) || null;
+
+  if (trades.length === 0) {
+    return (
+      <div style={{ marginTop: 30, textAlign: "center", color: C.muted }}>
+        <div style={{ fontSize: 15, marginBottom: 14 }}>No trades logged yet.</div>
+        <button onClick={onGoLog} style={{
+          display: "inline-flex", alignItems: "center", gap: 8, background: C.clayWash,
+          border: `1px solid ${C.clay}`, color: C.clayOnWhite, borderRadius: 999, padding: "10px 18px",
+          fontWeight: 700, fontSize: 14, cursor: "pointer",
+        }}><Plus size={16} /> Log your first trade</button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 640 }}>
+      {trades.map((t) => {
+        const win = t.rActual > 0, flat = t.rActual === 0;
+        const borderColor = flat ? C.faint : win ? C.sage : C.rustRed;
+        return (
+          <div key={t.id} style={{
+            background: C.paper, border: `1px solid ${C.line}`, borderLeft: `4px solid ${borderColor}`,
+            borderRadius: 16, padding: "18px 20px",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 17 }}>{t.symbol}</div>
+                <div style={{ fontFamily: MONO, fontSize: 13, color: C.muted, marginTop: 2 }}>{t.date}</div>
+              </div>
+              <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: 19, color: flat ? C.muted : win ? C.sage : C.rustRed }}>
+                {fmtR(t.rActual)}
+              </div>
+            </div>
+            {t.reason && <div style={{ fontSize: 14, color: C.inkSoft, marginTop: 10 }}>{t.reason}</div>}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+              {t.direction && <Tag text={t.direction} color={C.clayOnWhite} bg={C.clayWash} />}
+              {t.rules && <Tag text={t.rules} color={t.rules === "Yes" ? C.sageOnWhite : t.rules === "No" ? C.rustOnWhite : C.amberOnWhite}
+                bg={t.rules === "Yes" ? C.sageWash : t.rules === "No" ? C.rustWash : C.amberWash} />}
+              {(t.emotions || []).map((e) => <Tag key={e} text={e} color={C.inkSoft} bg={C.paperSoft} />)}
+            </div>
+            {t.notes && <div style={{ fontSize: 13, color: C.muted, marginTop: 10, fontStyle: "italic" }}>{t.notes}</div>}
+            <button onClick={() => setConfirmId(t.id)} style={{
+              marginTop: 14, background: "transparent", border: "none", color: C.faint, fontSize: 13,
+              display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: 0,
+            }}><Trash2 size={13} /> Delete</button>
+          </div>
+        );
+      })}
+      {confirmTrade && (
+        <>
+          <div onClick={() => setConfirmId(null)} style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", zIndex: 39,
+          }} />
+          <div style={{
+            position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+            zIndex: 40, width: "min(340px, calc(100vw - 48px))",
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: 22,
+            boxShadow: "0 16px 40px rgba(0,0,0,0.25)",
+          }}>
+            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 18, marginBottom: 8 }}>Delete this trade?</div>
+            <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.5, marginBottom: 20 }}>
+              {confirmTrade.symbol} &middot; {confirmTrade.date} &middot; {fmtR(confirmTrade.rActual)} will be permanently removed.
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => setConfirmId(null)}
+                style={{
+                  flex: 1, padding: "11px 0", borderRadius: 12, border: `1px solid ${C.line}`,
+                  background: C.paperSoft, color: C.ink, fontWeight: 700, fontSize: 14.5, cursor: "pointer",
+                }}
+              >No</button>
+              <button
+                onClick={() => { onDelete(confirmTrade.id); setConfirmId(null); }}
+                style={{
+                  flex: 1, padding: "11px 0", borderRadius: 12, border: "none",
+                  background: C.dangerBg, color: "#FFFFFF", fontWeight: 700, fontSize: 14.5, cursor: "pointer",
+                }}
+              >Yes, Delete</button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ---- Dashboard ----
+function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
+  const C = useTheme();
+  const dx = x - cx, dy = y - cy;
+  const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+  const push = 12;
+  const nx = x + (dx / dist) * push;
+  const ny = y + (dy / dist) * push;
+  const words = String(payload.value).split(" ");
+  return (
+    <text x={nx} y={ny} textAnchor={textAnchor} fontFamily={SANS} fontSize={11} fill={C.inkSoft}>
+      {words.map((w, i) => (
+        <tspan key={i} x={nx} dy={i === 0 ? (words.length > 1 ? -5 : 3.5) : 12}>{w}</tspan>
+      ))}
+    </text>
+  );
+}
+function StatCard({ label, value, color }) {
+  const C = useTheme();
+  return (
+    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: "16px 18px" }}>
+      <div style={{ fontFamily: SANS, fontSize: 11, fontWeight: 600, letterSpacing: "0.05em", color: C.muted, textTransform: "uppercase", marginBottom: 8 }}>{label}</div>
+      <div style={{ fontFamily: MONO, fontSize: 23, fontWeight: 700, color: color || C.ink }}>{value}</div>
+    </div>
+  );
+}
+function Dashboard({ trades }) {
+  const C = useTheme();
+  const [period, setPeriod] = useState("all");
+  const filteredTrades = useMemo(() => {
+    if (period === "all") return trades;
+    const now = new Date();
+    let start;
+    if (period === "week") start = startOfWeek(now);
+    else if (period === "month") start = startOfMonth(now);
+    else start = startOfYear(now);
+    return trades.filter((t) => parseISO(t.date) >= start);
+  }, [trades, period]);
+  const stats = useMemo(() => computeStats(filteredTrades), [filteredTrades]);
+
+  if (trades.length === 0) {
+    return <div style={{ marginTop: 30, color: C.muted, fontSize: 15 }}>Log a trade to see your performance dashboard.</div>;
+  }
+
+  return (
+    <div style={{ maxWidth: 680 }}>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 22 }}>
+        {PERIODS.map((p) => (
+          <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
+        ))}
+      </div>
+      {filteredTrades.length === 0 ? (
+        <div style={{ color: C.muted, fontSize: 15, marginBottom: 26 }}>No trades logged in this period.</div>
+      ) : (
+        <>
+          <SectionLabel text={`Summary \u00b7 ${filteredTrades.length} trade${filteredTrades.length === 1 ? "" : "s"}`} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 26 }}>
+            <StatCard label="Total Trades" value={stats.total} />
+            <StatCard label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} color={C.clayDeep} />
+            <StatCard label="Total R" value={fmtR(stats.totalR)} color={stats.totalR >= 0 ? C.sage : C.rustRed} />
+            <StatCard label="Expectancy" value={stats.expectancy.toFixed(2)} color={C.clayDeep} />
+            <StatCard label="Avg Win" value={`+${stats.avgWin.toFixed(2)}`} color={C.sage} />
+            <StatCard label="Avg Loss" value={stats.avgLoss.toFixed(2)} color={C.rustRed} />
+          </div>
+          <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: "22px 10px 6px", marginBottom: 26 }}>
+            <div style={{ padding: "0 16px" }}>
+              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 18 }}>Trader Scorecard</div>
+              <div style={{ fontSize: 13, color: C.muted, marginTop: 2, marginBottom: 4 }}>Score 0–100 per dimension</div>
+            </div>
+            <div style={{ width: "100%", height: 300, overflow: "visible" }}>
+              <ResponsiveContainer>
+                <RadarChart data={stats.scorecard} outerRadius="52%" margin={{ top: 18, right: 42, bottom: 12, left: 58 }}>
+                  <PolarGrid stroke={C.line} />
+                  <PolarAngleAxis dataKey="metric" tick={<ScorecardTick />} />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
+                  <Radar dataKey="value" stroke={C.clay} fill={C.clay} fillOpacity={0.22} strokeWidth={2} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <SectionLabel text="By Rules Compliance" />
+          <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: "6px 20px" }}>
+            {["Yes", "Partial", "No"].map((r, i) => {
+              const d = stats.byRules[r];
+              const avg = d.count ? d.total / d.count : 0;
+              const color = r === "Yes" ? C.sage : r === "No" ? C.rustRed : C.amber;
+              return (
+                <div key={r} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 0", borderTop: i > 0 ? `1px solid ${C.lineSoft}` : "none" }}>
+                  <div style={{ fontWeight: 700, color, minWidth: 70 }}>{r}</div>
+                  <div style={{ fontFamily: MONO, fontSize: 13, color: C.muted, textAlign: "right" }}>
+                    {d.count} trade &middot; total {fmtR(d.total)} &middot; avg {avg.toFixed(2)}R
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
