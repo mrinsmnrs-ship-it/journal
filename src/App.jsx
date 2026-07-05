@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
 import {
   Trash2, Plus, PencilLine, BookOpen, LayoutDashboard,
-  Sun, Moon, Zap, ChevronLeft, ChevronRight,
+  Sun, Moon, Zap, ChevronLeft, ChevronRight, LogOut,
 } from "lucide-react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer,
 } from "recharts";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { auth, db } from "./firebase";
+import AuthScreen from "./AuthScreen.jsx";
 
 // ---- Design tokens : monochrome, Claude-matched palettes ----
 const LIGHT = {
@@ -93,16 +97,20 @@ const PERIODS = [
   { key: "year", label: "This Year" },
 ];
 
-// ---- Storage (in-memory only for this preview — GitHub version keeps localStorage) ----
-const memoryStore = {};
-async function loadKey(key, fallback) {
-  return key in memoryStore ? memoryStore[key] : fallback;
+// ---- Storage (Firestore, per signed-in user) ----
+// Each user's data lives in a single document: users/{uid}
+// Fields: { trades: [...], theme: "light" | "dark" | "blue" }
+async function loadUserData(uid) {
+  const snap = await getDoc(doc(db, "users", uid));
+  if (snap.exists()) {
+    const data = snap.data();
+    return { trades: data.trades || [], theme: data.theme || "light" };
+  }
+  return { trades: [], theme: "light" };
 }
-async function saveKey(key, value) {
-  memoryStore[key] = value;
+async function saveUserData(uid, partial) {
+  await setDoc(doc(db, "users", uid), partial, { merge: true });
 }
-const TRADES_KEY = "rjournal:trades";
-const THEME_KEY = "rjournal:theme";
 
 // ---- Small atoms ----
 function Chip({ label, active, onClick, activeColor, activeBg }) {
@@ -249,8 +257,27 @@ function computeStats(trades) {
   };
 }
 
+// ---- Auth gate: shows AuthScreen until a user is signed in ----
+export default function App() {
+  const [user, setUser] = useState(undefined); // undefined = checking, null = logged out
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+    return unsub;
+  }, []);
+
+  if (user === undefined) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: SANS, color: "#767470" }}>
+        Loading…
+      </div>
+    );
+  }
+  if (!user) return <AuthScreen />;
+  return <RJournal user={user} />;
+}
+
 // ---- App ----
-export default function RJournal() {
+function RJournal({ user }) {
   const [tab, setTab] = useState("log");
   const [trades, setTrades] = useState([]);
   const [themeMode, setThemeMode] = useState("light");
@@ -262,19 +289,17 @@ export default function RJournal() {
 
   useEffect(() => {
     (async () => {
-      const [t, th] = await Promise.all([
-        loadKey(TRADES_KEY, []), loadKey(THEME_KEY, "light"),
-      ]);
-      setTrades(t);
-      setThemeMode(THEME_ORDER.includes(th) ? th : "light");
+      const data = await loadUserData(user.uid);
+      setTrades(data.trades);
+      setThemeMode(THEME_ORDER.includes(data.theme) ? data.theme : "light");
       setLoaded(true);
     })();
-  }, []);
+  }, [user.uid]);
 
   async function toggleTheme() {
     const next = THEME_ORDER[(THEME_ORDER.indexOf(themeMode) + 1) % THEME_ORDER.length];
     setThemeMode(next);
-    await saveKey(THEME_KEY, next);
+    await saveUserData(user.uid, { theme: next });
   }
   function updateForm(key, val) { setForm((f) => ({ ...f, [key]: val })); }
   function toggleEmotion(e) {
@@ -293,14 +318,17 @@ export default function RJournal() {
     };
     const next = [trade, ...trades];
     setTrades(next);
-    await saveKey(TRADES_KEY, next);
+    await saveUserData(user.uid, { trades: next });
     setForm({ date: todayISO(), symbol: "", direction: "", reason: "", riskPct: "", rPlanned: "", rActual: "", rules: "", emotions: [], notes: "" });
     setTab("journal");
   }
   async function handleDelete(id) {
     const next = trades.filter((t) => t.id !== id);
     setTrades(next);
-    await saveKey(TRADES_KEY, next);
+    await saveUserData(user.uid, { trades: next });
+  }
+  async function handleLogout() {
+    await signOut(auth);
   }
 
   const stats = useMemo(() => computeStats(trades), [trades]);
@@ -382,11 +410,22 @@ export default function RJournal() {
               </button>
             ))}
             <div style={{ flex: 1 }} />
-            <div style={{ padding: "0 2px", marginBottom: 12 }}>
+            <div style={{ padding: "0 2px", marginBottom: 10, display: "flex", gap: 8 }}>
               <ThemeToggle mode={themeMode} onToggle={toggleTheme} />
+              <button
+                onClick={handleLogout}
+                title="Log out"
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 999,
+                  padding: "9px 12px", cursor: "pointer", color: C.inkSoft,
+                }}
+              >
+                <LogOut size={15} />
+              </button>
             </div>
             <div style={{ fontSize: 12, color: C.faint, padding: "0 10px", lineHeight: 1.5 }}>
-              All data is stored locally in this browser.
+              Signed in as {user.email}. Synced across your devices.
             </div>
             <div style={{ fontSize: 11, color: C.faint, padding: "10px 10px 0", opacity: 0.7 }}>
               &copy; {new Date().getFullYear()} Apocalypse Archives. All rights reserved.
@@ -398,7 +437,20 @@ export default function RJournal() {
             <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 17, textTransform: "uppercase", letterSpacing: "0.04em" }}>
               Apocalypse Archives
             </div>
-            <ThemeToggle mode={themeMode} onToggle={toggleTheme} compact />
+            <div style={{ display: "flex", gap: 8 }}>
+              <ThemeToggle mode={themeMode} onToggle={toggleTheme} compact />
+              <button
+                onClick={handleLogout}
+                title="Log out"
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 999,
+                  padding: 8, cursor: "pointer", color: C.inkSoft,
+                }}
+              >
+                <LogOut size={15} />
+              </button>
+            </div>
           </div>
 
           {/* Main content */}
