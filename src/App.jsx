@@ -185,7 +185,9 @@ function ThemeToggle({ mode, onToggle, compact }) {
       <Icon size={15} style={{ color: C.ink }} />
       {!compact && label}
     </button>
-  );// ---- Stats ----
+  );
+}
+// ---- Stats ----
 function computeStats(trades) {
   const total = trades.length;
   if (total === 0) {
