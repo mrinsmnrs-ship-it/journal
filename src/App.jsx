@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
 import {
   Trash2, Plus, PencilLine, BookOpen, LayoutDashboard,
-  Sun, Moon, Zap, ChevronLeft, ChevronRight, LogOut,
+  Sun, Moon, Zap, ChevronLeft, ChevronRight, LogOut, Sparkles,
 } from "lucide-react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer,
 } from "recharts";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth, db } from "./firebase";
+import { auth } from "./firebase";
+import { loadUserData, saveUserData } from "./store";
 import AuthScreen from "./AuthScreen.jsx";
+import JournalChat from "./JournalChat.jsx";
 
 // ---- Design tokens : monochrome, Claude-matched palettes ----
 const LIGHT = {
@@ -96,21 +97,6 @@ const PERIODS = [
   { key: "month", label: "This Month" },
   { key: "year", label: "This Year" },
 ];
-
-// ---- Storage (Firestore, per signed-in user) ----
-// Each user's data lives in a single document: users/{uid}
-// Fields: { trades: [...], theme: "light" | "dark" | "blue" }
-async function loadUserData(uid) {
-  const snap = await getDoc(doc(db, "users", uid));
-  if (snap.exists()) {
-    const data = snap.data();
-    return { trades: data.trades || [], theme: data.theme || "light" };
-  }
-  return { trades: [], theme: "light" };
-}
-async function saveUserData(uid, partial) {
-  await setDoc(doc(db, "users", uid), partial, { merge: true });
-}
 
 // ---- Small atoms ----
 function Chip({ label, active, onClick, activeColor, activeBg }) {
@@ -337,6 +323,7 @@ function RJournal({ user }) {
     { key: "log", label: "Log Trade", icon: PencilLine },
     { key: "journal", label: "Journal", icon: BookOpen },
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { key: "chat", label: "AI Chat", icon: Sparkles },
   ];
 
   const C = themeMode === "dark" ? DARK : themeMode === "blue" ? BLUE : LIGHT;
@@ -466,6 +453,8 @@ function RJournal({ user }) {
               <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} />
             ) : tab === "journal" ? (
               <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} />
+            ) : tab === "chat" ? (
+              <JournalChat user={user} trades={trades} theme={C} />
             ) : (
               <Dashboard trades={trades} />
             )}
