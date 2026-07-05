@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
 import {
   Trash2, Plus, PencilLine, BookOpen, LayoutDashboard,
-  Sun, Moon, ChevronLeft, ChevronRight,
+  Sun, Moon, Zap, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -9,35 +9,47 @@ import {
 } from "recharts";
 
 // ---- Design tokens : monochrome, Claude-matched palettes ----
-// Accent is pure black/white (no orange). Green/red/amber are kept ONLY as
-// functional data signals (win/loss, rules compliance) — not decorative accents.
 const LIGHT = {
   bg: "#FAFAF8", paper: "#FFFFFF", paperSoft: "#F3F3F1",
   ink: "#171717", inkSoft: "#3F3F3D", muted: "#767470", faint: "#AFAEA9",
   line: "#E3E2DD", lineSoft: "#EDECE8",
-  clay: "#171717", clayDeep: "#000000", clayWash: "#ECECE9",
-  sage: "#5C8060", sageWash: "#E4EBE2",
-  rustRed: "#B85C50", rustWash: "#F1E2DE",
-  amber: "#B08A3E", amberWash: "#F1E7D4",
+  clay: "#171717", clayDeep: "#000000", clayWash: "#ECECE9", clayOnWhite: "#000000",
+  sage: "#5C8060", sageWash: "#E4EBE2", sageOnWhite: "#5C8060",
+  rustRed: "#B85C50", rustWash: "#F1E2DE", rustOnWhite: "#B85C50", dangerBg: "#B85C50",
+  amber: "#B08A3E", amberWash: "#F1E7D4", amberOnWhite: "#B08A3E",
+  inputBg: "#F3F3F1", inputText: "#171717", inputPlaceholder: "#AFAEA9", inputBorder: "#E3E2DD",
 };
-
 const DARK = {
   bg: "#1B1B1A", paper: "#252524", paperSoft: "#2E2E2C",
   ink: "#F2F1EC", inkSoft: "#CFCEC8", muted: "#94928C", faint: "#5E5D58",
   line: "#3D3C39", lineSoft: "#333230",
-  clay: "#F2F1EC", clayDeep: "#FFFFFF", clayWash: "#38372F",
-  sage: "#8CAE8E", sageWash: "#33402F",
-  rustRed: "#D28A7E", rustWash: "#453029",
-  amber: "#D4AE6E", amberWash: "#443A24",
+  clay: "#F2F1EC", clayDeep: "#FFFFFF", clayWash: "#38372F", clayOnWhite: "#FFFFFF",
+  sage: "#8CAE8E", sageWash: "#33402F", sageOnWhite: "#8CAE8E",
+  rustRed: "#D28A7E", rustWash: "#453029", rustOnWhite: "#D28A7E", dangerBg: "#D28A7E",
+  amber: "#D4AE6E", amberWash: "#443A24", amberOnWhite: "#D4AE6E",
+  inputBg: "#2E2E2C", inputText: "#F2F1EC", inputPlaceholder: "#5E5D58", inputBorder: "#3D3C39",
+};
+const BLUE = {
+  bg: "#2340FF", paper: "#2340FF", paperSoft: "#2A48FF",
+  ink: "#FFFFFF", inkSoft: "#FFFFFF", muted: "#FFFFFF", faint: "#B9C4FF",
+  line: "#FFFFFF", lineSoft: "#8DA0FF",
+  clay: "#FFFFFF", clayDeep: "#CFE0FF", clayWash: "#FFFFFF", clayOnWhite: "#182463",
+  sage: "#FFFFFF", sageWash: "#FFFFFF", sageOnWhite: "#182463",
+  rustRed: "#7A93FF", rustWash: "#FFFFFF", rustOnWhite: "#182463", dangerBg: "#182463",
+  amber: "#B9CCFF", amberWash: "#FFFFFF", amberOnWhite: "#182463",
+  inputBg: "#FFFFFF", inputText: "#182463", inputPlaceholder: "#8A93C2", inputBorder: "#C7CEEA",
+  chipBorderAccent: false,
 };
 
-const SERIF = "'Source Serif 4', 'Georgia', serif";
+
+const SERIF = "'Playfair Display', 'Georgia', serif";
 const SANS = "'Inter', system-ui, -apple-system, sans-serif";
 const MONO = "'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace";
 
 const EMOTIONS = ["Calm", "Confident", "Hesitant", "Bored", "FOMO", "Revenge", "Anxious"];
 const POSITIVE_EMOTIONS = new Set(["Calm", "Confident"]);
 const NEGATIVE_EMOTIONS = new Set(["Hesitant", "Bored", "FOMO", "Revenge", "Anxious"]);
+
 const ThemeContext = createContext(LIGHT);
 function useTheme() { return useContext(ThemeContext); }
 
@@ -71,12 +83,9 @@ function startOfWeek(d) {
   monday.setHours(0, 0, 0, 0);
   return monday;
 }
-function startOfMonth(d) {
-  return new Date(d.getFullYear(), d.getMonth(), 1);
-}
-function startOfYear(d) {
-  return new Date(d.getFullYear(), 0, 1);
-}
+function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+function startOfYear(d) { return new Date(d.getFullYear(), 0, 1); }
+
 const PERIODS = [
   { key: "all", label: "All Time" },
   { key: "week", label: "This Week" },
@@ -84,37 +93,28 @@ const PERIODS = [
   { key: "year", label: "This Year" },
 ];
 
-// ---- Storage ----
+// ---- Storage (in-memory only for this preview — GitHub version keeps localStorage) ----
+const memoryStore = {};
+async function loadKey(key, fallback) {
+  return key in memoryStore ? memoryStore[key] : fallback;
+}
+async function saveKey(key, value) {
+  memoryStore[key] = value;
+}
 const TRADES_KEY = "rjournal:trades";
 const THEME_KEY = "rjournal:theme";
 
-async function loadKey(key, fallback) {
-  try {
-    const raw = window.localStorage.getItem(key);
-    return raw !== null ? JSON.parse(raw) : fallback;
-  } catch (e) {
-    return fallback;
-  }
-}
-async function saveKey(key, value) {
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value));
-  } catch (e) {
-    console.error("storage save failed", e);
-  }
-}
-
 // ---- Small atoms ----
-
 function Chip({ label, active, onClick, activeColor, activeBg }) {
   const C = useTheme();
+  const borderColor = active ? (C.chipBorderAccent === false ? C.line : activeColor) : C.line;
   return (
     <button
       onClick={onClick}
       style={{
         fontFamily: SANS, fontSize: 13, fontWeight: 600,
         padding: "8px 15px", borderRadius: 999,
-        border: `1px solid ${active ? activeColor : C.line}`,
+        border: `1px solid ${borderColor}`,
         background: active ? activeBg : C.paper,
         color: active ? activeColor : C.inkSoft,
         cursor: "pointer", transition: "all .15s ease",
@@ -124,7 +124,6 @@ function Chip({ label, active, onClick, activeColor, activeBg }) {
     </button>
   );
 }
-
 function Field({ label, children }) {
   const C = useTheme();
   return (
@@ -137,16 +136,14 @@ function Field({ label, children }) {
     </div>
   );
 }
-
 function useInputStyle() {
   const C = useTheme();
   return {
-    width: "100%", boxSizing: "border-box", background: C.paperSoft,
-    border: `1px solid ${C.line}`, borderRadius: 12, padding: "12px 14px",
-    color: C.ink, fontFamily: SANS, fontSize: 15, outline: "none",
+    width: "100%", boxSizing: "border-box", background: C.inputBg,
+    border: `1px solid ${C.inputBorder}`, borderRadius: 12, padding: "12px 14px",
+    color: C.inputText, fontFamily: SANS, fontSize: 15, outline: "none",
   };
 }
-
 function Tag({ text, color, bg }) {
   return (
     <span style={{ fontSize: 12, fontWeight: 600, color, background: bg, borderRadius: 999, padding: "4px 11px" }}>
@@ -154,7 +151,6 @@ function Tag({ text, color, bg }) {
     </span>
   );
 }
-
 function SectionLabel({ text }) {
   const C = useTheme();
   return (
@@ -164,13 +160,21 @@ function SectionLabel({ text }) {
     }}>{text}</div>
   );
 }
-
+const THEME_ORDER = ["light", "dark", "blue"];
+const THEME_META = {
+  light: { label: "Light", Icon: Sun },
+  dark: { label: "Dark", Icon: Moon },
+  blue: { label: "Blue", Icon: Zap },
+};
 function ThemeToggle({ mode, onToggle, compact }) {
   const C = useTheme();
+  const { label, Icon } = THEME_META[mode] || THEME_META.light;
+  const nextMode = THEME_ORDER[(THEME_ORDER.indexOf(mode) + 1) % THEME_ORDER.length];
+  const nextLabel = THEME_META[nextMode]?.label || "Light";
   return (
     <button
       onClick={onToggle}
-      title={mode === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+      title={`Switch to ${nextLabel} theme`}
       style={{
         display: "flex", alignItems: "center", gap: 9,
         background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 999,
@@ -178,20 +182,16 @@ function ThemeToggle({ mode, onToggle, compact }) {
         fontFamily: SANS, fontSize: 13, fontWeight: 600,
       }}
     >
-      {mode === "dark" ? <Moon size={15} style={{ color: C.ink }} /> : <Sun size={15} style={{ color: C.ink }} />}
-      {!compact && (mode === "dark" ? "Dark" : "Light")}
+      <Icon size={15} style={{ color: C.ink }} />
+      {!compact && label}
     </button>
-  );
-}
-
-// ---- Stats ----
-
+  );// ---- Stats ----
 function computeStats(trades) {
   const total = trades.length;
   if (total === 0) {
     return {
       total: 0, winRate: 0, totalR: 0, expectancy: 0, avgWin: 0, avgLoss: 0,
-      scorecard: ["Win Rate", "Discipline", "Emotional Control", "Risk Consistency", "Profitability"].map((m) => ({ metric: m, value: 0 })),
+      scorecard: ["Profitability", "Discipline", "Emotional Control", "Risk Consistency", "Win Rate"].map((m) => ({ metric: m, value: 0 })),
       byRules: { Yes: { count: 0, total: 0 }, Partial: { count: 0, total: 0 }, No: { count: 0, total: 0 } },
     };
   }
@@ -202,12 +202,10 @@ function computeStats(trades) {
   const expectancy = totalR / total;
   const avgWin = wins.length ? wins.reduce((s, t) => s + t.rActual, 0) / wins.length : 0;
   const avgLoss = losses.length ? losses.reduce((s, t) => s + t.rActual, 0) / losses.length : 0;
-
   const disciplined = trades.filter((t) => t.rules);
   const disciplineScore = disciplined.length
     ? disciplined.reduce((s, t) => s + (t.rules === "Yes" ? 100 : t.rules === "Partial" ? 50 : 0), 0) / disciplined.length
     : 0;
-
   const withEmotions = trades.filter((t) => (t.emotions || []).length > 0);
   const emotionalScore = withEmotions.length
     ? withEmotions.reduce((s, t) => {
@@ -218,7 +216,6 @@ function computeStats(trades) {
         return s + 50;
       }, 0) / withEmotions.length
     : 0;
-
   const risks = trades.map((t) => t.riskPct).filter((r) => r !== null && r !== undefined && !isNaN(r));
   let riskConsistency = 100;
   if (risks.length >= 2) {
@@ -227,9 +224,7 @@ function computeStats(trades) {
     const cv = mean !== 0 ? Math.sqrt(variance) / Math.abs(mean) : 0;
     riskConsistency = clamp(100 - cv * 100, 0, 100);
   }
-
   const profitability = clamp(((expectancy + 2) / 4) * 100, 0, 100);
-
   const byRules = { Yes: { count: 0, total: 0 }, Partial: { count: 0, total: 0 }, No: { count: 0, total: 0 } };
   trades.forEach((t) => {
     if (t.rules && byRules[t.rules]) {
@@ -237,15 +232,14 @@ function computeStats(trades) {
       byRules[t.rules].total += t.rActual;
     }
   });
-
   return {
     total, winRate, totalR, expectancy, avgWin, avgLoss,
     scorecard: [
-      { metric: "Win Rate", value: Math.round(winRate) },
+      { metric: "Profitability", value: Math.round(profitability) },
       { metric: "Discipline", value: Math.round(disciplineScore) },
       { metric: "Emotional Control", value: Math.round(emotionalScore) },
       { metric: "Risk Consistency", value: Math.round(riskConsistency) },
-      { metric: "Profitability", value: Math.round(profitability) },
+      { metric: "Win Rate", value: Math.round(winRate) },
     ],
     byRules,
     disciplineScore, emotionalScore, riskConsistency,
@@ -253,13 +247,11 @@ function computeStats(trades) {
 }
 
 // ---- App ----
-
 export default function RJournal() {
   const [tab, setTab] = useState("log");
   const [trades, setTrades] = useState([]);
   const [themeMode, setThemeMode] = useState("light");
   const [loaded, setLoaded] = useState(false);
-
   const [form, setForm] = useState({
     date: todayISO(), symbol: "", direction: "", reason: "",
     riskPct: "", rPlanned: "", rActual: "", rules: "", emotions: [], notes: "",
@@ -271,23 +263,21 @@ export default function RJournal() {
         loadKey(TRADES_KEY, []), loadKey(THEME_KEY, "light"),
       ]);
       setTrades(t);
-      setThemeMode(th === "dark" ? "dark" : "light");
+      setThemeMode(THEME_ORDER.includes(th) ? th : "light");
       setLoaded(true);
     })();
   }, []);
 
   async function toggleTheme() {
-    const next = themeMode === "dark" ? "light" : "dark";
+    const next = THEME_ORDER[(THEME_ORDER.indexOf(themeMode) + 1) % THEME_ORDER.length];
     setThemeMode(next);
     await saveKey(THEME_KEY, next);
   }
-
   function updateForm(key, val) { setForm((f) => ({ ...f, [key]: val })); }
   function toggleEmotion(e) {
     setForm((f) => ({ ...f, emotions: f.emotions.includes(e) ? f.emotions.filter((x) => x !== e) : [...f.emotions, e] }));
   }
   const canSave = form.symbol.trim() && form.direction && form.rActual !== "";
-
   async function handleSave() {
     if (!canSave) return;
     const trade = {
@@ -304,7 +294,6 @@ export default function RJournal() {
     setForm({ date: todayISO(), symbol: "", direction: "", reason: "", riskPct: "", rPlanned: "", rActual: "", rules: "", emotions: [], notes: "" });
     setTab("journal");
   }
-
   async function handleDelete(id) {
     const next = trades.filter((t) => t.id !== id);
     setTrades(next);
@@ -319,21 +308,24 @@ export default function RJournal() {
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   ];
 
-  const C = themeMode === "dark" ? DARK : LIGHT;
-
-  return (
+  const C = themeMode === "dark" ? DARK : themeMode === "blue" ? BLUE : LIGHT;
+  }
+return (
     <ThemeContext.Provider value={C}>
       <div style={{ background: C.bg, minHeight: "100vh", color: C.ink, fontFamily: SANS, transition: "background .2s ease, color .2s ease" }}>
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:opsz,wght@5..1200,500;5..1200,600;5..1200,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
           * { box-sizing: border-box; }
           html, body { margin:0; }
-          input::placeholder, textarea::placeholder { color: ${C.faint}; }
+          button { -webkit-tap-highlight-color: transparent; transition: transform .1s ease; }
+          button:active:not(:disabled) { transform: scale(0.96); }
+          .no-press, .no-press:active { transform: none !important; }
+          input::placeholder, textarea::placeholder { color: ${C.inputPlaceholder}; }
           input, textarea { font-family: ${SANS}; }
           input:focus, textarea:focus { border-color: ${C.clay} !important; }
           ::-webkit-scrollbar { width: 6px; }
           ::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 4px; }
-
+          .recharts-wrapper, .recharts-wrapper svg, .recharts-surface { overflow: visible !important; }
           .app-shell { display: flex; min-height: 100vh; }
           .sidebar {
             width: 232px; flex-shrink: 0; padding: 26px 18px;
@@ -342,14 +334,14 @@ export default function RJournal() {
           .main-area { flex: 1; min-width: 0; padding: 34px 40px 60px; max-width: 900px; }
           .bottom-nav { display: none; }
           .mobile-topbar { display: none; }
+          .app-footer-mobile { display: none; }
           .nav-item {
             display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:12px;
             font-size:14.5px; font-weight:600; cursor:pointer; border:none; background:transparent;
             color: ${C.inkSoft}; width:100%; text-align:left; margin-bottom:4px; transition: all .12s ease;
           }
-          .nav-item.active { background: ${C.clayWash}; color: ${C.clayDeep}; }
+          .nav-item.active { background: ${C.clayWash}; color: ${C.clayOnWhite}; }
           .nav-item:hover:not(.active) { background: ${C.paperSoft}; }
-
           @media (max-width: 820px) {
             .sidebar { display: none; }
             .main-area { padding: 74px 16px 100px; max-width: 100%; }
@@ -363,15 +355,18 @@ export default function RJournal() {
               justify-content: space-between; align-items: center;
               background: ${C.bg}; padding: 14px 16px; border-bottom: 1px solid ${C.line};
             }
+            .app-footer-mobile {
+              display: block; text-align: center; font-size: 11px; color: ${C.faint};
+              opacity: 0.7; margin-top: 32px; padding-bottom: 8px;
+            }
           }
         `}</style>
-
         <div className="app-shell">
           {/* Sidebar (desktop) */}
           <div className="sidebar">
             <div style={{ padding: "6px 10px 26px" }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 22 }}>
-                R Journal
+              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 21, textTransform: "uppercase", letterSpacing: "0.045em" }}>
+                Apocalypse Archives
               </div>
               <div style={{ fontFamily: MONO, fontSize: 12, color: C.muted, marginTop: 4 }}>
                 {trades.length} trade{trades.length === 1 ? "" : "s"} logged
@@ -390,24 +385,26 @@ export default function RJournal() {
             <div style={{ fontSize: 12, color: C.faint, padding: "0 10px", lineHeight: 1.5 }}>
               All data is stored locally in this browser.
             </div>
+            <div style={{ fontSize: 11, color: C.faint, padding: "10px 10px 0", opacity: 0.7 }}>
+              &copy; {new Date().getFullYear()} Apocalypse Archives. All rights reserved.
+            </div>
           </div>
 
           {/* Mobile top bar */}
           <div className="mobile-topbar">
-            <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 19 }}>
-              R Journal
+            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 17, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              Apocalypse Archives
             </div>
             <ThemeToggle mode={themeMode} onToggle={toggleTheme} compact />
-                      </div>
+          </div>
 
           {/* Main content */}
           <div className="main-area">
             <div style={{ marginBottom: 26 }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 26 }}>
+              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 26 }}>
                 {NAV.find((n) => n.key === tab)?.label}
               </div>
             </div>
-
             {!loaded ? (
               <div style={{ color: C.faint, fontSize: 14 }}>Loading…</div>
             ) : tab === "log" ? (
@@ -417,6 +414,9 @@ export default function RJournal() {
             ) : (
               <Dashboard trades={trades} />
             )}
+            <div className="app-footer-mobile">
+              &copy; {new Date().getFullYear()} Apocalypse Archives. All rights reserved.
+            </div>
           </div>
         </div>
 
@@ -436,21 +436,17 @@ export default function RJournal() {
       </div>
     </ThemeContext.Provider>
   );
-}
-
+              }
 // ---- Log Trade ----
-
 function DateField({ value, onChange }) {
   const C = useTheme();
   const [open, setOpen] = useState(false);
   const initial = value ? new Date(value + "T00:00:00") : new Date();
   const [viewYear, setViewYear] = useState(initial.getFullYear());
   const [viewMonth, setViewMonth] = useState(initial.getMonth());
-
   const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
   const pad = (n) => String(n).padStart(2, "0");
-
   const daysCount = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
   const cells = [...Array(firstDay).fill(null), ...Array.from({ length: daysCount }, (_, i) => i + 1)];
@@ -470,16 +466,16 @@ function DateField({ value, onChange }) {
     <div style={{ position: "relative" }}>
       <button
         type="button"
+        className="no-press"
         onClick={() => setOpen((o) => !o)}
         style={{
-          width: "100%", boxSizing: "border-box", background: C.paperSoft, border: `1px solid ${C.line}`,
-          borderRadius: 12, padding: "12px 14px", color: C.ink, fontFamily: SANS, fontSize: 15,
+          width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
+          borderRadius: 12, padding: "12px 14px", color: C.inputText, fontFamily: SANS, fontSize: 15,
           textAlign: "left", cursor: "pointer",
         }}
       >
         {value ? fmtDateDisplay(value) : "Select date"}
       </button>
-
       {open && (
         <>
           <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
@@ -549,7 +545,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
                 flex: 1, padding: "12px 0", borderRadius: 12,
                 border: `1px solid ${active ? C.clay : C.line}`,
                 background: active ? C.clayWash : C.paperSoft,
-                color: active ? C.clayDeep : C.inkSoft, fontWeight: 700, fontSize: 15, cursor: "pointer",
+                color: active ? C.clayOnWhite : C.inkSoft, fontWeight: 700, fontSize: 15, cursor: "pointer",
               }}>{d}</button>
             );
           })}
@@ -577,7 +573,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {["Yes", "Partial", "No"].map((r) => (
             <Chip key={r} label={r} active={form.rules === r} onClick={() => updateForm("rules", r)}
-              activeColor={r === "Yes" ? C.sage : r === "No" ? C.rustRed : C.amber}
+              activeColor={r === "Yes" ? C.sageOnWhite : r === "No" ? C.rustOnWhite : C.amberOnWhite}
               activeBg={r === "Yes" ? C.sageWash : r === "No" ? C.rustWash : C.amberWash} />
           ))}
         </div>
@@ -585,7 +581,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
       <Field label="Emotions">
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {EMOTIONS.map((e) => (
-            <Chip key={e} label={e} active={form.emotions.includes(e)} onClick={() => toggleEmotion(e)} activeColor={C.clayDeep} activeBg={C.clayWash} />
+            <Chip key={e} label={e} active={form.emotions.includes(e)} onClick={() => toggleEmotion(e)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
           ))}
         </div>
       </Field>
@@ -599,10 +595,8 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
       }}>Save Trade</button>
     </div>
   );
-}
-
+    }
 // ---- Journal ----
-
 function JournalList({ trades, onDelete, onGoLog }) {
   const C = useTheme();
   const [confirmId, setConfirmId] = useState(null);
@@ -614,12 +608,13 @@ function JournalList({ trades, onDelete, onGoLog }) {
         <div style={{ fontSize: 15, marginBottom: 14 }}>No trades logged yet.</div>
         <button onClick={onGoLog} style={{
           display: "inline-flex", alignItems: "center", gap: 8, background: C.clayWash,
-          border: `1px solid ${C.clay}`, color: C.clayDeep, borderRadius: 999, padding: "10px 18px",
+          border: `1px solid ${C.clay}`, color: C.clayOnWhite, borderRadius: 999, padding: "10px 18px",
           fontWeight: 700, fontSize: 14, cursor: "pointer",
         }}><Plus size={16} /> Log your first trade</button>
       </div>
     );
   }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 640 }}>
       {trades.map((t) => {
@@ -641,8 +636,8 @@ function JournalList({ trades, onDelete, onGoLog }) {
             </div>
             {t.reason && <div style={{ fontSize: 14, color: C.inkSoft, marginTop: 10 }}>{t.reason}</div>}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
-              {t.direction && <Tag text={t.direction} color={C.clayDeep} bg={C.clayWash} />}
-              {t.rules && <Tag text={t.rules} color={t.rules === "Yes" ? C.sage : t.rules === "No" ? C.rustRed : C.amber}
+              {t.direction && <Tag text={t.direction} color={C.clayOnWhite} bg={C.clayWash} />}
+              {t.rules && <Tag text={t.rules} color={t.rules === "Yes" ? C.sageOnWhite : t.rules === "No" ? C.rustOnWhite : C.amberOnWhite}
                 bg={t.rules === "Yes" ? C.sageWash : t.rules === "No" ? C.rustWash : C.amberWash} />}
               {(t.emotions || []).map((e) => <Tag key={e} text={e} color={C.inkSoft} bg={C.paperSoft} />)}
             </div>
@@ -654,7 +649,6 @@ function JournalList({ trades, onDelete, onGoLog }) {
           </div>
         );
       })}
-
       {confirmTrade && (
         <>
           <div onClick={() => setConfirmId(null)} style={{
@@ -666,7 +660,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
             background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: 22,
             boxShadow: "0 16px 40px rgba(0,0,0,0.25)",
           }}>
-            <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Delete this trade?</div>
+            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 18, marginBottom: 8 }}>Delete this trade?</div>
             <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.5, marginBottom: 20 }}>
               {confirmTrade.symbol} &middot; {confirmTrade.date} &middot; {fmtR(confirmTrade.rActual)} will be permanently removed.
             </div>
@@ -682,7 +676,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
                 onClick={() => { onDelete(confirmTrade.id); setConfirmId(null); }}
                 style={{
                   flex: 1, padding: "11px 0", borderRadius: 12, border: "none",
-                  background: C.rustRed, color: "#FFFFFF", fontWeight: 700, fontSize: 14.5, cursor: "pointer",
+                  background: C.dangerBg, color: "#FFFFFF", fontWeight: 700, fontSize: 14.5, cursor: "pointer",
                 }}
               >Yes, Delete</button>
             </div>
@@ -692,9 +686,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
     </div>
   );
 }
-
 // ---- Dashboard ----
-
 function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
   const C = useTheme();
   const dx = x - cx, dy = y - cy;
@@ -711,7 +703,6 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
     </text>
   );
 }
-
 function StatCard({ label, value, color }) {
   const C = useTheme();
   return (
@@ -721,11 +712,9 @@ function StatCard({ label, value, color }) {
     </div>
   );
 }
-
 function Dashboard({ trades }) {
   const C = useTheme();
   const [period, setPeriod] = useState("all");
-
   const filteredTrades = useMemo(() => {
     if (period === "all") return trades;
     const now = new Date();
@@ -735,20 +724,19 @@ function Dashboard({ trades }) {
     else start = startOfYear(now);
     return trades.filter((t) => parseISO(t.date) >= start);
   }, [trades, period]);
-
   const stats = useMemo(() => computeStats(filteredTrades), [filteredTrades]);
 
   if (trades.length === 0) {
     return <div style={{ marginTop: 30, color: C.muted, fontSize: 15 }}>Log a trade to see your performance dashboard.</div>;
   }
+
   return (
     <div style={{ maxWidth: 680 }}>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 22 }}>
         {PERIODS.map((p) => (
-          <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayDeep} activeBg={C.clayWash} />
+          <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
         ))}
       </div>
-
       {filteredTrades.length === 0 ? (
         <div style={{ color: C.muted, fontSize: 15, marginBottom: 26 }}>No trades logged in this period.</div>
       ) : (
@@ -762,15 +750,14 @@ function Dashboard({ trades }) {
             <StatCard label="Avg Win" value={`+${stats.avgWin.toFixed(2)}`} color={C.sage} />
             <StatCard label="Avg Loss" value={stats.avgLoss.toFixed(2)} color={C.rustRed} />
           </div>
-
           <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: "22px 10px 6px", marginBottom: 26 }}>
             <div style={{ padding: "0 16px" }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 18 }}>Trader Scorecard</div>
+              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 18 }}>Trader Scorecard</div>
               <div style={{ fontSize: 13, color: C.muted, marginTop: 2, marginBottom: 4 }}>Score 0–100 per dimension</div>
             </div>
             <div style={{ width: "100%", height: 300, overflow: "visible" }}>
               <ResponsiveContainer>
-                <RadarChart data={stats.scorecard} outerRadius="66%" margin={{ top: 18, right: 30, bottom: 12, left: 30 }}>
+                <RadarChart data={stats.scorecard} outerRadius="52%" margin={{ top: 18, right: 42, bottom: 12, left: 58 }}>
                   <PolarGrid stroke={C.line} />
                   <PolarAngleAxis dataKey="metric" tick={<ScorecardTick />} />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
@@ -779,7 +766,6 @@ function Dashboard({ trades }) {
               </ResponsiveContainer>
             </div>
           </div>
-
           <SectionLabel text="By Rules Compliance" />
           <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: "6px 20px" }}>
             {["Yes", "Partial", "No"].map((r, i) => {
@@ -800,5 +786,4 @@ function Dashboard({ trades }) {
       )}
     </div>
   );
-                           }
-                           
+            }
