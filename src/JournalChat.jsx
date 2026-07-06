@@ -15,6 +15,10 @@ const SYSTEM_PROMPT =
 
 const MAX_TEXTAREA_HEIGHT = 160;
 
+function isCoarsePointer() {
+  return typeof window !== "undefined" && window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+}
+
 export default function JournalChat({ user, trades, theme }) {
   const C = theme;
   const [messages, setMessages] = useState([]);
@@ -90,7 +94,7 @@ export default function JournalChat({ user, trades, theme }) {
   }
 
   function handleKeyDown(e) {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !isCoarsePointer()) {
       e.preventDefault();
       handleSend();
     }
@@ -159,6 +163,7 @@ export default function JournalChat({ user, trades, theme }) {
                   background: m.role === "user" ? C.clay : C.paperSoft,
                   color: m.role === "user" ? C.paper : C.ink,
                   fontSize: 14, fontFamily: SANS, whiteSpace: "pre-wrap", lineHeight: 1.5,
+                  overflowWrap: "anywhere", wordBreak: "break-word",
                 }}
               >
                 {m.content}
@@ -194,6 +199,7 @@ export default function JournalChat({ user, trades, theme }) {
             flex: 1, resize: "none", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
             borderRadius: 12, padding: "10px 14px", color: C.inputText, fontFamily: SANS, fontSize: 14, outline: "none",
             lineHeight: 1.4, maxHeight: MAX_TEXTAREA_HEIGHT, overflowY: "hidden",
+            overflowWrap: "anywhere", wordBreak: "break-word",
           }}
         />
         <button
