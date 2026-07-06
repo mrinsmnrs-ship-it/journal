@@ -96,7 +96,6 @@ export default function AuthScreen() {
     background: C.paper,
   }}
 />
-/>
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: 14 }}>
