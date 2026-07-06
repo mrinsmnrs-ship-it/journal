@@ -90,10 +90,10 @@ export default function AuthScreen() {
   muted
   playsInline
   style={{
-    width: "100%", height: 160, objectFit: "contain",
-    borderRadius: 14, display: "block", marginBottom: 22,
-    background: C.paperSoft || C.bg,
-  }}
+  width: "100%", height: 160, objectFit: "contain",
+  borderRadius: 14, display: "block", marginBottom: 22,
+  background: C.paper,
+}}
 />
 
         <form onSubmit={handleSubmit}>
