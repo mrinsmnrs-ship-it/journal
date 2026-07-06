@@ -251,7 +251,11 @@ export default function JournalChat({ user, trades, theme }) {
           </div>
         )}
 
-        {error && <div style={{ color: C.rustRed, fontSize: 12, textAlign: "center" }}>{error}</div>}
+        {error && (
+  <div style={{ color: C.faint, fontSize: 10, fontFamily: CHAT_FONT, textAlign: "center" }}>
+    {error}
+  </div>
+)}
         <div ref={scrollRef} />
       </div>
 
