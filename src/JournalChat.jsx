@@ -174,18 +174,16 @@ export default function JournalChat({ user, trades, theme }) {
   return (
     <div
       style={{
-        maxWidth: 640,
-        width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        minHeight: 0,
-        flex: 1,
-        background: C.paper,
-        border: `1px solid ${C.line}`,
-        borderRadius: 20,
-        overflow: "hidden",
-      }}
+  maxWidth: 640,
+  width: "100%",
+  display: "flex",
+  flexDirection: "column",
+  height: "100%",
+  minHeight: 0,
+  flex: 1,
+  background: C.paper,
+  overflow: "hidden",
+}}
     >
       <style>{`
         @keyframes chatSpin { to { transform: rotate(360deg); } }
@@ -264,36 +262,46 @@ export default function JournalChat({ user, trades, theme }) {
       </div>
 
       {/* Input */}
-      <div style={{ borderTop: `1px solid ${C.line}`, padding: 14, display: "flex", gap: 10, alignItems: "flex-end" }}>
-        <textarea
-          ref={textareaRef}
-          className="chat-input"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          rows={1}
-          placeholder="Write a message..."
-          style={{
-            flex: 1, resize: "none", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
-            borderRadius: 12, padding: "10px 14px", color: C.inputText, fontFamily: SANS, fontSize: 14, outline: "none",
-            lineHeight: 1.4, maxHeight: MAX_TEXTAREA_HEIGHT, overflowY: "hidden",
-            overflowWrap: "anywhere", wordBreak: "break-word",
-          }}
-        />
-        <button
-          onClick={handleSend}
-          disabled={isSending || !input.trim()}
-          style={{
-            display: "flex", alignItems: "center", justifyContent: "center",
-            width: 40, height: 40, flexShrink: 0,
-            background: C.clay, color: C.paper, border: "none", borderRadius: "50%",
-            cursor: isSending || !input.trim() ? "not-allowed" : "pointer",
-            opacity: isSending || !input.trim() ? 0.4 : 1,
-          }}
-        >
-          <ArrowUp size={18} strokeWidth={2.4} />
-        </button>
-      </div>
-    </div>
+<div style={{ padding: "14px 4px 6px" }}>
+  <div
+    style={{
+      display: "flex", gap: 10, alignItems: "flex-end",
+      border: `1px solid ${C.line}`, borderRadius: 24,
+      padding: "8px 8px 8px 16px", background: C.paper,
+    }}
+  >
+    <textarea
+      ref={textareaRef}
+      className="chat-input"
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      onKeyDown={handleKeyDown}
+      rows={1}
+      placeholder="Write a message..."
+      style={{
+        flex: 1, resize: "none", background: "transparent", border: "none",
+        padding: "8px 0", color: C.inputText, fontFamily: CHAT_FONT, fontSize: 14, outline: "none",
+        lineHeight: 1.4, maxHeight: MAX_TEXTAREA_HEIGHT, overflowY: "hidden",
+        overflowWrap: "anywhere", wordBreak: "break-word",
+      }}
+    />
+    <button
+      onClick={handleSend}
+      disabled={isSending || !input.trim()}
+      style={{
+        display: "flex", alignItems: "center", justifyContent: "center",
+        width: 34, height: 34, flexShrink: 0,
+        background: C.ink, color: C.paper, border: "none", borderRadius: "50%",
+        cursor: isSending || !input.trim() ? "not-allowed" : "pointer",
+        opacity: isSending || !input.trim() ? 0.3 : 1,
+      }}
+    >
+      <ArrowUp size={16} strokeWidth={2.4} />
+    </button>
+  </div>
+  <div style={{ textAlign: "center", fontSize: 11, color: C.faint, marginTop: 10, fontFamily: CHAT_FONT }}>
+    {PERSONA_NAME} adalah AI dan dapat melakukan kesalahan. Harap periksa kembali jawaban.
+  </div>
+</div>
   );
 }
