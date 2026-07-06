@@ -37,8 +37,11 @@ export async function askGemini(history, systemInstruction = "") {
   });
 
   if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Gemini API error (${res.status}): ${errText}`);
+  if (res.status === 429) {
+    throw new Error("Batas penggunaan tercapai. Coba lagi dalam beberapa saat.");
+  }
+  const errText = await res.text();
+  throw new Error(`Terjadi kesalahan (${res.status}). Coba lagi nanti.`);
   }
 
   const data = await res.json();
