@@ -270,37 +270,40 @@ export default function JournalChat({ user, trades, theme }) {
             }}
           />
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                background: C.paperSoft,
-                borderRadius: 999,
-                padding: "7px 14px",
-                fontFamily: CHAT_FONT,
-                fontSize: 12.5,
-                fontWeight: 600,
-                color: C.ink,
-              }}
-            >
-              {PERSONA_NAME}
-              <span style={{ color: C.faint, margin: "0 6px" }}>•</span>
-              <span style={{ color: C.muted, fontWeight: 500 }}>{PERSONA_TITLE}</span>
-            </div>
-            <button
-              onClick={handleSend}
-              disabled={isSending || !input.trim()}
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "center",
-                width: 34, height: 34, flexShrink: 0,
-                background: C.ink, color: C.paper, border: "none", borderRadius: "50%",
-                cursor: isSending || !input.trim() ? "not-allowed" : "pointer",
-                opacity: isSending || !input.trim() ? 0.3 : 1,
-              }}
-            >
-              <ArrowUp size={16} strokeWidth={2.4} />
-            </button>
-          </div>
+  <div
+    style={{
+      display: "inline-flex",
+      alignItems: "center",
+      background: "transparent",
+      border: `1px solid ${C.line}`,
+      borderRadius: 999,
+      padding: "5px 12px",
+      height: 28,
+      boxSizing: "border-box",
+      fontFamily: CHAT_FONT,
+      fontSize: 12,
+      fontWeight: 400,
+      color: C.inkSoft,
+    }}
+  >
+    {PERSONA_NAME}
+    <span style={{ color: C.faint, margin: "0 5px" }}>•</span>
+    <span style={{ color: C.muted }}>{PERSONA_TITLE}</span>
+  </div>
+  <button
+    onClick={handleSend}
+    disabled={isSending || !input.trim()}
+    style={{
+      display: "flex", alignItems: "center", justifyContent: "center",
+      width: 28, height: 28, flexShrink: 0,
+      background: C.ink, color: C.paper, border: "none", borderRadius: "50%",
+      cursor: isSending || !input.trim() ? "not-allowed" : "pointer",
+      opacity: isSending || !input.trim() ? 0.3 : 1,
+    }}
+  >
+    <ArrowUp size={13} strokeWidth={2.4} />
+  </button>
+</div>
         </div>
         <div style={{ textAlign: "center", fontSize: 11, color: C.faint, marginTop: 10, fontFamily: CHAT_FONT }}>
           {PERSONA_NAME} adalah AI dan dapat melakukan kesalahan. Harap periksa kembali jawaban.
