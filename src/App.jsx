@@ -320,7 +320,7 @@ function RJournal({ user }) {
     { key: "log", label: "Log Trade", icon: PencilLine },
     { key: "journal", label: "Journal", icon: BookOpen },
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { key: "chat", label: "AI Chat", icon: Sparkles },
+    { key: "chat", label: "AI Chat", icon: MessageCircle },
   ];
 
   const C = themeMode === "dark" ? DARK : LIGHT;
