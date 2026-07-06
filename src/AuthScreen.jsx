@@ -6,13 +6,14 @@ import {
 } from "firebase/auth";
 import { auth } from "./firebase";
 
-const SERIF = "'Playfair Display', 'Georgia', serif";
-const SANS = "'Inter', system-ui, -apple-system, sans-serif";
+const SERIF = "'Poppins', 'Arial', sans-serif";
+const SANS = "'Lora', 'Georgia', serif";
 
 const C = {
-  bg: "#FAFAF8", paper: "#FFFFFF", ink: "#171717", inkSoft: "#3F3F3D",
-  muted: "#767470", line: "#E3E2DD", inputBg: "#F3F3F1",
-  rustRed: "#B85C50", rustWash: "#F1E2DE",
+  bg: "#FAF9F5", paper: "#FFFFFF", ink: "#141413", inkSoft: "#3D3D3A",
+  muted: "#767470", line: "#E3E2DD", inputBg: "#F0EEE6",
+  clay: "#D97757", rustRed: "#B85C50", rustWash: "#F1E2DE",
+  sage: "#788C5D", sageWash: "#E8ECE1",
 };
 
 export default function AuthScreen() {
@@ -67,19 +68,32 @@ export default function AuthScreen() {
       fontFamily: SANS, color: C.ink,
     }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:opsz,wght@5..1200,600;5..1200,700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&display=swap');
         input::placeholder { color: #AFAEA9; }
       `}</style>
       <div style={{
         width: "100%", maxWidth: 380, background: C.paper,
         border: `1px solid ${C.line}`, borderRadius: 20, padding: 32,
       }}>
-        <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 22, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6 }}>
+        <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 22, textTransform: "uppercase", letterSpacing: "-0.01em", marginBottom: 6, color: C.ink }}>
           Apocalypse Archives
         </div>
-        <div style={{ fontSize: 14, color: C.muted, marginBottom: 26 }}>
+        <div style={{ fontSize: 14, color: C.muted, marginBottom: 16 }}>
           {mode === "login" ? "Log in to sync your trades." : "Create an account to get started."}
         </div>
+
+        {/* Animated butterfly video — served from /public/butterfly.mp4 */}
+        <video
+          src="/butterfly.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={{
+            width: "100%", height: 130, objectFit: "cover",
+            borderRadius: 14, display: "block", marginBottom: 22,
+          }}
+        />
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: 14 }}>
@@ -93,8 +107,8 @@ export default function AuthScreen() {
               placeholder="you@example.com"
               style={{
                 width: "100%", boxSizing: "border-box", background: C.inputBg,
-                border: `1px solid ${C.line}`, borderRadius: 12, padding: "12px 14px",
-                fontSize: 15, outline: "none", color: C.ink,
+                border: `1px solid ${error ? C.rustRed : C.line}`, borderRadius: 12, padding: "12px 14px",
+                fontSize: 15, outline: "none", color: C.ink, fontFamily: SANS,
               }}
             />
           </div>
@@ -109,8 +123,8 @@ export default function AuthScreen() {
               placeholder="At least 6 characters"
               style={{
                 width: "100%", boxSizing: "border-box", background: C.inputBg,
-                border: `1px solid ${C.line}`, borderRadius: 12, padding: "12px 14px",
-                fontSize: 15, outline: "none", color: C.ink,
+                border: `1px solid ${error ? C.rustRed : C.line}`, borderRadius: 12, padding: "12px 14px",
+                fontSize: 15, outline: "none", color: C.ink, fontFamily: SANS,
               }}
             />
           </div>
@@ -123,7 +137,7 @@ export default function AuthScreen() {
           )}
           {info && (
             <div style={{
-              background: "#E4EBE2", color: "#5C8060", borderRadius: 10,
+              background: C.sageWash, color: C.sage, borderRadius: 10,
               padding: "10px 12px", fontSize: 13, marginBottom: 14,
             }}>{info}</div>
           )}
@@ -133,7 +147,7 @@ export default function AuthScreen() {
             disabled={busy}
             style={{
               width: "100%", padding: "13px 0", borderRadius: 12, border: "none",
-              background: "#171717", color: "#FFFFFF", fontWeight: 700, fontSize: 15,
+              background: C.clay, color: "#FFFFFF", fontWeight: 700, fontSize: 15,
               cursor: busy ? "not-allowed" : "pointer", opacity: busy ? 0.6 : 1,
               marginBottom: 14,
             }}
@@ -145,7 +159,7 @@ export default function AuthScreen() {
         {mode === "login" && (
           <button
             onClick={handleForgotPassword}
-            style={{ background: "transparent", border: "none", color: C.muted, fontSize: 13, cursor: "pointer", padding: 0, marginBottom: 18 }}
+            style={{ background: "transparent", border: "none", color: C.muted, fontSize: 13, cursor: "pointer", padding: 0, marginBottom: 18, fontFamily: SANS }}
           >
             Forgot password?
           </button>
@@ -154,13 +168,13 @@ export default function AuthScreen() {
         <div style={{ borderTop: `1px solid ${C.line}`, paddingTop: 16, fontSize: 13.5, color: C.muted, textAlign: "center" }}>
           {mode === "login" ? (
             <>Don't have an account?{" "}
-              <button onClick={() => { setMode("signup"); setError(""); setInfo(""); }} style={{ background: "transparent", border: "none", color: C.ink, fontWeight: 700, cursor: "pointer", padding: 0 }}>
+              <button onClick={() => { setMode("signup"); setError(""); setInfo(""); }} style={{ background: "transparent", border: "none", color: C.ink, fontWeight: 700, cursor: "pointer", padding: 0, fontFamily: SANS }}>
                 Sign up
               </button>
             </>
           ) : (
             <>Already have an account?{" "}
-              <button onClick={() => { setMode("login"); setError(""); setInfo(""); }} style={{ background: "transparent", border: "none", color: C.ink, fontWeight: 700, cursor: "pointer", padding: 0 }}>
+              <button onClick={() => { setMode("login"); setError(""); setInfo(""); }} style={{ background: "transparent", border: "none", color: C.ink, fontWeight: 700, cursor: "pointer", padding: 0, fontFamily: SANS }}>
                 Log in
               </button>
             </>
