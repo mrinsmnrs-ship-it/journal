@@ -4,7 +4,7 @@
 // Riwayat chat disimpan permanen di users/{uid}.chatMessages
 
 import { useState, useEffect, useRef } from "react";
-import { Send, Sparkles, Loader2 } from "lucide-react";
+import { ArrowUp, Sparkles, Loader2 } from "lucide-react";
 import { askGemini } from "./gemini";
 import { loadUserData, saveUserData } from "./store";
 
@@ -100,11 +100,12 @@ export default function JournalChat({ user, trades, theme }) {
     <div
       style={{
         maxWidth: 640,
+        width: "100%",
         display: "flex",
         flexDirection: "column",
-        height: "calc(100vh - 210px)",
-        minHeight: 420,
-        maxHeight: 720,
+        height: "100%",
+        minHeight: 0,
+        flex: 1,
         background: C.paper,
         border: `1px solid ${C.line}`,
         borderRadius: 20,
@@ -142,7 +143,7 @@ export default function JournalChat({ user, trades, theme }) {
       </div>
 
       {/* Messages */}
-      <div className="chat-messages" style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="chat-messages" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
         {!loaded ? (
           <div style={{ color: C.faint, fontSize: 14 }}>Memuat...</div>
         ) : messages.length === 0 ? (
@@ -206,7 +207,7 @@ export default function JournalChat({ user, trades, theme }) {
             opacity: isSending || !input.trim() ? 0.4 : 1,
           }}
         >
-          <Send size={16} />
+          <ArrowUp size={18} strokeWidth={2.4} />
         </button>
       </div>
     </div>
