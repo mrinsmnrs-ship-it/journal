@@ -12,6 +12,7 @@ import { askGemini } from "./gemini";
 import { loadUserData, saveUserData } from "./store";
 
 const SANS = "'Lora', 'Georgia', serif";
+const CHAT_FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
 const PERSONA_NAME = "Nox Valerica";
 const PERSONA_TITLE = "Journal Assistant";
@@ -200,22 +201,22 @@ export default function JournalChat({ user, trades, theme }) {
 
       {/* Header */}
       <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          padding: "16px 20px",
-          borderBottom: `1px solid ${C.line}`,
-          fontFamily: SANS,
-          color: C.ink,
-        }}
-      >
-        <Brain size={20} style={{ color: C.clay, flexShrink: 0 }} />
-<div style={{ fontSize: 13, letterSpacing: "0.01em" }}>
-  <span style={{ fontWeight: 700 }}>{PERSONA_NAME}</span>
-  <span style={{ fontWeight: 500, color: C.muted }}>&nbsp;|&nbsp;{PERSONA_TITLE}</span>
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "16px 20px",
+    borderBottom: `1px solid ${C.line}`,
+    fontFamily: SANS,
+    color: C.ink,
+  }}
+>
+  <Brain size={20} style={{ color: C.ink, flexShrink: 0 }} />
+  <div style={{ fontSize: 13, letterSpacing: "0.01em", lineHeight: 1.3 }}>
+    <div style={{ fontWeight: 700, color: C.ink }}>{PERSONA_NAME}</div>
+    <div style={{ fontWeight: 500, color: C.muted, fontSize: 11 }}>{PERSONA_TITLE}</div>
+  </div>
 </div>
-      </div>
 
       {/* Messages */}
       <div className="chat-messages" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
@@ -227,20 +228,26 @@ export default function JournalChat({ user, trades, theme }) {
           </div>
         ) : (
           messages.map((m, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
-              <div
-                style={{
-                  maxWidth: "78%", padding: "10px 14px", borderRadius: 16,
-                  background: m.role === "user" ? C.clay : C.paperSoft,
-                  color: m.role === "user" ? C.paper : C.ink,
-                  fontSize: 14, fontFamily: SANS, whiteSpace: "pre-wrap", lineHeight: 1.5,
-                  overflowWrap: "anywhere", wordBreak: "break-word",
-                }}
-              >
-                {m.content}
-              </div>
-            </div>
-          ))
+  <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
+    <div
+      style={{
+        maxWidth: "78%",
+        padding: m.role === "user" ? "10px 14px" : "0",
+        borderRadius: m.role === "user" ? 16 : 0,
+        background: m.role === "user" ? C.paperSoft : "transparent",
+        color: C.ink,
+        fontSize: 14,
+        fontFamily: CHAT_FONT,
+        whiteSpace: "pre-wrap",
+        lineHeight: 1.5,
+        overflowWrap: "anywhere",
+        wordBreak: "break-word",
+      }}
+    >
+      {m.content}
+    </div>
+  </div>
+))
         )}
 
         {isSending && (
