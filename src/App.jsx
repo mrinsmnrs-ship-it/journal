@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
 import {
   Trash2, Plus, PencilLine, BookOpen, LayoutDashboard,
-  Sun, Moon, Zap, ChevronLeft, ChevronRight, LogOut, Sparkles,
+  Sun, Moon, ChevronLeft, ChevronRight, LogOut, Sparkles,
 } from "lucide-react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -13,43 +13,35 @@ import { loadUserData, saveUserData } from "./store";
 import AuthScreen from "./AuthScreen.jsx";
 import JournalChat from "./JournalChat.jsx";
 
-// ---- Design tokens : monochrome, Claude-matched palettes ----
+// ---- Design tokens : Claude-matched palette (clay / sage / amber) ----
 const LIGHT = {
-  bg: "#FAFAF8", paper: "#FFFFFF", paperSoft: "#F3F3F1",
-  ink: "#171717", inkSoft: "#3F3F3D", muted: "#767470", faint: "#AFAEA9",
+  bg: "#FAF9F5", paper: "#FFFFFF", paperSoft: "#F0EEE6",
+  ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
   line: "#E3E2DD", lineSoft: "#EDECE8",
-  clay: "#171717", clayDeep: "#000000", clayWash: "#ECECE9", clayOnWhite: "#000000",
-  sage: "#5C8060", sageWash: "#E4EBE2", sageOnWhite: "#5C8060",
+  clay: "#D97757", clayDeep: "#B85C3E", clayWash: "#F5E4DB", clayOnWhite: "#B85C3E",
+  sage: "#788C5D", sageWash: "#E8ECE1", sageOnWhite: "#5F7048",
   rustRed: "#B85C50", rustWash: "#F1E2DE", rustOnWhite: "#B85C50", dangerBg: "#B85C50",
-  amber: "#B08A3E", amberWash: "#F1E7D4", amberOnWhite: "#B08A3E",
-  inputBg: "#F3F3F1", inputText: "#171717", inputPlaceholder: "#AFAEA9", inputBorder: "#E3E2DD",
+  amber: "#6A9BCC", amberWash: "#E4ECF3", amberOnWhite: "#3D6C9C",
+  inputBg: "#F0EEE6", inputText: "#141413", inputPlaceholder: "#AFAEA9", inputBorder: "#E3E2DD",
 };
 const DARK = {
-  bg: "#1B1B1A", paper: "#252524", paperSoft: "#2E2E2C",
-  ink: "#F2F1EC", inkSoft: "#CFCEC8", muted: "#94928C", faint: "#5E5D58",
-  line: "#3D3C39", lineSoft: "#333230",
-  clay: "#F2F1EC", clayDeep: "#FFFFFF", clayWash: "#38372F", clayOnWhite: "#FFFFFF",
-  sage: "#8CAE8E", sageWash: "#33402F", sageOnWhite: "#8CAE8E",
-  rustRed: "#D28A7E", rustWash: "#453029", rustOnWhite: "#D28A7E", dangerBg: "#D28A7E",
-  amber: "#D4AE6E", amberWash: "#443A24", amberOnWhite: "#D4AE6E",
-  inputBg: "#2E2E2C", inputText: "#F2F1EC", inputPlaceholder: "#5E5D58", inputBorder: "#3D3C39",
-};
-const BLUE = {
-  bg: "#2340FF", paper: "#2340FF", paperSoft: "#2A48FF",
-  ink: "#FFFFFF", inkSoft: "#FFFFFF", muted: "#FFFFFF", faint: "#B9C4FF",
-  line: "#FFFFFF", lineSoft: "#8DA0FF",
-  clay: "#FFFFFF", clayDeep: "#CFE0FF", clayWash: "#FFFFFF", clayOnWhite: "#182463",
-  sage: "#FFFFFF", sageWash: "#FFFFFF", sageOnWhite: "#182463",
-  rustRed: "#7A93FF", rustWash: "#FFFFFF", rustOnWhite: "#182463", dangerBg: "#182463",
-  amber: "#B9CCFF", amberWash: "#FFFFFF", amberOnWhite: "#182463",
-  inputBg: "#FFFFFF", inputText: "#182463", inputPlaceholder: "#8A93C2", inputBorder: "#C7CEEA",
-  chipBorderAccent: false,
+  bg: "#141413", paper: "#1F1E1B", paperSoft: "#262521",
+  ink: "#FAF9F5", inkSoft: "#D8D6CF", muted: "#9C9A93", faint: "#65635C",
+  line: "#3A3935", lineSoft: "#2E2D29",
+  clay: "#D97757", clayDeep: "#E8926F", clayWash: "#3A2A21", clayOnWhite: "#E8926F",
+  sage: "#788C5D", sageWash: "#232A1D", sageOnWhite: "#9CB27E",
+  rustRed: "#D28A7E", rustWash: "#3B2822", rustOnWhite: "#D28A7E", dangerBg: "#D28A7E",
+  amber: "#6A9BCC", amberWash: "#1E2A35", amberOnWhite: "#8FB8DE",
+  inputBg: "#262521", inputText: "#FAF9F5", inputPlaceholder: "#65635C", inputBorder: "#3A3935",
 };
 
-
-const SERIF = "'Playfair Display', 'Georgia', serif";
-const SANS = "'Inter', system-ui, -apple-system, sans-serif";
+const SERIF = "'Poppins', 'Arial', sans-serif";
+const SANS = "'Lora', 'Georgia', serif";
 const MONO = "'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace";
+
+function getPageBackground(themeMode, C) {
+  return { backgroundColor: C.paper };
+}
 
 const EMOTIONS = ["Calm", "Confident", "Hesitant", "Bored", "FOMO", "Revenge", "Anxious"];
 const POSITIVE_EMOTIONS = new Set(["Calm", "Confident"]);
@@ -101,7 +93,7 @@ const PERIODS = [
 // ---- Small atoms ----
 function Chip({ label, active, onClick, activeColor, activeBg }) {
   const C = useTheme();
-  const borderColor = active ? (C.chipBorderAccent === false ? C.line : activeColor) : C.line;
+  const borderColor = active ? activeColor : C.line;
   return (
     <button
       onClick={onClick}
@@ -154,11 +146,10 @@ function SectionLabel({ text }) {
     }}>{text}</div>
   );
 }
-const THEME_ORDER = ["light", "dark", "blue"];
+const THEME_ORDER = ["light", "dark"];
 const THEME_META = {
   light: { label: "Light", Icon: Sun },
   dark: { label: "Dark", Icon: Moon },
-  blue: { label: "Blue", Icon: Zap },
 };
 function ThemeToggle({ mode, onToggle, compact }) {
   const C = useTheme();
@@ -326,13 +317,13 @@ function RJournal({ user }) {
     { key: "chat", label: "AI Chat", icon: Sparkles },
   ];
 
-  const C = themeMode === "dark" ? DARK : themeMode === "blue" ? BLUE : LIGHT;
+  const C = themeMode === "dark" ? DARK : LIGHT;
 
   return (
     <ThemeContext.Provider value={C}>
-      <div style={{ background: C.bg, minHeight: "100vh", color: C.ink, fontFamily: SANS, transition: "background .2s ease, color .2s ease" }}>
+      <div style={{ ...getPageBackground(themeMode, C), minHeight: "100vh", color: C.ink, fontFamily: SANS, transition: "background .2s ease, color .2s ease" }}>
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:opsz,wght@5..1200,500;5..1200,600;5..1200,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
           * { box-sizing: border-box; }
           html, body { margin:0; }
           button { -webkit-tap-highlight-color: transparent; transition: transform .1s ease; }
@@ -383,7 +374,7 @@ function RJournal({ user }) {
           {/* Sidebar (desktop) */}
           <div className="sidebar">
             <div style={{ padding: "6px 10px 26px" }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 21, textTransform: "uppercase", letterSpacing: "0.045em" }}>
+              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 21, textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink }}>
                 Apocalypse Archives
               </div>
               <div style={{ fontFamily: MONO, fontSize: 12, color: C.muted, marginTop: 4 }}>
@@ -421,7 +412,7 @@ function RJournal({ user }) {
 
           {/* Mobile top bar */}
           <div className="mobile-topbar">
-            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 17, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 17, textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink }}>
               Apocalypse Archives
             </div>
             <div style={{ display: "flex", gap: 8 }}>
@@ -443,7 +434,7 @@ function RJournal({ user }) {
           {/* Main content */}
           <div className="main-area">
             <div style={{ marginBottom: 26 }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 26 }}>
+              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 26, letterSpacing: "-0.01em", color: C.ink }}>
                 {NAV.find((n) => n.key === tab)?.label}
               </div>
             </div>
@@ -706,7 +697,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
             background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: 22,
             boxShadow: "0 16px 40px rgba(0,0,0,0.25)",
           }}>
-            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 18, marginBottom: 8 }}>Delete this trade?</div>
+            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 18, marginBottom: 8, letterSpacing: "-0.01em", color: C.ink }}>Delete this trade?</div>
             <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.5, marginBottom: 20 }}>
               {confirmTrade.symbol} &middot; {confirmTrade.date} &middot; {fmtR(confirmTrade.rActual)} will be permanently removed.
             </div>
@@ -799,7 +790,7 @@ function Dashboard({ trades }) {
           </div>
           <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: "22px 10px 6px", marginBottom: 26 }}>
             <div style={{ padding: "0 16px" }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 18 }}>Trader Scorecard</div>
+              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 18, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
               <div style={{ fontSize: 13, color: C.muted, marginTop: 2, marginBottom: 4 }}>Score 0–100 per dimension</div>
             </div>
             <div style={{ width: "100%", height: 300, overflow: "visible" }}>
