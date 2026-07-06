@@ -13,6 +13,8 @@ const SANS = "'Lora', 'Georgia', serif";
 const SYSTEM_PROMPT =
   "Kamu adalah teman ngobrol sekaligus teman refleksi trading di aplikasi trading journal bernama Apocalypse Archives. Jawab hangat, ringkas, dalam Bahasa Indonesia. Kalau pengguna diberi konteks trade terbaru mereka (simbol, arah, hasil R, kepatuhan pada rules, emosi saat itu, catatan), bantu mereka merefleksikan pola perilaku dan emosinya saat trading dengan empati dan tanpa menghakimi, tanpa membuat diagnosis psikologis apapun. Kalau pengguna cuma mau ngobrol santai, ikuti saja obrolannya seperti biasa.";
 
+const MAX_TEXTAREA_HEIGHT = 160;
+
 export default function JournalChat({ user, trades, theme }) {
   const C = theme;
   const [messages, setMessages] = useState([]);
@@ -21,6 +23,7 @@ export default function JournalChat({ user, trades, theme }) {
   const [error, setError] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const scrollRef = useRef(null);
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     (async () => {
@@ -33,6 +36,15 @@ export default function JournalChat({ user, trades, theme }) {
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isSending]);
+
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const next = Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT);
+    el.style.height = `${next}px`;
+    el.style.overflowY = el.scrollHeight > MAX_TEXTAREA_HEIGHT ? "auto" : "hidden";
+  }, [input]);
 
   function buildTradeContext() {
     const recent = trades.slice(0, 5);
@@ -90,7 +102,9 @@ export default function JournalChat({ user, trades, theme }) {
         maxWidth: 640,
         display: "flex",
         flexDirection: "column",
-        height: 560,
+        height: "calc(100vh - 210px)",
+        minHeight: 420,
+        maxHeight: 720,
         background: C.paper,
         border: `1px solid ${C.line}`,
         borderRadius: 20,
@@ -100,6 +114,13 @@ export default function JournalChat({ user, trades, theme }) {
       <style>{`
         @keyframes chatSpin { to { transform: rotate(360deg); } }
         .chat-input, .chat-input:focus { border-color: ${C.inputBorder} !important; }
+        .chat-messages { scrollbar-width: thin; scrollbar-color: ${C.line} transparent; }
+        .chat-messages::-webkit-scrollbar { width: 5px; }
+        .chat-messages::-webkit-scrollbar-track { background: transparent; }
+        .chat-messages::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 10px; }
+        .chat-input::-webkit-scrollbar { width: 5px; }
+        .chat-input::-webkit-scrollbar-track { background: transparent; }
+        .chat-input::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 10px; }
       `}</style>
 
       {/* Header */}
@@ -121,7 +142,7 @@ export default function JournalChat({ user, trades, theme }) {
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="chat-messages" style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
         {!loaded ? (
           <div style={{ color: C.faint, fontSize: 14 }}>Memuat...</div>
         ) : messages.length === 0 ? (
@@ -161,15 +182,17 @@ export default function JournalChat({ user, trades, theme }) {
       {/* Input */}
       <div style={{ borderTop: `1px solid ${C.line}`, padding: 14, display: "flex", gap: 10, alignItems: "flex-end" }}>
         <textarea
+          ref={textareaRef}
           className="chat-input"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           rows={1}
-          placeholder="Tulis pesan atau tanya soal trading kamu..."
+          placeholder="Write a message..."
           style={{
             flex: 1, resize: "none", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
             borderRadius: 12, padding: "10px 14px", color: C.inputText, fontFamily: SANS, fontSize: 14, outline: "none",
+            lineHeight: 1.4, maxHeight: MAX_TEXTAREA_HEIGHT, overflowY: "hidden",
           }}
         />
         <button
