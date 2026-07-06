@@ -379,7 +379,7 @@ function RJournal({ user }) {
               display: block; text-align: center; font-size: 11px; color: ${C.faint};
               opacity: 0.7; margin-top: 32px; padding-bottom: 8px;
             }
-            .chat-mode .main-area { padding: 74px 16px 16px; }
+            .chat-mode .main-area { padding: 74px 16px 96px; }
           }
         `}</style>
         <div className="app-shell">
