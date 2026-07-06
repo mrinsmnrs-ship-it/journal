@@ -7,7 +7,7 @@
 // nyambung & kenal pengguna walau tampilan chat sudah bersih.
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowUp, Loader2 } from "lucide-react";
+import { ArrowUp, Loader2, Brain } from "lucide-react";
 import { askGemini } from "./gemini";
 import { loadUserData, saveUserData } from "./store";
 
@@ -210,15 +210,11 @@ export default function JournalChat({ user, trades, theme }) {
           color: C.ink,
         }}
       >
-        <img
-          src={`${import.meta.env.BASE_URL}nox-valerica.png`}
-          alt={PERSONA_NAME}
-          style={{ width: 24, height: 24, objectFit: "contain", flexShrink: 0, borderRadius: 6 }}
-        />
-        <div style={{ fontSize: 15, textTransform: "uppercase", letterSpacing: "0.02em" }}>
-          <span style={{ fontWeight: 800 }}>{PERSONA_NAME}</span>
-          <span style={{ fontWeight: 500, color: C.muted }}>&nbsp;|&nbsp;{PERSONA_TITLE}</span>
-        </div>
+        <Brain size={20} style={{ color: C.clay, flexShrink: 0 }} />
+<div style={{ fontSize: 13, letterSpacing: "0.01em" }}>
+  <span style={{ fontWeight: 700 }}>{PERSONA_NAME}</span>
+  <span style={{ fontWeight: 500, color: C.muted }}>&nbsp;|&nbsp;{PERSONA_TITLE}</span>
+</div>
       </div>
 
       {/* Messages */}
