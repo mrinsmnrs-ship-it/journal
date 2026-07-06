@@ -89,11 +89,13 @@ export default function AuthScreen() {
   loop
   muted
   playsInline
+  preload="auto"
   style={{
-  width: "100%", height: 160, objectFit: "contain",
-  borderRadius: 14, display: "block", marginBottom: 22,
-  background: C.paper,
-}}
+    width: "100%", height: 160, objectFit: "contain",
+    borderRadius: 14, display: "block", marginBottom: 22,
+    background: C.paper,
+  }}
+/>
 />
 
         <form onSubmit={handleSubmit}>
