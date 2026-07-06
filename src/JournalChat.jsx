@@ -214,6 +214,7 @@ export default function JournalChat({ user, trades, theme }) {
                   padding: m.role === "user" ? "10px 14px" : "0",
                   borderRadius: m.role === "user" ? 16 : 0,
                   background: m.role === "user" ? C.paperSoft : "transparent",
+border: m.role === "user" ? `1px solid ${C.line}` : "none",
                   color: C.ink,
                   fontSize: 14,
                   fontFamily: CHAT_FONT,
@@ -271,25 +272,25 @@ export default function JournalChat({ user, trades, theme }) {
           />
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
   <div
-    style={{
-      display: "inline-flex",
-      alignItems: "center",
-      background: "transparent",
-      border: `1px solid ${C.line}`,
-      borderRadius: 999,
-      padding: "5px 12px",
-      height: 28,
-      boxSizing: "border-box",
-      fontFamily: CHAT_FONT,
-      fontSize: 12,
-      fontWeight: 400,
-      color: C.inkSoft,
-    }}
-  >
-    {PERSONA_NAME}
-    <span style={{ color: C.faint, margin: "0 5px" }}>•</span>
-    <span style={{ color: C.muted }}>{PERSONA_TITLE}</span>
-  </div>
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    background: "transparent",
+    border: `1px solid ${C.line}`,
+    borderRadius: 999,
+    padding: "5px 12px",
+    height: 28,
+    boxSizing: "border-box",
+    fontFamily: CHAT_FONT,
+    fontSize: 11,
+    fontWeight: 400,
+    color: C.muted,
+  }}
+>
+  {PERSONA_NAME}
+  <span style={{ color: C.faint, margin: "0 5px" }}>•</span>
+  <span style={{ color: C.muted }}>{PERSONA_TITLE}</span>
+</div>
   <button
     onClick={handleSend}
     disabled={isSending || !input.trim()}
@@ -305,7 +306,7 @@ export default function JournalChat({ user, trades, theme }) {
   </button>
 </div>
         </div>
-        <div style={{ textAlign: "center", fontSize: 11, color: C.faint, marginTop: 10, fontFamily: CHAT_FONT }}>
+        <div style={{ textAlign: "center", fontSize: 9, color: C.faint, marginTop: 10, fontFamily: CHAT_FONT }}>
           {PERSONA_NAME} adalah AI dan dapat melakukan kesalahan. Harap periksa kembali jawaban.
         </div>
       </div>
