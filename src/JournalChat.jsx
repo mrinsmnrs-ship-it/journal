@@ -7,7 +7,7 @@
 // nyambung & kenal pengguna walau tampilan chat sudah bersih.
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowUp, Loader2, Brain } from "lucide-react";
+import { ArrowUp, Loader2 } from "lucide-react";
 import { askGemini } from "./gemini";
 import { loadUserData, saveUserData } from "./store";
 
@@ -198,23 +198,33 @@ export default function JournalChat({ user, trades, theme }) {
       `}</style>
 
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          padding: "16px 20px",
-          borderBottom: `1px solid ${C.line}`,
-          fontFamily: SANS,
-          color: C.ink,
-        }}
-      >
-        <Brain size={20} style={{ color: C.ink, flexShrink: 0 }} />
-        <div style={{ fontSize: 13, letterSpacing: "0.01em", lineHeight: 1.3 }}>
-          <div style={{ fontWeight: 700, color: C.ink }}>{PERSONA_NAME}</div>
-          <div style={{ fontWeight: 500, color: C.muted, fontSize: 11 }}>{PERSONA_TITLE}</div>
-        </div>
-      </div>
+      {/* Header */}
+<div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    padding: "16px 20px",
+    borderBottom: `1px solid ${C.line}`,
+  }}
+>
+  <div
+    style={{
+      display: "inline-flex",
+      alignItems: "center",
+      border: `1px solid ${C.line}`,
+      borderRadius: 999,
+      padding: "7px 14px",
+      fontFamily: CHAT_FONT,
+      fontSize: 13,
+      fontWeight: 600,
+      color: C.ink,
+    }}
+  >
+    {PERSONA_NAME}
+    <span style={{ color: C.faint, margin: "0 6px" }}>•</span>
+    <span style={{ color: C.muted, fontWeight: 500 }}>{PERSONA_TITLE}</span>
+  </div>
+</div>
 
       {/* Messages */}
       <div className="chat-messages" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
