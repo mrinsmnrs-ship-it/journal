@@ -7,7 +7,7 @@
 // nyambung & kenal pengguna walau tampilan chat sudah bersih.
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowUp, Loader2 } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { askGemini } from "./gemini";
 import { loadUserData, saveUserData } from "./store";
 
@@ -186,7 +186,18 @@ export default function JournalChat({ user, trades, theme }) {
       }}
     >
       <style>{`
-        @keyframes chatSpin { to { transform: rotate(360deg); } }
+        @keyframes typingBounce {
+          0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+          30% { transform: translateY(-4px); opacity: 1; }
+        }
+        .typing-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: ${C.faint};
+          display: inline-block;
+          animation: typingBounce 1.2s infinite ease-in-out;
+        }
         .chat-input, .chat-input:focus { border-color: transparent !important; }
         .chat-messages { scrollbar-width: thin; scrollbar-color: ${C.line} transparent; }
         .chat-messages::-webkit-scrollbar { width: 5px; }
@@ -214,7 +225,7 @@ export default function JournalChat({ user, trades, theme }) {
                   padding: m.role === "user" ? "10px 14px" : "0",
                   borderRadius: m.role === "user" ? 16 : 0,
                   background: m.role === "user" ? C.paperSoft : "transparent",
-border: m.role === "user" ? `1px solid ${C.line}` : "none",
+                  border: m.role === "user" ? `1px solid ${C.line}` : "none",
                   color: C.ink,
                   fontSize: 14,
                   fontFamily: CHAT_FONT,
@@ -232,9 +243,10 @@ border: m.role === "user" ? `1px solid ${C.line}` : "none",
 
         {isSending && (
           <div style={{ display: "flex", justifyContent: "flex-start" }}>
-            <div style={{ padding: "10px 14px", borderRadius: 16, background: C.paperSoft, color: C.muted, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
-              <Loader2 size={14} style={{ animation: "chatSpin 1s linear infinite" }} />
-              Sedang mengetik...
+            <div style={{ display: "flex", gap: 4, padding: "6px 0" }}>
+              <span className="typing-dot" style={{ animationDelay: "0s" }} />
+              <span className="typing-dot" style={{ animationDelay: "0.15s" }} />
+              <span className="typing-dot" style={{ animationDelay: "0.3s" }} />
             </div>
           </div>
         )}
@@ -271,45 +283,45 @@ border: m.role === "user" ? `1px solid ${C.line}` : "none",
             }}
           />
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-  <div
-  style={{
-    display: "inline-flex",
-    alignItems: "center",
-    background: "transparent",
-    border: `1px solid ${C.line}`,
-    borderRadius: 999,
-    padding: "5px 12px",
-    height: 28,
-    boxSizing: "border-box",
-    fontFamily: CHAT_FONT,
-    fontSize: 11,
-    fontWeight: 400,
-    color: C.muted,
-  }}
->
-  {PERSONA_NAME}
-  <span style={{ color: C.faint, margin: "0 5px" }}>•</span>
-  <span style={{ color: C.muted }}>{PERSONA_TITLE}</span>
-</div>
-  <button
-    onClick={handleSend}
-    disabled={isSending || !input.trim()}
-    style={{
-      display: "flex", alignItems: "center", justifyContent: "center",
-      width: 28, height: 28, flexShrink: 0,
-      background: C.ink, color: C.paper, border: "none", borderRadius: "50%",
-      cursor: isSending || !input.trim() ? "not-allowed" : "pointer",
-      opacity: isSending || !input.trim() ? 0.3 : 1,
-    }}
-  >
-    <ArrowUp size={13} strokeWidth={2.4} />
-  </button>
-</div>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                background: "transparent",
+                border: `1px solid ${C.line}`,
+                borderRadius: 999,
+                padding: "5px 12px",
+                height: 28,
+                boxSizing: "border-box",
+                fontFamily: CHAT_FONT,
+                fontSize: 11,
+                fontWeight: 400,
+                color: C.muted,
+              }}
+            >
+              {PERSONA_NAME}
+              <span style={{ color: C.faint, margin: "0 5px" }}>•</span>
+              <span style={{ color: C.muted }}>{PERSONA_TITLE}</span>
+            </div>
+            <button
+              onClick={handleSend}
+              disabled={isSending || !input.trim()}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                width: 28, height: 28, flexShrink: 0,
+                background: C.ink, color: C.paper, border: "none", borderRadius: "50%",
+                cursor: isSending || !input.trim() ? "not-allowed" : "pointer",
+                opacity: isSending || !input.trim() ? 0.3 : 1,
+              }}
+            >
+              <ArrowUp size={13} strokeWidth={2.4} />
+            </button>
+          </div>
         </div>
-        <div style={{ textAlign: "center", fontSize: 9, color: C.faint, marginTop: 10, fontFamily: CHAT_FONT }}>
+        <div style={{ textAlign: "center", fontSize: 10, color: C.faint, marginTop: 10, fontFamily: CHAT_FONT }}>
           {PERSONA_NAME} adalah AI dan dapat melakukan kesalahan. Harap periksa kembali jawaban.
         </div>
       </div>
     </div>
   );
-    }
+}
