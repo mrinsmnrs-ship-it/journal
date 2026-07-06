@@ -451,11 +451,13 @@ function RJournal({ user }) {
 
           {/* Main content */}
           <div className="main-area">
-            <div style={{ marginBottom: isChatTab ? 14 : 26, flexShrink: 0 }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 26, letterSpacing: "-0.01em", color: C.ink }}>
-                {NAV.find((n) => n.key === tab)?.label}
-              </div>
-            </div>
+            {!isChatTab && (
+  <div style={{ marginBottom: 26, flexShrink: 0 }}>
+    <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 26, letterSpacing: "-0.01em", color: C.ink }}>
+      {NAV.find((n) => n.key === tab)?.label}
+    </div>
+  </div>
+)}
             {!loaded ? (
               <div style={{ color: C.faint, fontSize: 14 }}>Loading…</div>
             ) : isChatTab ? (
