@@ -318,10 +318,11 @@ function RJournal({ user }) {
   ];
 
   const C = themeMode === "dark" ? DARK : LIGHT;
+  const isChatTab = tab === "chat";
 
   return (
     <ThemeContext.Provider value={C}>
-      <div style={{ ...getPageBackground(themeMode, C), minHeight: "100vh", color: C.ink, fontFamily: SANS, transition: "background .2s ease, color .2s ease" }}>
+      <div className={isChatTab ? "chat-mode" : ""} style={{ ...getPageBackground(themeMode, C), minHeight: "100vh", color: C.ink, fontFamily: SANS, transition: "background .2s ease, color .2s ease" }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
           * { box-sizing: border-box; }
@@ -351,6 +352,16 @@ function RJournal({ user }) {
           }
           .nav-item.active { background: ${C.clayWash}; color: ${C.clayOnWhite}; }
           .nav-item:hover:not(.active) { background: ${C.paperSoft}; }
+
+          /* --- AI Chat tab: page itself never scrolls, only the chat's message list does --- */
+          .chat-mode { height: 100dvh; overflow: hidden; }
+          .chat-mode .app-shell { height: 100%; }
+          .chat-mode .sidebar { overflow-y: auto; }
+          .chat-mode .main-area {
+            display: flex; flex-direction: column; overflow: hidden;
+            height: 100%;
+          }
+
           @media (max-width: 820px) {
             .sidebar { display: none; }
             .main-area { padding: 74px 16px 100px; max-width: 100%; }
@@ -368,6 +379,7 @@ function RJournal({ user }) {
               display: block; text-align: center; font-size: 11px; color: ${C.faint};
               opacity: 0.7; margin-top: 32px; padding-bottom: 8px;
             }
+            .chat-mode .main-area { padding: 74px 16px 16px; }
           }
         `}</style>
         <div className="app-shell">
@@ -433,25 +445,29 @@ function RJournal({ user }) {
 
           {/* Main content */}
           <div className="main-area">
-            <div style={{ marginBottom: 26 }}>
+            <div style={{ marginBottom: isChatTab ? 14 : 26, flexShrink: 0 }}>
               <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 26, letterSpacing: "-0.01em", color: C.ink }}>
                 {NAV.find((n) => n.key === tab)?.label}
               </div>
             </div>
             {!loaded ? (
               <div style={{ color: C.faint, fontSize: 14 }}>Loading…</div>
+            ) : isChatTab ? (
+              <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
+                <JournalChat user={user} trades={trades} theme={C} />
+              </div>
             ) : tab === "log" ? (
               <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} />
             ) : tab === "journal" ? (
               <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} />
-            ) : tab === "chat" ? (
-              <JournalChat user={user} trades={trades} theme={C} />
             ) : (
               <Dashboard trades={trades} />
             )}
-            <div className="app-footer-mobile">
-              &copy; {new Date().getFullYear()} Apocalypse Archives. All rights reserved.
-            </div>
+            {!isChatTab && (
+              <div className="app-footer-mobile">
+                &copy; {new Date().getFullYear()} Apocalypse Archives. All rights reserved.
+              </div>
+            )}
           </div>
         </div>
 
