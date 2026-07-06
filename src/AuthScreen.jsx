@@ -84,7 +84,7 @@ export default function AuthScreen() {
 
         {/* Animated butterfly video — served from /public/butterfly.mp4 */}
         <video
-          src="/butterfly.mp4"
+  src={`${import.meta.env.BASE_URL}butterfly.mp4`}
           autoPlay
           loop
           muted
