@@ -8,7 +8,7 @@ import { Send, Sparkles, MessageCircle, Loader2 } from "lucide-react";
 import { askGemini } from "./gemini";
 import { loadUserData, saveUserData } from "./store";
 
-const SANS = "'Inter', system-ui, -apple-system, sans-serif";
+const SANS = "'Lora', 'Georgia', serif";
 
 const SYSTEM_PROMPTS = {
   general:
@@ -207,7 +207,9 @@ export default function JournalChat({ user, trades, theme }) {
           onClick={handleSend}
           disabled={isSending || !input.trim()}
           style={{
-            background: C.clay, color: C.paper, border: "none", borderRadius: 12, padding: "10px 14px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            width: 40, height: 40, flexShrink: 0,
+            background: C.clay, color: C.paper, border: "none", borderRadius: "50%",
             cursor: isSending || !input.trim() ? "not-allowed" : "pointer",
             opacity: isSending || !input.trim() ? 0.4 : 1,
           }}
