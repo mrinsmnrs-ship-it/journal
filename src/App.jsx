@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
 import {
   Trash2, Plus, PencilLine, BookOpen, LayoutDashboard,
-  Sun, Moon, ChevronLeft, ChevronRight, LogOut, Sparkles,
+  Sun, Moon, ChevronLeft, ChevronRight, LogOut, MessageCircle,
 } from "lucide-react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -38,6 +38,12 @@ const DARK = {
 const SERIF = "'Poppins', 'Arial', sans-serif";
 const SANS = "'Lora', 'Georgia', serif";
 const MONO = "'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace";
+const NAV = [
+  { key: "log", label: "Log Trade", icon: PencilLine },
+  { key: "journal", label: "Journal", icon: BookOpen },
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "chat", label: "AI Chat", icon: MessageCircle },
+];
 
 function getPageBackground(themeMode, C) {
   return { backgroundColor: C.paper };
