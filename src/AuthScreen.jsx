@@ -83,17 +83,18 @@ export default function AuthScreen() {
         </div>
 
         {/* Animated butterfly video — served from /public/butterfly.mp4 */}
-        <video
+       <video
   src={`${import.meta.env.BASE_URL}butterfly.mp4`}
-          autoPlay
-          loop
-          muted
-          playsInline
-          style={{
-            width: "100%", height: 130, objectFit: "cover",
-            borderRadius: 14, display: "block", marginBottom: 22,
-          }}
-        />
+  autoPlay
+  loop
+  muted
+  playsInline
+  style={{
+    width: "100%", height: 160, objectFit: "contain",
+    borderRadius: 14, display: "block", marginBottom: 22,
+    background: C.paperSoft || C.bg,
+  }}
+/>
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: 14 }}>
