@@ -187,7 +187,7 @@ export default function JournalChat({ user, trades, theme }) {
     >
       <style>{`
         @keyframes chatSpin { to { transform: rotate(360deg); } }
-        .chat-input, .chat-input:focus { border-color: ${C.inputBorder} !important; }
+        .chat-input, .chat-input:focus { border-color: transparent !important; }
         .chat-messages { scrollbar-width: thin; scrollbar-color: ${C.line} transparent; }
         .chat-messages::-webkit-scrollbar { width: 5px; }
         .chat-messages::-webkit-scrollbar-track { background: transparent; }
@@ -196,35 +196,6 @@ export default function JournalChat({ user, trades, theme }) {
         .chat-input::-webkit-scrollbar-track { background: transparent; }
         .chat-input::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 10px; }
       `}</style>
-
-      {/* Header */}
-      {/* Header */}
-<div
-  style={{
-    display: "flex",
-    alignItems: "center",
-    padding: "16px 20px",
-    borderBottom: `1px solid ${C.line}`,
-  }}
->
-  <div
-    style={{
-      display: "inline-flex",
-      alignItems: "center",
-      border: `1px solid ${C.line}`,
-      borderRadius: 999,
-      padding: "7px 14px",
-      fontFamily: CHAT_FONT,
-      fontSize: 13,
-      fontWeight: 600,
-      color: C.ink,
-    }}
-  >
-    {PERSONA_NAME}
-    <span style={{ color: C.faint, margin: "0 6px" }}>•</span>
-    <span style={{ color: C.muted, fontWeight: 500 }}>{PERSONA_TITLE}</span>
-  </div>
-</div>
 
       {/* Messages */}
       <div className="chat-messages" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
@@ -271,13 +242,14 @@ export default function JournalChat({ user, trades, theme }) {
         <div ref={scrollRef} />
       </div>
 
-      {/* Input */}
+      {/* Input — satu kotak border, textarea di atas, pill persona + tombol kirim di bawah (mirip layout Claude) */}
       <div style={{ padding: "14px 4px 6px" }}>
         <div
           style={{
-            display: "flex", gap: 10, alignItems: "flex-end",
-            border: `1px solid ${C.line}`, borderRadius: 24,
-            padding: "8px 8px 8px 16px", background: C.paper,
+            border: `1px solid ${C.line}`,
+            borderRadius: 24,
+            background: C.paper,
+            padding: "12px 10px 10px 16px",
           }}
         >
           <textarea
@@ -289,25 +261,46 @@ export default function JournalChat({ user, trades, theme }) {
             rows={1}
             placeholder="Write a message..."
             style={{
-              flex: 1, resize: "none", background: "transparent", border: "none",
-              padding: "8px 0", color: C.inputText, fontFamily: CHAT_FONT, fontSize: 14, outline: "none",
+              width: "100%",
+              display: "block",
+              resize: "none", background: "transparent", border: "none",
+              padding: "0 0 8px 0", color: C.inputText, fontFamily: CHAT_FONT, fontSize: 14, outline: "none",
               lineHeight: 1.4, maxHeight: MAX_TEXTAREA_HEIGHT, overflowY: "hidden",
               overflowWrap: "anywhere", wordBreak: "break-word",
             }}
           />
-          <button
-            onClick={handleSend}
-            disabled={isSending || !input.trim()}
-            style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              width: 34, height: 34, flexShrink: 0,
-              background: C.ink, color: C.paper, border: "none", borderRadius: "50%",
-              cursor: isSending || !input.trim() ? "not-allowed" : "pointer",
-              opacity: isSending || !input.trim() ? 0.3 : 1,
-            }}
-          >
-            <ArrowUp size={16} strokeWidth={2.4} />
-          </button>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                background: C.paperSoft,
+                borderRadius: 999,
+                padding: "7px 14px",
+                fontFamily: CHAT_FONT,
+                fontSize: 12.5,
+                fontWeight: 600,
+                color: C.ink,
+              }}
+            >
+              {PERSONA_NAME}
+              <span style={{ color: C.faint, margin: "0 6px" }}>•</span>
+              <span style={{ color: C.muted, fontWeight: 500 }}>{PERSONA_TITLE}</span>
+            </div>
+            <button
+              onClick={handleSend}
+              disabled={isSending || !input.trim()}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                width: 34, height: 34, flexShrink: 0,
+                background: C.ink, color: C.paper, border: "none", borderRadius: "50%",
+                cursor: isSending || !input.trim() ? "not-allowed" : "pointer",
+                opacity: isSending || !input.trim() ? 0.3 : 1,
+              }}
+            >
+              <ArrowUp size={16} strokeWidth={2.4} />
+            </button>
+          </div>
         </div>
         <div style={{ textAlign: "center", fontSize: 11, color: C.faint, marginTop: 10, fontFamily: CHAT_FONT }}>
           {PERSONA_NAME} adalah AI dan dapat melakukan kesalahan. Harap periksa kembali jawaban.
@@ -315,4 +308,4 @@ export default function JournalChat({ user, trades, theme }) {
       </div>
     </div>
   );
-         }
+    }
