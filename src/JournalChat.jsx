@@ -1,27 +1,56 @@
 // src/JournalChat.jsx
-// Komponen chat AI — satu mode gabungan (chat bebas + refleksi trading).
+// Komponen chat AI — persona "Nox Valerica" (Journal Assistant).
 // Konteks 5 trade terbaru otomatis disertakan ke AI kalau ada.
-// Riwayat chat disimpan permanen di users/{uid}.chatMessages
+// Riwayat chat disimpan permanen di users/{uid}.chatMessages, dan direset
+// setiap 24 jam sejak aktivitas terakhir — tapi sebelum direset, percakapan
+// diringkas jadi "chatMemory" yang tetap dipakai supaya Nox Valerica tetap
+// nyambung & kenal pengguna walau tampilan chat sudah bersih.
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowUp, Sparkles, Loader2 } from "lucide-react";
+import { ArrowUp, Loader2 } from "lucide-react";
 import { askGemini } from "./gemini";
 import { loadUserData, saveUserData } from "./store";
 
 const SANS = "'Lora', 'Georgia', serif";
 
-const SYSTEM_PROMPT =
-  "Kamu adalah teman ngobrol sekaligus teman refleksi trading di aplikasi trading journal bernama Apocalypse Archives. Jawab hangat, ringkas, dalam Bahasa Indonesia. Kalau pengguna diberi konteks trade terbaru mereka (simbol, arah, hasil R, kepatuhan pada rules, emosi saat itu, catatan), bantu mereka merefleksikan pola perilaku dan emosinya saat trading dengan empati dan tanpa menghakimi, tanpa membuat diagnosis psikologis apapun. Kalau pengguna cuma mau ngobrol santai, ikuti saja obrolannya seperti biasa.";
+const PERSONA_NAME = "Nox Valerica";
+const PERSONA_TITLE = "Journal Assistant";
 
+const SYSTEM_PROMPT_BASE =
+  `Kamu adalah ${PERSONA_NAME}, ${PERSONA_TITLE} di aplikasi trading journal bernama Apocalypse Archives — teman ngobrol sekaligus teman refleksi trading. Jawab hangat, ringkas, dalam Bahasa Indonesia. Kalau pengguna diberi konteks trade terbaru mereka (simbol, arah, hasil R, kepatuhan pada rules, emosi saat itu, catatan), bantu mereka merefleksikan pola perilaku dan emosinya saat trading dengan empati dan tanpa menghakimi, tanpa membuat diagnosis psikologis apapun. Kalau pengguna cuma mau ngobrol santai, ikuti saja obrolannya seperti biasa.`;
+
+const INTRO_MESSAGE =
+  `Halo, aku ${PERSONA_NAME} — ${PERSONA_TITLE} kamu di Apocalypse Archives. Aku di sini buat nemenin ngobrol atau bantu kamu merefleksikan trading kamu, kapan pun kamu butuh. Ada yang mau diobrolin?`;
+
+const RESET_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 jam
 const MAX_TEXTAREA_HEIGHT = 160;
 
 function isCoarsePointer() {
   return typeof window !== "undefined" && window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
 }
 
+// Ringkas percakapan lama jadi catatan jangka panjang tentang pengguna,
+// digabung dengan ringkasan sebelumnya (kalau ada), supaya "kenal" pengguna
+// tetap terjaga meski tampilan chat direset tiap 24 jam.
+async function summarizeForMemory(oldMessages, previousMemory) {
+  const transcript = oldMessages
+    .map((m) => `${m.role === "user" ? "Pengguna" : PERSONA_NAME}: ${m.content}`)
+    .join("\n");
+
+  const prompt =
+    `Berikut transkrip percakapan sebelumnya antara pengguna dan asisten trading journal bernama ${PERSONA_NAME}:\n\n${transcript}\n\n` +
+    (previousMemory ? `Catatan ringkasan sebelumnya tentang pengguna:\n${previousMemory}\n\n` : "") +
+    `Buatkan ringkasan singkat (maksimal 8 poin) berisi fakta, preferensi, kebiasaan trading, dan konteks personal penting tentang pengguna yang perlu diingat untuk percakapan-percakapan berikutnya, supaya asisten tetap terasa mengenal pengguna meskipun riwayat chat sudah direset. Jangan sertakan basa-basi, cukup poin-poinnya saja dalam Bahasa Indonesia.`;
+
+  const summary = await askGemini([{ role: "user", content: prompt }], "");
+  return summary.trim();
+}
+
 export default function JournalChat({ user, trades, theme }) {
   const C = theme;
   const [messages, setMessages] = useState([]);
+  const [chatMemory, setChatMemory] = useState("");
+  const [needsIntro, setNeedsIntro] = useState(false);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState(null);
@@ -32,9 +61,36 @@ export default function JournalChat({ user, trades, theme }) {
   useEffect(() => {
     (async () => {
       const data = await loadUserData(user.uid);
-      setMessages(data.chatMessages || []);
+      const storedMessages = data.chatMessages || [];
+      const storedMemory = data.chatMemory || "";
+      const lastActive = data.chatLastActive || null;
+      const expired = lastActive && Date.now() - lastActive > RESET_INTERVAL_MS;
+
+      if (expired && storedMessages.length > 0) {
+        // Sudah lebih dari 24 jam sejak pesan terakhir: ringkas dulu supaya
+        // "ingatan" tentang pengguna tidak hilang, baru kosongkan chat.
+        let mergedMemory = storedMemory;
+        try {
+          mergedMemory = await summarizeForMemory(storedMessages, storedMemory);
+        } catch (e) {
+          console.error("Gagal meringkas chat lama, memory lama dipertahankan:", e);
+        }
+        setChatMemory(mergedMemory);
+        setMessages([]);
+        setNeedsIntro(true);
+        await saveUserData(user.uid, {
+          chatMessages: [],
+          chatMemory: mergedMemory,
+          chatLastActive: Date.now(),
+        });
+      } else {
+        setChatMemory(storedMemory);
+        setMessages(storedMessages);
+        setNeedsIntro(storedMessages.length === 0);
+      }
       setLoaded(true);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.uid]);
 
   useEffect(() => {
@@ -60,6 +116,16 @@ export default function JournalChat({ user, trades, theme }) {
     return `Berikut 5 trade terbaru milik pengguna:\n${lines.join("\n")}`;
   }
 
+  function buildSystemInstruction() {
+    let systemInstruction = SYSTEM_PROMPT_BASE;
+    if (chatMemory) {
+      systemInstruction += `\n\nCatatan tentang pengguna dari percakapan-percakapan sebelumnya (pakai ini supaya kamu tetap terasa kenal & nyambung dengan pengguna, tapi jangan menyebut ini sebagai "catatan"/"ringkasan" ke pengguna kecuali relevan):\n${chatMemory}`;
+    }
+    const tradeContext = buildTradeContext();
+    if (tradeContext) systemInstruction += `\n\n${tradeContext}`;
+    return systemInstruction;
+  }
+
   async function handleSend() {
     const text = input.trim();
     if (!text || isSending) return;
@@ -68,23 +134,27 @@ export default function JournalChat({ user, trades, theme }) {
     setError(null);
     setIsSending(true);
 
+    const shouldIntro = needsIntro;
+    if (shouldIntro) setNeedsIntro(false);
+
     const userMsg = { role: "user", content: text, ts: Date.now() };
-    const withUserMsg = [...messages, userMsg];
+    let withUserMsg = [...messages, userMsg];
+
+    if (shouldIntro) {
+      const introMsg = { role: "assistant", content: INTRO_MESSAGE, ts: Date.now() - 1 };
+      withUserMsg = [introMsg, ...withUserMsg];
+    }
     setMessages(withUserMsg);
 
     try {
       const historyForChat = withUserMsg.map((m) => ({ role: m.role, content: m.content }));
-
-      let systemInstruction = SYSTEM_PROMPT;
-      const context = buildTradeContext();
-      if (context) systemInstruction += `\n\n${context}`;
-
+      const systemInstruction = buildSystemInstruction();
       const reply = await askGemini(historyForChat, systemInstruction);
       const aiMsg = { role: "assistant", content: reply, ts: Date.now() };
       const finalMessages = [...withUserMsg, aiMsg];
 
       setMessages(finalMessages);
-      await saveUserData(user.uid, { chatMessages: finalMessages });
+      await saveUserData(user.uid, { chatMessages: finalMessages, chatLastActive: Date.now() });
     } catch (err) {
       console.error(err);
       setError(err.message || "Terjadi kesalahan. Coba lagi.");
@@ -133,17 +203,22 @@ export default function JournalChat({ user, trades, theme }) {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 8,
+          gap: 10,
           padding: "16px 20px",
           borderBottom: `1px solid ${C.line}`,
-          fontWeight: 700,
-          fontSize: 15,
           fontFamily: SANS,
           color: C.ink,
         }}
       >
-        <Sparkles size={17} />
-        Asisten AI
+        <img
+          src={`${import.meta.env.BASE_URL}nox-valerica.png`}
+          alt={PERSONA_NAME}
+          style={{ width: 24, height: 24, objectFit: "contain", flexShrink: 0, borderRadius: 6 }}
+        />
+        <div style={{ fontSize: 15, textTransform: "uppercase", letterSpacing: "0.02em" }}>
+          <span style={{ fontWeight: 800 }}>{PERSONA_NAME}</span>
+          <span style={{ fontWeight: 500, color: C.muted }}>&nbsp;|&nbsp;{PERSONA_TITLE}</span>
+        </div>
       </div>
 
       {/* Messages */}
@@ -152,7 +227,7 @@ export default function JournalChat({ user, trades, theme }) {
           <div style={{ color: C.faint, fontSize: 14 }}>Memuat...</div>
         ) : messages.length === 0 ? (
           <div style={{ color: C.faint, fontSize: 14, textAlign: "center", marginTop: 40 }}>
-            Mulai obrolan dengan asisten kamu — bebas ngobrol atau refleksi soal trading kamu.
+            Mulai obrolan dengan {PERSONA_NAME} — bebas ngobrol atau refleksi soal trading kamu.
           </div>
         ) : (
           messages.map((m, i) => (
