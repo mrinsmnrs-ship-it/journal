@@ -113,13 +113,12 @@ export default function AuthScreen() {
       fontFamily: SANS, color: C.ink,
     }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&display=swap');
         * { box-sizing: border-box; }
         input::placeholder { color: ${C.faint}; }
         .auth-input { transition: border-color .12s ease, box-shadow .12s ease; }
-        .auth-input:focus { outline: none; border-color: ${C.clay} !important; box-shadow: 0 0 0 3px ${C.clay}22; }
+        .auth-input:focus { outline: none; border-color: ${C.ink} !important; box-shadow: 0 0 0 3px ${C.ink}22; }
         .auth-submit { transition: background .12s ease, transform .1s ease; }
-        .auth-submit:hover:not(:disabled) { background: ${C.clayDeep}; }
+        .auth-submit:hover:not(:disabled) { background: #000000; }
         .auth-submit:active:not(:disabled) { transform: scale(0.98); }
         .auth-tab { transition: color .12s ease; }
       `}</style>
@@ -373,7 +372,7 @@ export default function AuthScreen() {
             className="auth-submit"
             style={{
               width: "100%", padding: "13px 0", borderRadius: 12, border: "none",
-              background: C.clay, color: "#FFFFFF", fontWeight: 700, fontSize: 15,
+              background: C.ink, color: "#FFFFFF", fontWeight: 700, fontSize: 15,
               cursor: busy ? "not-allowed" : "pointer", opacity: busy ? 0.6 : 1,
             }}
           >
@@ -388,3 +387,4 @@ export default function AuthScreen() {
     </div>
   );
         }
+          
