@@ -972,15 +972,16 @@ function Dashboard({ trades }) {
           <SectionLabel text="By Rules Compliance" />
           <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: "2px 16px" }}>
   {["Yes", "Partial", "No"].map((r, i) => {
-    ...
-    <div key={r} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderTop: i > 0 ? `1px solid ${C.lineSoft}` : "none" }}>
-      <div style={{ fontWeight: 700, fontSize: 13.5, color: C.ink, minWidth: 60 }}>{r}</div>
-      <div style={{ fontFamily: MONO, fontSize: 11.5, color: C.muted, textAlign: "right" }}>
-                    {d.count} trade &middot; total {fmtR(d.total)} &middot; avg {avg.toFixed(2)}R
-                  </div>
-                </div>
-              );
-            })}
+    const d = stats.byRules[r];
+    const avg = d.count ? d.total / d.count : 0;
+    return (
+      <div key={r} style={{...}}>
+        ...
+        {d.count} trade &middot; total {fmtR(d.total)} &middot; avg {avg.toFixed(2)}R
+        ...
+      </div>
+    );
+})}
           </div>
         </>
       )}
