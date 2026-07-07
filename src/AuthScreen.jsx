@@ -130,7 +130,7 @@ export default function AuthScreen() {
         border: `1px solid ${C.line}`, borderRadius: 20, padding: 32,
         boxShadow: "0 12px 32px rgba(20,20,19,0.06)",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 4, fontSize: "clamp(14px, 5.4vw, 22px)", flexWrap: "nowrap" }}>
+<div style={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 4, fontSize: "clamp(14px, 5.4vw, 22px)", flexWrap: "nowrap" }}>
           <svg viewBox="0 0 494 497" style={{ color: C.ink, flexShrink: 0, width: "1.05em", height: "1.05em" }}>
             {blinkFrame === "open" && (
               <g transform="translate(0.000000,497.000000) scale(0.100000,-0.100000)"
@@ -382,4 +382,9 @@ export default function AuthScreen() {
         </form>
       </div>
       <div style={{ fontSize: 9, color: C.faint, marginTop: 16, fontFamily: SANS, opacity: 0.7 }}>
-        &copy; {new Date().getFullY
+        &copy; {new Date().getFullYear()} Apocalypse Archives. All rights reserved.
+      </div>
+      </div>
+    </div>
+  );
+            }
