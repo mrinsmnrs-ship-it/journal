@@ -130,8 +130,8 @@ export default function AuthScreen() {
         border: `1px solid ${C.line}`, borderRadius: 20, padding: 32,
         boxShadow: "0 12px 32px rgba(20,20,19,0.06)",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 4 }}>
-          <svg viewBox="0 0 494 497" width="24" height="24" style={{ color: C.ink, flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 4, fontSize: "clamp(14px, 5.4vw, 22px)", flexWrap: "nowrap" }}>
+          <svg viewBox="0 0 494 497" style={{ color: C.ink, flexShrink: 0, width: "1.05em", height: "1.05em" }}>
             {blinkFrame === "open" && (
               <g transform="translate(0.000000,497.000000) scale(0.100000,-0.100000)"
               fill="currentColor" stroke="none">
@@ -254,7 +254,7 @@ export default function AuthScreen() {
               </g>
             )}
           </svg>
-          <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 22, textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink }}>
+          <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: "1em", textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink, whiteSpace: "nowrap" }}>
             Apocalypse Archives
           </div>
         </div>
@@ -285,7 +285,9 @@ export default function AuthScreen() {
           ))}
         </div>
 
-        {/* Animated butterfly video — served from /public/butterfly.mp4 */}
+        {/* Animated butterfly video — decorative only, so touch/long-press
+            interaction is disabled to prevent the browser's native
+            download / picture-in-picture context menu from popping up. */}
         <video
           src={`${import.meta.env.BASE_URL}butterfly.mp4`}
           autoPlay
@@ -293,10 +295,16 @@ export default function AuthScreen() {
           muted
           playsInline
           preload="auto"
+          disablePictureInPicture
+          controlsList="nodownload noremoteplayback nofullscreen"
+          onContextMenu={(e) => e.preventDefault()}
           style={{
             width: "100%", height: 140, objectFit: "contain",
             borderRadius: 14, display: "block", marginBottom: 20,
             background: C.paper,
+            pointerEvents: "none",
+            WebkitTouchCallout: "none",
+            userSelect: "none",
           }}
         />
 
@@ -374,9 +382,4 @@ export default function AuthScreen() {
         </form>
       </div>
       <div style={{ fontSize: 9, color: C.faint, marginTop: 16, fontFamily: SANS, opacity: 0.7 }}>
-        &copy; {new Date().getFullYear()} Apocalypse Archives. All rights reserved.
-      </div>
-      </div>
-    </div>
-  );
-               }
+        &copy; {new Date().getFullY
