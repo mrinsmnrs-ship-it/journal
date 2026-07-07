@@ -26,20 +26,6 @@ const INTRO_MESSAGE =
 const RESET_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 jam
 const MAX_TEXTAREA_HEIGHT = 160;
 
-// Bikin ubin gelombang (satu periode, seamless) sebagai data-URI SVG,
-// dipakai sebagai background-image yang di-repeat-x untuk efek "tepi jelly".
-function buildWaveTile(color, height = 16, period = 75) {
-  const half = period / 2;
-  const quarter = period / 4;
-  const threeQuarter = half + quarter;
-  const svg =
-    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${period} ${height}'>` +
-    `<path d='M0,${height / 2} C${quarter},${height} ${quarter},0 ${half},${height / 2} ` +
-    `C${threeQuarter},${height} ${threeQuarter},0 ${period},${height / 2} L${period},${height} L0,${height} Z' ` +
-    `fill='${color}'/></svg>`;
-  return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
-}
-
 function isCoarsePointer() {
   return typeof window !== "undefined" && window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
 }
@@ -72,9 +58,6 @@ export default function JournalChat({ user, trades, theme }) {
   const [loaded, setLoaded] = useState(false);
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
-  const topJellyRef = useRef(null);
-  const bottomJellyRef = useRef(null);
-  const lastJellyRef = useRef(0);
 
   useEffect(() => {
     (async () => {
@@ -181,32 +164,6 @@ export default function JournalChat({ user, trades, theme }) {
     }
   }
 
-  // Bikin tepi atas/bawah "meleyot" seperti jelly setiap kali chat discroll.
-  function triggerJelly(ref) {
-    const el = ref.current;
-    if (!el || !el.animate) return;
-    el.getAnimations?.().forEach((a) => a.cancel());
-    el.animate(
-      [
-        { transform: "scaleY(1)" },
-        { transform: "scaleY(0.55)", offset: 0.18 },
-        { transform: "scaleY(1.45)", offset: 0.42 },
-        { transform: "scaleY(0.82)", offset: 0.64 },
-        { transform: "scaleY(1.1)", offset: 0.82 },
-        { transform: "scaleY(1)", offset: 1 },
-      ],
-      { duration: 620, easing: "cubic-bezier(.36,.07,.19,.97)" }
-    );
-  }
-
-  function handleMessagesScroll() {
-    const now = Date.now();
-    if (now - lastJellyRef.current < 160) return;
-    lastJellyRef.current = now;
-    triggerJelly(topJellyRef);
-    triggerJelly(bottomJellyRef);
-  }
-
   function handleKeyDown(e) {
     if (e.key === "Enter" && !e.shiftKey && !isCoarsePointer()) {
       e.preventDefault();
@@ -226,16 +183,10 @@ export default function JournalChat({ user, trades, theme }) {
         flex: 1,
         background: C.paper,
         overflow: "hidden",
+        position: "relative",
       }}
     >
       <style>{`
-        @keyframes jellyDriftX {
-          from { background-position-x: 0; }
-          to { background-position-x: -75px; }
-        }
-        .jelly-wave-layer {
-          animation: jellyDriftX 5s linear infinite;
-        }
         @keyframes typingBounce {
           0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
           30% { transform: translateY(-4px); opacity: 1; }
@@ -261,39 +212,8 @@ export default function JournalChat({ user, trades, theme }) {
       {/* Messages */}
       <div
         className="chat-messages"
-        onScroll={handleMessagesScroll}
-        style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10, position: "relative" }}
+        style={{ flex: 1, minHeight: 0, overflowY: "auto", paddingTop: 16, paddingLeft: 20, paddingRight: 20, paddingBottom: 16, display: "flex", flexDirection: "column", gap: 10 }}
       >
-        {/* Tepi jelly atas — nempel di puncak area scroll, pesan lewat di baliknya */}
-        <div style={{ position: "sticky", top: 0, height: 0, zIndex: 3, pointerEvents: "none" }}>
-          <div
-            ref={topJellyRef}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: -20,
-              right: -20,
-              height: 22,
-              transformOrigin: "top",
-              background: `linear-gradient(to bottom, ${C.paper} 40%, transparent)`,
-            }}
-          >
-            <div
-              className="jelly-wave-layer"
-              style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
-                top: 10,
-                height: 16,
-                backgroundImage: buildWaveTile(C.paper),
-                backgroundRepeat: "repeat-x",
-                backgroundSize: "75px 16px",
-              }}
-            />
-          </div>
-        </div>
-
         {!loaded ? (
           <div style={{ color: C.faint, fontSize: 14 }}>Memuat...</div>
         ) : messages.length === 0 ? (
@@ -340,43 +260,11 @@ export default function JournalChat({ user, trades, theme }) {
     {error}
   </div>
 )}
-
-        {/* Tepi jelly bawah — nempel di dasar area scroll, pesan lewat di baliknya */}
-        <div style={{ position: "sticky", bottom: 0, height: 0, zIndex: 3, pointerEvents: "none" }}>
-          <div
-            ref={bottomJellyRef}
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: -20,
-              right: -20,
-              height: 22,
-              transformOrigin: "bottom",
-              background: `linear-gradient(to top, ${C.paper} 40%, transparent)`,
-            }}
-          >
-            <div
-              className="jelly-wave-layer"
-              style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
-                bottom: 10,
-                height: 16,
-                transform: "scaleY(-1)",
-                backgroundImage: buildWaveTile(C.paper),
-                backgroundRepeat: "repeat-x",
-                backgroundSize: "75px 16px",
-              }}
-            />
-          </div>
-        </div>
-
         <div ref={scrollRef} />
       </div>
 
-      {/* Input — satu kotak border, textarea di atas, pill persona + tombol kirim di bawah (mirip layout Claude) */}
-      <div style={{ padding: "14px 4px 6px" }}>
+      {/* Input — mengambang di atas area pesan (bukan elemen terpisah), jadi teks yang lewat kepotong tegas oleh kotak ini, tanpa gradasi */}
+      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "8px 20px 10px", background: C.paper, zIndex: 5 }}>
         <div
           style={{
             border: `1px solid ${C.line}`,
@@ -444,4 +332,4 @@ export default function JournalChat({ user, trades, theme }) {
       </div>
     </div>
   );
-                                               }
+        }
