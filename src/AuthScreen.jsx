@@ -130,7 +130,7 @@ export default function AuthScreen() {
         border: `1px solid ${C.line}`, borderRadius: 20, padding: 32,
         boxShadow: "0 12px 32px rgba(20,20,19,0.06)",
       }}>
-<div style={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 4, fontSize: "clamp(14px, 5.4vw, 22px)", flexWrap: "nowrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 4, fontSize: "clamp(14px, 5.4vw, 22px)", flexWrap: "nowrap" }}>
           <svg viewBox="0 0 494 497" style={{ color: C.ink, flexShrink: 0, width: "1.05em", height: "1.05em" }}>
             {blinkFrame === "open" && (
               <g transform="translate(0.000000,497.000000) scale(0.100000,-0.100000)"
@@ -258,7 +258,7 @@ export default function AuthScreen() {
             Apocalypse Archives
           </div>
         </div>
-        <div style={{ fontSize: 14, color: C.muted, marginBottom: 20 }}>
+        <div style={{ fontSize: 12, color: C.muted, marginBottom: 20 }}>
           {mode === "login" ? "Log in to sync your trades." : "Create an account to get started."}
         </div>
 
@@ -336,7 +336,7 @@ export default function AuthScreen() {
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  style={{ background: "transparent", border: "none", color: C.muted, fontSize: 12, fontWeight: 600, cursor: "pointer", padding: 0, fontFamily: SANS }}
+                  style={{ background: "transparent", border: "none", color: C.muted, fontSize: 11, fontWeight: 400, cursor: "pointer", padding: 0, fontFamily: SANS }}
                 >
                   Forgot password?
                 </button>
@@ -387,4 +387,4 @@ export default function AuthScreen() {
       </div>
     </div>
   );
-            }
+        }
