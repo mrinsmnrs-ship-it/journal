@@ -23,16 +23,20 @@ const LIGHT = {
   rustRed: "#B85C50", rustWash: "#F1E2DE", rustOnWhite: "#B85C50", dangerBg: "#B85C50",
   amber: "#6A9BCC", amberWash: "#E4ECF3", amberOnWhite: "#3D6C9C",
   inputBg: "#F0EEE6", inputText: "#141413", inputPlaceholder: "#AFAEA9", inputBorder: "#E3E2DD",
+  btnAccent: "#B98A72", btnAccentBorder: "#B98A72", btnAccentWash: "#EFE4DA",
+  btnAccentText: "#9C6F58", btnAccentTextActive: "#FFFFFF",
 };
 const DARK = {
-  bg: "#141413", paper: "#1F1E1B", paperSoft: "#262521",
-  ink: "#FAF9F5", inkSoft: "#D8D6CF", muted: "#9C9A93", faint: "#65635C",
-  line: "#3A3935", lineSoft: "#2E2D29",
+  bg: "#282725", paper: "#322F2C", paperSoft: "#3B3733",
+  ink: "#FAF9F5", inkSoft: "#D8D6CF", muted: "#9C9A93", faint: "#6E6C64",
+  line: "#4E4A44", lineSoft: "#3E3A35",
   clay: "#D97757", clayDeep: "#E8926F", clayWash: "#3A2A21", clayOnWhite: "#E8926F",
   sage: "#788C5D", sageWash: "#232A1D", sageOnWhite: "#9CB27E",
   rustRed: "#D28A7E", rustWash: "#3B2822", rustOnWhite: "#D28A7E", dangerBg: "#D28A7E",
   amber: "#6A9BCC", amberWash: "#1E2A35", amberOnWhite: "#8FB8DE",
-  inputBg: "#262521", inputText: "#FAF9F5", inputPlaceholder: "#65635C", inputBorder: "#3A3935",
+  inputBg: "#3B3733", inputText: "#FAF9F5", inputPlaceholder: "#6E6C64", inputBorder: "#4E4A44",
+  btnAccent: "#FAF9F5", btnAccentBorder: "#4E4A44", btnAccentWash: "#3B3733",
+  btnAccentText: "#D8D6CF", btnAccentTextActive: "#322F2C",
 };
 
 const CHAT_FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
@@ -99,7 +103,6 @@ const PERIODS = [
 
 // ---- Small atoms ----
 function Chip({ label, active, onClick }) {
-  // Monokrom: aktif = solid ink/paper, tidak lagi per-kategori warna (clay/sage/rust/amber)
   const C = useTheme();
   return (
     <button
@@ -107,9 +110,9 @@ function Chip({ label, active, onClick }) {
       style={{
         fontFamily: SANS, fontSize: 13, fontWeight: 600,
         padding: "8px 15px", borderRadius: 999,
-        border: `1px solid ${active ? C.ink : C.line}`,
-        background: active ? C.ink : C.paper,
-        color: active ? C.paper : C.inkSoft,
+        border: `1px solid ${C.btnAccentBorder}`,
+        background: active ? C.btnAccent : C.btnAccentWash,
+        color: active ? C.btnAccentTextActive : C.btnAccentText,
         cursor: "pointer", transition: "all .15s ease",
       }}
     >
@@ -771,9 +774,9 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
             return (
               <button key={d} onClick={() => updateForm("direction", d)} style={{
                 flex: 1, padding: "12px 0", borderRadius: 12,
-                border: `1px solid ${active ? C.ink : C.line}`,
-                background: active ? C.ink : C.paperSoft,
-                color: active ? C.paper : C.inkSoft, fontWeight: 700, fontSize: 15, cursor: "pointer",
+                border: `1px solid ${C.btnAccentBorder}`,
+                background: active ? C.btnAccent : C.btnAccentWash,
+                color: active ? C.btnAccentTextActive : C.btnAccentText, fontWeight: 700, fontSize: 15, cursor: "pointer",
               }}>{d}</button>
             );
           })}
