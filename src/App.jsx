@@ -27,16 +27,16 @@ const LIGHT = {
   btnAccentText: "#9C6F58", btnAccentTextActive: "#FFFFFF",
 };
 const DARK = {
-  bg: "#282725", paper: "#322F2C", paperSoft: "#3B3733",
+  bg: "#242424", paper: "#2D2D2D", paperSoft: "#363636",
   ink: "#FAF9F5", inkSoft: "#D8D6CF", muted: "#9C9A93", faint: "#6E6C64",
-  line: "#4E4A44", lineSoft: "#3E3A35",
+  line: "#484848", lineSoft: "#383838",
   clay: "#D97757", clayDeep: "#E8926F", clayWash: "#3A2A21", clayOnWhite: "#E8926F",
   sage: "#788C5D", sageWash: "#232A1D", sageOnWhite: "#9CB27E",
   rustRed: "#D28A7E", rustWash: "#3B2822", rustOnWhite: "#D28A7E", dangerBg: "#D28A7E",
   amber: "#6A9BCC", amberWash: "#1E2A35", amberOnWhite: "#8FB8DE",
-  inputBg: "#3B3733", inputText: "#FAF9F5", inputPlaceholder: "#6E6C64", inputBorder: "#4E4A44",
-  btnAccent: "#FAF9F5", btnAccentBorder: "#4E4A44", btnAccentWash: "#3B3733",
-  btnAccentText: "#D8D6CF", btnAccentTextActive: "#322F2C",
+  inputBg: "#363636", inputText: "#FAF9F5", inputPlaceholder: "#6E6C64", inputBorder: "#484848",
+btnAccent: "#FAF9F5", btnAccentBorder: "#484848", btnAccentWash: "#363636",
+btnAccentText: "#D8D6CF", btnAccentTextActive: "#2D2D2D",
 };
 
 const CHAT_FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
@@ -820,10 +820,10 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
         <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
       </Field>
       <button onClick={handleSave} disabled={!canSave} style={{
-        width: "100%", padding: "14px 0", borderRadius: 12, border: "none",
-        background: canSave ? C.ink : C.lineSoft, color: canSave ? C.paper : C.faint,
-        fontWeight: 700, fontSize: 15.5, cursor: canSave ? "pointer" : "not-allowed",
-      }}>Save Trade</button>
+  width: "100%", padding: "14px 0", borderRadius: 12, border: "none",
+  background: canSave ? C.btnAccent : C.lineSoft, color: canSave ? C.btnAccentTextActive : C.faint,
+  fontWeight: 700, fontSize: 15.5, cursor: canSave ? "pointer" : "not-allowed",
+}}>Save Trade</button>
           </div>
   );
 }
@@ -992,7 +992,7 @@ function Dashboard({ trades }) {
                   <PolarGrid stroke={C.line} />
                   <PolarAngleAxis dataKey="metric" tick={<ScorecardTick />} />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
-                  <Radar dataKey="value" stroke={C.ink} fill={C.ink} fillOpacity={0.15} strokeWidth={2} dot={{ r: 4, fill: C.ink, fillOpacity: 1, stroke: "none" }} />
+                  <Radar dataKey="value" stroke={C.btnAccent} fill={C.btnAccent} fillOpacity={0.15} strokeWidth={2} dot={{ r: 4, fill: C.btnAccent, fillOpacity: 1, stroke: "none" }} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
