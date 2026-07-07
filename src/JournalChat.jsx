@@ -291,7 +291,7 @@ export default function JournalChat({ user, trades, theme }) {
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                background: "#ffffff",
+                background: C.paper,
                 border: `1px solid ${C.line}`,
                 borderRadius: 999,
                 padding: "5px 12px",
