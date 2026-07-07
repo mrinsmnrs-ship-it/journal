@@ -418,8 +418,8 @@ function RJournal({ user }) {
             .main-area { padding: 74px 16px 100px; max-width: 100%; }
                         .bottom-nav {
               display: flex; position: fixed; bottom: 0; left: 0; right: 0;
-              background: ${C.paper}; border-top: 1px solid ${C.line};
-              justify-content: space-around; padding: 18px 0 20px; z-index: 20;
+              background: ${C.bg}; border-top: 1px solid ${C.line};
+justify-content: space-around; padding: 10px 0 20px; z-index: 20;
             }
             .mobile-topbar {
               display: flex; position: fixed; top: 0; left: 0; right: 0; z-index: 20;
@@ -645,7 +645,7 @@ function RJournal({ user }) {
               onClick={() => setTab(n.key)}
               style={{
                 background: "transparent", border: "none", cursor: "pointer",
-                padding: "10px 6px 4px",
+                padding: "6px 6px 4px",
                 color: tab === n.key ? C.ink : C.muted,
                 transition: "color .15s ease",
               }}
