@@ -207,16 +207,14 @@ function computeStats(trades) {
   const disciplineScore = disciplined.length
       ? disciplined.reduce((s, t) => s + (t.rules === "Yes" ? 100 : t.rules === "Partial" ? 50 : 0), 0) / disciplined.length
     : 0;
-  const withEmotions = trades.filter((t) => (t.emotions || []).length > 0);
-  const emotionalScore = withEmotions.length
-    ? withEmotions.reduce((s, t) => {
-        const hasPos = t.emotions.some((e) => POSITIVE_EMOTIONS.has(e));
-        const hasNeg = t.emotions.some((e) => NEGATIVE_EMOTIONS.has(e));
-        if (hasPos && !hasNeg) return s + 100;
-        if (hasNeg && !hasPos) return s + 0;
-        return s + 50;
-      }, 0) / withEmotions.length
-    : 0;
+  const withEmotions = trades.filter((t) => !!t.emotion);
+const emotionalScore = withEmotions.length
+  ? withEmotions.reduce((s, t) => {
+      if (POSITIVE_EMOTIONS.has(t.emotion)) return s + 100;
+      if (NEGATIVE_EMOTIONS.has(t.emotion)) return s + 0;
+      return s + 50;
+    }, 0) / withEmotions.length
+  : 0;
   const risks = trades.map((t) => t.riskPct).filter((r) => r !== null && r !== undefined && !isNaN(r));
   let riskConsistency = 100;
   if (risks.length >= 2) {
@@ -274,7 +272,7 @@ function RJournal({ user }) {
   const [loaded, setLoaded] = useState(false);
   const [form, setForm] = useState({
     date: todayISO(), symbol: "", direction: "", reason: "",
-    riskPct: "", rPlanned: "", rActual: "", rules: "", emotions: [], notes: "",
+    riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "",
   });
 
   useEffect(() => {
@@ -319,7 +317,7 @@ function RJournal({ user }) {
   }
   function updateForm(key, val) { setForm((f) => ({ ...f, [key]: val })); }
   function toggleEmotion(e) {
-    setForm((f) => ({ ...f, emotions: f.emotions.includes(e) ? f.emotions.filter((x) => x !== e) : [...f.emotions, e] }));
+  setForm((f) => ({ ...f, emotion: f.emotion === e ? "" : e }));
   }
   const canSave = form.symbol.trim() && form.direction && form.rActual !== "";
   async function handleSave() {
@@ -330,12 +328,12 @@ function RJournal({ user }) {
       riskPct: form.riskPct === "" ? null : Number(form.riskPct),
       rPlanned: form.rPlanned === "" ? null : Number(form.rPlanned),
       rActual: Number(form.rActual), rules: form.rules || null,
-      emotions: form.emotions, notes: form.notes.trim(), createdAt: Date.now(),
+      emotion: form.emotion, notes: form.notes.trim(), createdAt: Date.now(),
     };
     const next = [trade, ...trades];
     setTrades(next);
     await saveUserData(user.uid, { trades: next });
-    setForm({ date: todayISO(), symbol: "", direction: "", reason: "", riskPct: "", rPlanned: "", rActual: "", rules: "", emotions: [], notes: "" });
+    setForm({ date: todayISO(), symbol: "", direction: "", reason: "", riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "" });
     setTab("journal");
   }
   async function handleDelete(id) {
@@ -456,9 +454,7 @@ function RJournal({ user }) {
             <div style={{ fontSize: 12, color: C.faint, padding: "0 10px", lineHeight: 1.5 }}>
               Signed in as {user.email}. Synced across your devices.
             </div>
-            <div style={{ fontSize: 11, color: C.faint, padding: "10px 10px 0", opacity: 0.7 }}>
-              &copy; {new Date().getFullYear()} Apocalypse Archives. All rights reserved.
-            </div>
+            
           </div>
 
           {/* Mobile top bar */}
@@ -622,11 +618,7 @@ function RJournal({ user }) {
             ) : (
               <Dashboard trades={trades} />
             )}
-            {!isChatTab && (
-              <div className="app-footer-mobile">
-                &copy; {new Date().getFullYear()} Apocalypse Archives. All rights reserved.
-              </div>
-            )}
+            
           </div>
         </div>
 
@@ -792,7 +784,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
       <Field label="Emotions">
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {EMOTIONS.map((e) => (
-            <Chip key={e} label={e} active={form.emotions.includes(e)} onClick={() => toggleEmotion(e)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
+            <Chip key={e} label={e} active={form.emotion === e} onClick={() => toggleEmotion(e)} />
           ))}
         </div>
       </Field>
@@ -837,21 +829,20 @@ function JournalList({ trades, onDelete, onGoLog }) {
             borderRadius: 16, padding: "18px 20px",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 17 }}>{t.symbol}</div>
-                <div style={{ fontFamily: MONO, fontSize: 13, color: C.muted, marginTop: 2 }}>{t.date}</div>
-              </div>
-              <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: 19, color: win ? C.ink : C.faint }}>
-                {fmtR(t.rActual)}
-              </div>
-            </div>
-            {t.reason && <div style={{ fontSize: 14, color: C.inkSoft, marginTop: 10 }}>{t.reason}</div>}
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
-              {t.direction && <Tag text={t.direction} color={C.clayOnWhite} bg={C.clayWash} />}
-              {t.rules && <Tag text={t.rules} color={t.rules === "Yes" ? C.sageOnWhite : t.rules === "No" ? C.rustOnWhite : C.amberOnWhite}
-                bg={t.rules === "Yes" ? C.sageWash : t.rules === "No" ? C.rustWash : C.amberWash} />}
-              {(t.emotions || []).map((e) => <Tag key={e} text={e} color={C.inkSoft} bg={C.paperSoft} />)}
-            </div>
+  <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+    <div style={{ fontWeight: 700, fontSize: 17 }}>{t.symbol}</div>
+    <div style={{ fontFamily: SANS, fontSize: 13, color: C.faint }}>{t.date}</div>
+  </div>
+  <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 15, color: win ? C.ink : C.faint }}>
+    {fmtR(t.rActual)}
+  </div>
+</div>
+{t.reason && <div style={{ fontSize: 14, color: C.inkSoft, marginTop: 10 }}>{t.reason}</div>}
+<div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+  {t.direction && <Tag text={`Direction: ${t.direction}`} />}
+  {t.rules && <Tag text={`Rules: ${t.rules}`} />}
+  {(t.emotions || []).map((e) => <Tag key={e} text={`Emotion: ${e}`} />)}
+</div>
             {t.notes && <div style={{ fontSize: 13, color: C.muted, marginTop: 10, fontStyle: "italic" }}>{t.notes}</div>}
             <button onClick={() => setConfirmId(t.id)} style={{
               marginTop: 14, background: "transparent", border: "none", color: C.faint, fontSize: 13,
@@ -918,9 +909,9 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
 function StatCard({ label, value, color }) {
   const C = useTheme();
   return (
-    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: "16px 18px" }}>
-      <div style={{ fontFamily: SANS, fontSize: 11, fontWeight: 600, letterSpacing: "0.05em", color: C.muted, textTransform: "uppercase", marginBottom: 8 }}>{label}</div>
-      <div style={{ fontFamily: MONO, fontSize: 23, fontWeight: 700, color: C.ink }}>{value}</div>
+    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 12, padding: "10px 12px" }}>
+      <div style={{ fontFamily: SANS, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em", color: C.muted, textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
+      <div style={{ fontFamily: SANS, fontSize: 16, fontWeight: 700, color: C.ink }}>{value}</div>
     </div>
   );
 }
@@ -954,7 +945,7 @@ function Dashboard({ trades }) {
       ) : (
         <>
           <SectionLabel text={`Summary \u00b7 ${filteredTrades.length} trade${filteredTrades.length === 1 ? "" : "s"}`} />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 26 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 20 }}>
             <StatCard label="Total Trades" value={stats.total} />
             <StatCard label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} color={C.clayDeep} />
             <StatCard label="Total R" value={fmtR(stats.totalR)} color={stats.totalR >= 0 ? C.sage : C.rustRed} />
@@ -962,14 +953,14 @@ function Dashboard({ trades }) {
             <StatCard label="Avg Win" value={`+${stats.avgWin.toFixed(2)}`} color={C.sage} />
             <StatCard label="Avg Loss" value={stats.avgLoss.toFixed(2)} color={C.rustRed} />
           </div>
-          <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: "22px 10px 6px", marginBottom: 26 }}>
-            <div style={{ padding: "0 16px" }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 18, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
-              <div style={{ fontSize: 13, color: C.muted, marginTop: 2, marginBottom: 4 }}>Score 0–100 per dimension</div>
-            </div>
-            <div style={{ width: "100%", height: 300, overflow: "visible" }}>
-              <ResponsiveContainer>
-                <RadarChart data={stats.scorecard} outerRadius="52%" margin={{ top: 18, right: 42, bottom: 12, left: 58 }}>
+          <div style={{ marginBottom: 16, marginTop: -6 }}>
+  <div style={{ padding: "0 4px" }}>
+    <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 18, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
+    <div style={{ fontSize: 13, color: C.muted, marginTop: 2, marginBottom: 0 }}>Score 0–100 per dimension</div>
+  </div>
+  <div style={{ width: "100%", height: 280, overflow: "visible" }}>
+    <ResponsiveContainer>
+      <RadarChart data={stats.scorecard} outerRadius="72%" margin={{ top: 4, right: 32, bottom: 4, left: 46 }}>
                   <PolarGrid stroke={C.line} />
                   <PolarAngleAxis dataKey="metric" tick={<ScorecardTick />} />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
@@ -979,14 +970,12 @@ function Dashboard({ trades }) {
             </div>
           </div>
           <SectionLabel text="By Rules Compliance" />
-          <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: "6px 20px" }}>
-            {["Yes", "Partial", "No"].map((r, i) => {
-              const d = stats.byRules[r];
-              const avg = d.count ? d.total / d.count : 0;
-              return (
-                <div key={r} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 0", borderTop: i > 0 ? `1px solid ${C.lineSoft}` : "none" }}>
-                  <div style={{ fontWeight: 700, color: C.ink, minWidth: 70 }}>{r}</div>
-                  <div style={{ fontFamily: MONO, fontSize: 13, color: C.muted, textAlign: "right" }}>
+          <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: "2px 16px" }}>
+  {["Yes", "Partial", "No"].map((r, i) => {
+    ...
+    <div key={r} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderTop: i > 0 ? `1px solid ${C.lineSoft}` : "none" }}>
+      <div style={{ fontWeight: 700, fontSize: 13.5, color: C.ink, minWidth: 60 }}>{r}</div>
+      <div style={{ fontFamily: MONO, fontSize: 11.5, color: C.muted, textAlign: "right" }}>
                     {d.count} trade &middot; total {fmtR(d.total)} &middot; avg {avg.toFixed(2)}R
                   </div>
                 </div>
