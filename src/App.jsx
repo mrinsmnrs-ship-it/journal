@@ -35,8 +35,9 @@ const DARK = {
   inputBg: "#262521", inputText: "#FAF9F5", inputPlaceholder: "#65635C", inputBorder: "#3A3935",
 };
 
-const SERIF = "'Poppins', 'Arial', sans-serif";
-const SANS = "'Lora', 'Georgia', serif";
+const CHAT_FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const SERIF = CHAT_FONT; // font disatukan dengan halaman lain
+const SANS = CHAT_FONT;  // font disatukan dengan halaman lain
 const MONO = "'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace";
 const NAV = [
   { key: "log", label: "Log Trade", icon: PencilLine },
@@ -97,18 +98,18 @@ const PERIODS = [
 ];
 
 // ---- Small atoms ----
-function Chip({ label, active, onClick, activeColor, activeBg }) {
-    const C = useTheme();
-  const borderColor = active ? activeColor : C.line;
+function Chip({ label, active, onClick }) {
+  // Monokrom: aktif = solid ink/paper, tidak lagi per-kategori warna (clay/sage/rust/amber)
+  const C = useTheme();
   return (
     <button
       onClick={onClick}
       style={{
         fontFamily: SANS, fontSize: 13, fontWeight: 600,
         padding: "8px 15px", borderRadius: 999,
-        border: `1px solid ${borderColor}`,
-        background: active ? activeBg : C.paper,
-        color: active ? activeColor : C.inkSoft,
+        border: `1px solid ${active ? C.ink : C.line}`,
+        background: active ? C.ink : C.paper,
+        color: active ? C.paper : C.inkSoft,
         cursor: "pointer", transition: "all .15s ease",
       }}
     >
@@ -136,9 +137,15 @@ function useInputStyle() {
     color: C.inputText, fontFamily: SANS, fontSize: 15, outline: "none",
   };
 }
-function Tag({ text, color, bg }) {
+function Tag({ text }) {
+  // Monokrom: satu warna netral saja, tidak lagi per-kategori (clay/sage/rust/amber)
+  const C = useTheme();
   return (
-    <span style={{ fontSize: 12, fontWeight: 600, color, background: bg, borderRadius: 999, padding: "4px 11px" }}>
+    <span style={{
+      fontFamily: SANS, fontSize: 12, fontWeight: 600, color: C.inkSoft,
+      background: C.paperSoft, border: `1px solid ${C.line}`,
+      borderRadius: 999, padding: "4px 11px",
+    }}>
       {text}
     </span>
   );
@@ -247,7 +254,6 @@ export default function App() {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u));
     return unsub;
   }, []);
-
   if (user === undefined) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: SANS, color: "#767470" }}>
@@ -357,7 +363,7 @@ function RJournal({ user }) {
     <ThemeContext.Provider value={C}>
       <div className={isChatTab ? "chat-mode" : ""} style={{ ...getPageBackground(themeMode, C), minHeight: "100vh", color: C.ink, fontFamily: SANS, transition: "background .2s ease, color .2s ease" }}>
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
           * { box-sizing: border-box; }
           html, body { margin:0; }
           button { -webkit-tap-highlight-color: transparent; transition: transform .1s ease; }
@@ -373,7 +379,7 @@ function RJournal({ user }) {
           .sidebar {
             width: 232px; flex-shrink: 0; padding: 26px 18px;
             border-right: 1px solid ${C.line}; display: flex; flex-direction: column;
-          }
+            }
           .main-area { flex: 1; min-width: 0; padding: 34px 40px 60px; max-width: 900px; }
           .bottom-nav { display: none; }
           .mobile-topbar { display: none; }
@@ -467,7 +473,7 @@ function RJournal({ user }) {
                   -38 -284 -128 -361 -183 -38 -28 -73 -50 -76 -50 -4 0 -29 39 -55 88 -26 48
                   -86 152 -134 232 -48 80 -97 164 -109 188 -12 24 -60 101 -107 172 -96 146
                   -127 172 -203 172 -59 0 -86 -13 -111 -55 -24 -39 -27 -141 -6 -192 14 -33
-                  171 -300 242 -411 51 -80 204 -364 204 -379 0 -7 -26 -35 -57 -62 -102 -89
+                    171 -300 242 -411 51 -80 204 -364 204 -379 0 -7 -26 -35 -57 -62 -102 -89
                   -336 -325 -409 -413 -126 -150 -333 -480 -342 -542 -9 -68 33 -132 197 -297
                   155 -157 204 -195 377 -289 60 -33 112 -66 117 -74 10 -14 -75 -219 -133 -323
                   -80 -145 -119 -275 -101 -342 20 -73 105 -117 182 -94 63 19 108 73 163 196
@@ -523,7 +529,7 @@ function RJournal({ user }) {
                   -34 -28 c-97 -82 -407 -278 -559 -354 -136 -68 -307 -141 -410 -175 -118 -39
                   -273 -81 -278 -76 -2 2 26 34 61 70 70 71 141 171 189 267 69 139 105 382 79
                   534 -23 129 -90 285 -162 376 -57 72 -45 71 174 -16z"/>
-                  </g>
+                    </g>
                 )}
                 {blinkFrame === "half" && (
                   <g transform="translate(0.000000,497.000000) scale(0.100000,-0.100000)"
@@ -696,7 +702,7 @@ function DateField({ value, onChange }) {
               <div style={{ fontWeight: 700, fontSize: 13.5, fontFamily: SANS }}>{MONTHS[viewMonth]} {viewYear}</div>
               <button type="button" onClick={nextMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
                 <ChevronRight size={16} />
-              </button>
+                </button>
             </div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 2 }}>
               {WEEKDAYS.map((w, i) => (
@@ -748,9 +754,9 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
             return (
               <button key={d} onClick={() => updateForm("direction", d)} style={{
                 flex: 1, padding: "12px 0", borderRadius: 12,
-                border: `1px solid ${active ? C.clay : C.line}`,
-                background: active ? C.clayWash : C.paperSoft,
-                color: active ? C.clayOnWhite : C.inkSoft, fontWeight: 700, fontSize: 15, cursor: "pointer",
+                border: `1px solid ${active ? C.ink : C.line}`,
+                background: active ? C.ink : C.paperSoft,
+                color: active ? C.paper : C.inkSoft, fontWeight: 700, fontSize: 15, cursor: "pointer",
               }}>{d}</button>
             );
           })}
@@ -795,7 +801,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
       </Field>
       <button onClick={handleSave} disabled={!canSave} style={{
         width: "100%", padding: "14px 0", borderRadius: 12, border: "none",
-        background: canSave ? C.clay : C.lineSoft, color: canSave ? C.paper : C.faint,
+        background: canSave ? C.ink : C.lineSoft, color: canSave ? C.paper : C.faint,
         fontWeight: 700, fontSize: 15.5, cursor: canSave ? "pointer" : "not-allowed",
       }}>Save Trade</button>
           </div>
@@ -824,11 +830,10 @@ function JournalList({ trades, onDelete, onGoLog }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 640 }}>
       {trades.map((t) => {
-        const win = t.rActual > 0, flat = t.rActual === 0;
-        const borderColor = flat ? C.faint : win ? C.sage : C.rustRed;
+        const win = t.rActual > 0;
         return (
           <div key={t.id} style={{
-            background: C.paper, border: `1px solid ${C.line}`, borderLeft: `4px solid ${borderColor}`,
+            background: C.paper, border: `1px solid ${C.line}`,
             borderRadius: 16, padding: "18px 20px",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -836,7 +841,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
                 <div style={{ fontWeight: 700, fontSize: 17 }}>{t.symbol}</div>
                 <div style={{ fontFamily: MONO, fontSize: 13, color: C.muted, marginTop: 2 }}>{t.date}</div>
               </div>
-              <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: 19, color: flat ? C.muted : win ? C.sage : C.rustRed }}>
+              <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: 19, color: win ? C.ink : C.faint }}>
                 {fmtR(t.rActual)}
               </div>
             </div>
@@ -903,7 +908,7 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
   const ny = y + (dy / dist) * push;
   const words = String(payload.value).split(" ");
   return (
-    <text x={nx} y={ny} textAnchor={textAnchor} fontFamily={SANS} fontSize={11} fill={C.inkSoft}>
+    <text x={nx} y={ny} textAnchor={textAnchor} fontFamily={SANS} fontSize={11} fontWeight={700} fill={C.inkSoft}>
       {words.map((w, i) => (
         <tspan key={i} x={nx} dy={i === 0 ? (words.length > 1 ? -5 : 3.5) : 12}>{w}</tspan>
       ))}
@@ -915,7 +920,7 @@ function StatCard({ label, value, color }) {
   return (
     <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: "16px 18px" }}>
       <div style={{ fontFamily: SANS, fontSize: 11, fontWeight: 600, letterSpacing: "0.05em", color: C.muted, textTransform: "uppercase", marginBottom: 8 }}>{label}</div>
-      <div style={{ fontFamily: MONO, fontSize: 23, fontWeight: 700, color: color || C.ink }}>{value}</div>
+      <div style={{ fontFamily: MONO, fontSize: 23, fontWeight: 700, color: C.ink }}>{value}</div>
     </div>
   );
 }
@@ -968,7 +973,7 @@ function Dashboard({ trades }) {
                   <PolarGrid stroke={C.line} />
                   <PolarAngleAxis dataKey="metric" tick={<ScorecardTick />} />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
-                  <Radar dataKey="value" stroke={C.clay} fill={C.clay} fillOpacity={0.22} strokeWidth={2} />
+                  <Radar dataKey="value" stroke={C.ink} fill={C.ink} fillOpacity={0.15} strokeWidth={2} dot={{ r: 4, fill: C.ink, fillOpacity: 1, stroke: "none" }} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
@@ -978,10 +983,9 @@ function Dashboard({ trades }) {
             {["Yes", "Partial", "No"].map((r, i) => {
               const d = stats.byRules[r];
               const avg = d.count ? d.total / d.count : 0;
-              const color = r === "Yes" ? C.sage : r === "No" ? C.rustRed : C.amber;
               return (
                 <div key={r} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 0", borderTop: i > 0 ? `1px solid ${C.lineSoft}` : "none" }}>
-                  <div style={{ fontWeight: 700, color, minWidth: 70 }}>{r}</div>
+                  <div style={{ fontWeight: 700, color: C.ink, minWidth: 70 }}>{r}</div>
                   <div style={{ fontFamily: MONO, fontSize: 13, color: C.muted, textAlign: "right" }}>
                     {d.count} trade &middot; total {fmtR(d.total)} &middot; avg {avg.toFixed(2)}R
                   </div>
