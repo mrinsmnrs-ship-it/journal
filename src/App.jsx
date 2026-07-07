@@ -124,7 +124,7 @@ function Field({ label, children }) {
       <div style={{
         fontFamily: SANS, fontSize: 12, fontWeight: 600, letterSpacing: "0.04em",
         color: C.muted, marginBottom: 8, textTransform: "uppercase",
-      }}>{label}</div>
+            }}>{label}</div>
       {children}
     </div>
   );
@@ -249,7 +249,7 @@ const emotionalScore = withEmotions.length
 export default function App() {
   const [user, setUser] = useState(undefined); // undefined = checking, null = logged out
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+        const unsub = onAuthStateChanged(auth, (u) => setUser(u));
     return unsub;
   }, []);
   if (user === undefined) {
@@ -374,7 +374,7 @@ function RJournal({ user }) {
           ::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 4px; }
           .recharts-wrapper, .recharts-wrapper svg, .recharts-surface { overflow: visible !important; }
           .app-shell { display: flex; min-height: 100vh; }
-          .sidebar {
+                    .sidebar {
             width: 232px; flex-shrink: 0; padding: 26px 18px;
             border-right: 1px solid ${C.line}; display: flex; flex-direction: column;
             }
@@ -467,7 +467,7 @@ function RJournal({ user }) {
                   <path d="M2490 4419 c-33 -13 -68 -47 -88 -84 -17 -33 -18 -153 -6 -571 4
                   -143 3 -223 -3 -227 -6 -4 -70 -14 -144 -22 -164 -19 -260 -39 -353 -72 -108
                   -38 -284 -128 -361 -183 -38 -28 -73 -50 -76 -50 -4 0 -29 39 -55 88 -26 48
-                  -86 152 -134 232 -48 80 -97 164 -109 188 -12 24 -60 101 -107 172 -96 146
+                                      -86 152 -134 232 -48 80 -97 164 -109 188 -12 24 -60 101 -107 172 -96 146
                   -127 172 -203 172 -59 0 -86 -13 -111 -55 -24 -39 -27 -141 -6 -192 14 -33
                     171 -300 242 -411 51 -80 204 -364 204 -379 0 -7 -26 -35 -57 -62 -102 -89
                   -336 -325 -409 -413 -126 -150 -333 -480 -342 -542 -9 -68 33 -132 197 -297
@@ -522,7 +522,7 @@ function RJournal({ user }) {
                   c-269 35 -805 247 -1058 419 -155 105 -172 118 -172 130 0 22 199 199 343 304
                   85 62 338 201 477 262 52 23 135 60 183 82 119 54 235 95 272 97 l29 1 -40
                   -42z m1289 -33 c332 -133 603 -291 788 -462 52 -48 108 -99 124 -112 l28 -24
-                  -34 -28 c-97 -82 -407 -278 -559 -354 -136 -68 -307 -141 -410 -175 -118 -39
+                                      -34 -28 c-97 -82 -407 -278 -559 -354 -136 -68 -307 -141 -410 -175 -118 -39
                   -273 -81 -278 -76 -2 2 26 34 61 70 70 71 141 171 189 267 69 139 105 382 79
                   534 -23 129 -90 285 -162 376 -57 72 -45 71 174 -16z"/>
                     </g>
@@ -583,7 +583,7 @@ function RJournal({ user }) {
                   </g>
                 )}
               </svg>
-              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: "1em", textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink, whiteSpace: "nowrap" }}>
+                            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: "1em", textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink, whiteSpace: "nowrap" }}>
                 Apocalypse Archives
               </div>
             </div>
@@ -692,7 +692,7 @@ function DateField({ value, onChange }) {
                 <ChevronLeft size={16} />
               </button>
               <div style={{ fontWeight: 700, fontSize: 13.5, fontFamily: SANS }}>{MONTHS[viewMonth]} {viewYear}</div>
-              <button type="button" onClick={nextMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
+                            <button type="button" onClick={nextMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
                 <ChevronRight size={16} />
                 </button>
             </div>
@@ -790,7 +790,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
       </Field>
       <Field label="Notes">
         <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
-      </Field>
+              </Field>
       <button onClick={handleSave} disabled={!canSave} style={{
         width: "100%", padding: "14px 0", borderRadius: 12, border: "none",
         background: canSave ? C.ink : C.lineSoft, color: canSave ? C.paper : C.faint,
@@ -894,7 +894,7 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
   const C = useTheme();
   const dx = x - cx, dy = y - cy;
   const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-    const push = 12;
+      const push = 12;
   const nx = x + (dx / dist) * push;
   const ny = y + (dy / dist) * push;
   const words = String(payload.value).split(" ");
@@ -975,13 +975,14 @@ function Dashboard({ trades }) {
     const d = stats.byRules[r];
     const avg = d.count ? d.total / d.count : 0;
     return (
-      <div key={r} style={{...}}>
-        ...
-        {d.count} trade &middot; total {fmtR(d.total)} &middot; avg {avg.toFixed(2)}R
-        ...
+      <div key={r} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderTop: i > 0 ? `1px solid ${C.lineSoft}` : "none" }}>
+        <div style={{ fontWeight: 700, fontSize: 13.5, color: C.ink, minWidth: 60 }}>{r}</div>
+        <div style={{ fontFamily: MONO, fontSize: 11.5, color: C.muted, textAlign: "right" }}>
+          {d.count} trade &middot; total {fmtR(d.total)} &middot; avg {avg.toFixed(2)}R
+        </div>
       </div>
     );
-})}
+  })}
           </div>
         </>
       )}
