@@ -112,7 +112,7 @@ export default function JournalChat({ user, trades, theme }) {
     if (recent.length === 0) return "";
     const lines = recent.map(
       (t) =>
-        `- ${t.date} ${t.symbol} (${t.direction}), hasil: ${t.rActual}R, rules: ${t.rules || "-"}, emosi: ${(t.emotions || []).join(", ") || "-"}, catatan: ${t.notes || "-"}`
+        `- ${t.date} ${t.symbol} (${t.direction}), hasil: ${t.rActual}R, rules: ${t.rules || "-"}, emosi: ${t.emotion || "-"}, catatan: ${t.notes || "-"}`
     );
     return `Berikut 5 trade terbaru milik pengguna:\n${lines.join("\n")}`;
   }
