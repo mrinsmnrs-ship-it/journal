@@ -98,7 +98,7 @@ const PERIODS = [
 
 // ---- Small atoms ----
 function Chip({ label, active, onClick, activeColor, activeBg }) {
-  const C = useTheme();
+    const C = useTheme();
   const borderColor = active ? activeColor : C.line;
   return (
     <button
@@ -297,7 +297,7 @@ function RJournal({ user }) {
     function loop() {
       doBlink();
       timeouts.push(setTimeout(loop, 4500));
-}
+      }
         loop();
 
     return () => {
@@ -993,4 +993,4 @@ function Dashboard({ trades }) {
       )}
     </div>
   );
-                   }
+}
