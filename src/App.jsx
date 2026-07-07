@@ -124,7 +124,7 @@ function Field({ label, children }) {
       <div style={{
         fontFamily: SANS, fontSize: 12, fontWeight: 600, letterSpacing: "0.04em",
         color: C.muted, marginBottom: 8, textTransform: "uppercase",
-            }}>{label}</div>
+      }}>{label}</div>
       {children}
     </div>
   );
@@ -249,7 +249,7 @@ const emotionalScore = withEmotions.length
 export default function App() {
   const [user, setUser] = useState(undefined); // undefined = checking, null = logged out
   useEffect(() => {
-        const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
     return unsub;
   }, []);
   if (user === undefined) {
@@ -266,6 +266,8 @@ export default function App() {
 // ---- App ----
 function RJournal({ user }) {
   const [tab, setTab] = useState("log");
+  const navRefs = useRef({});
+  const [navIndicator, setNavIndicator] = useState({ left: 0, width: 0 });
   const [blinkFrame, setBlinkFrame] = useState("open"); // "open" | "open2" | "half" | "closed" — untuk ikon mata di header
   const [trades, setTrades] = useState([]);
   const [themeMode, setThemeMode] = useState("light");
@@ -347,6 +349,18 @@ function RJournal({ user }) {
 
   const stats = useMemo(() => computeStats(trades), [trades]);
 
+  useEffect(() => {
+    function updateNavIndicator() {
+      const el = navRefs.current[tab];
+      if (el) {
+        setNavIndicator({ left: el.offsetLeft, width: el.offsetWidth });
+      }
+    }
+    updateNavIndicator();
+    window.addEventListener("resize", updateNavIndicator);
+    return () => window.removeEventListener("resize", updateNavIndicator);
+  }, [tab]);
+
   const NAV = [
     { key: "log", label: "Log Trade", icon: PencilLine },
     { key: "journal", label: "Journal", icon: BookOpen },
@@ -374,7 +388,7 @@ function RJournal({ user }) {
           ::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 4px; }
           .recharts-wrapper, .recharts-wrapper svg, .recharts-surface { overflow: visible !important; }
           .app-shell { display: flex; min-height: 100vh; }
-                    .sidebar {
+          .sidebar {
             width: 232px; flex-shrink: 0; padding: 26px 18px;
             border-right: 1px solid ${C.line}; display: flex; flex-direction: column;
             }
@@ -405,7 +419,7 @@ function RJournal({ user }) {
                         .bottom-nav {
               display: flex; position: fixed; bottom: 0; left: 0; right: 0;
               background: ${C.paper}; border-top: 1px solid ${C.line};
-              justify-content: space-around; padding: 10px 0 16px; z-index: 20;
+              justify-content: space-around; padding: 18px 0 20px; z-index: 20;
             }
             .mobile-topbar {
               display: flex; position: fixed; top: 0; left: 0; right: 0; z-index: 20;
@@ -467,7 +481,7 @@ function RJournal({ user }) {
                   <path d="M2490 4419 c-33 -13 -68 -47 -88 -84 -17 -33 -18 -153 -6 -571 4
                   -143 3 -223 -3 -227 -6 -4 -70 -14 -144 -22 -164 -19 -260 -39 -353 -72 -108
                   -38 -284 -128 -361 -183 -38 -28 -73 -50 -76 -50 -4 0 -29 39 -55 88 -26 48
-                                      -86 152 -134 232 -48 80 -97 164 -109 188 -12 24 -60 101 -107 172 -96 146
+                  -86 152 -134 232 -48 80 -97 164 -109 188 -12 24 -60 101 -107 172 -96 146
                   -127 172 -203 172 -59 0 -86 -13 -111 -55 -24 -39 -27 -141 -6 -192 14 -33
                     171 -300 242 -411 51 -80 204 -364 204 -379 0 -7 -26 -35 -57 -62 -102 -89
                   -336 -325 -409 -413 -126 -150 -333 -480 -342 -542 -9 -68 33 -132 197 -297
@@ -482,7 +496,7 @@ function RJournal({ user }) {
                   33 -67 81 -86 106 -19 25 -65 78 -102 118 -38 40 -68 79 -68 87 0 18 60 66
                   185 148 197 130 361 257 384 298 77 136 8 286 -274 599 -48 54 -235 235 -383
                   372 -39 37 -72 73 -72 81 0 8 59 76 130 150 174 180 316 350 346 412 49 103
-                  22 205 -62 234 -86 30 -156 -11 -280 -165 -85 -105 -390 -424 -406 -424 -6 0
+                    22 205 -62 234 -86 30 -156 -11 -280 -165 -85 -105 -390 -424 -406 -424 -6 0
                   -37 16 -71 37 -57 34 -190 94 -379 168 -112 45 -261 83 -352 92 -39 3 -74 11
                   -78 17 -4 6 -8 43 -8 83 0 40 -4 127 -10 195 -5 68 -11 204 -12 304 -3 177 -3
                   181 -30 221 -16 24 -44 49 -70 62 -48 23 -70 25 -108 10z m658 -1355 c157 -52
@@ -522,7 +536,7 @@ function RJournal({ user }) {
                   c-269 35 -805 247 -1058 419 -155 105 -172 118 -172 130 0 22 199 199 343 304
                   85 62 338 201 477 262 52 23 135 60 183 82 119 54 235 95 272 97 l29 1 -40
                   -42z m1289 -33 c332 -133 603 -291 788 -462 52 -48 108 -99 124 -112 l28 -24
-                                      -34 -28 c-97 -82 -407 -278 -559 -354 -136 -68 -307 -141 -410 -175 -118 -39
+                  -34 -28 c-97 -82 -407 -278 -559 -354 -136 -68 -307 -141 -410 -175 -118 -39
                   -273 -81 -278 -76 -2 2 26 34 61 70 70 71 141 171 189 267 69 139 105 382 79
                   534 -23 129 -90 285 -162 376 -57 72 -45 71 174 -16z"/>
                     </g>
@@ -566,7 +580,7 @@ function RJournal({ user }) {
                   -144 219 -44 12 -79 3 -114 -29 -27 -26 -30 -34 -30 -93 0 -39 10 -98 24 -148
                   34 -115 129 -349 170 -418 36 -60 106 -196 106 -207 0 -18 -197 13 -359 56
                   -103 27 -198 25 -232 -5 -30 -27 -48 -74 -42 -108 7 -34 52 -81 104 -107 77
-                  -40 262 -89 463 -124 49 -8 91 -17 93 -20 5 -5 -87 -173 -127 -231 -15 -22
+                    -40 262 -89 463 -124 49 -8 91 -17 93 -20 5 -5 -87 -173 -127 -231 -15 -22
                   -65 -116 -111 -210 -72 -146 -84 -179 -87 -232 -4 -58 -2 -64 26 -93 25 -25
                   38 -30 78 -30 44 0 51 4 93 48 25 26 78 101 117 167 39 66 127 213 194 328
                   l123 207 41 0 c23 0 122 -9 221 -19 159 -17 316 -30 593 -47 74 -5 82 -8 86
@@ -583,7 +597,7 @@ function RJournal({ user }) {
                   </g>
                 )}
               </svg>
-                            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: "1em", textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink, whiteSpace: "nowrap" }}>
+              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: "1em", textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink, whiteSpace: "nowrap" }}>
                 Apocalypse Archives
               </div>
             </div>
@@ -623,17 +637,28 @@ function RJournal({ user }) {
         </div>
 
         {/* Bottom nav (mobile) */}
-        <div className="bottom-nav">
+        <div className="bottom-nav" style={{ position: "fixed", alignItems: "center" }}>
           {NAV.map((n) => (
-            <button key={n.key} onClick={() => setTab(n.key)} style={{
-              background: "transparent", border: "none", cursor: "pointer",
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
-              color: tab === n.key ? C.ink : C.muted,
-            }}>
-              <n.icon size={19} strokeWidth={2.2} />
-              <span style={{ fontSize: 11, fontWeight: 600 }}>{n.label}</span>
+            <button
+              key={n.key}
+              ref={(el) => { navRefs.current[n.key] = el; }}
+              onClick={() => setTab(n.key)}
+              style={{
+                background: "transparent", border: "none", cursor: "pointer",
+                padding: "10px 6px 4px",
+                color: tab === n.key ? C.ink : C.muted,
+                transition: "color .15s ease",
+              }}
+            >
+              <span style={{ fontSize: 13.5, fontWeight: 600 }}>{n.label}</span>
             </button>
           ))}
+          <div style={{
+            position: "absolute", top: 0, height: 3, borderRadius: 999,
+            background: C.ink,
+            left: navIndicator.left, width: navIndicator.width,
+            transition: "left .28s cubic-bezier(.4,0,.2,1), width .28s cubic-bezier(.4,0,.2,1)",
+          }} />
         </div>
       </div>
     </ThemeContext.Provider>
@@ -692,12 +717,12 @@ function DateField({ value, onChange }) {
                 <ChevronLeft size={16} />
               </button>
               <div style={{ fontWeight: 700, fontSize: 13.5, fontFamily: SANS }}>{MONTHS[viewMonth]} {viewYear}</div>
-                            <button type="button" onClick={nextMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
+              <button type="button" onClick={nextMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
                 <ChevronRight size={16} />
                 </button>
             </div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 2 }}>
-              {WEEKDAYS.map((w, i) => (
+                          {WEEKDAYS.map((w, i) => (
                 <div key={i} style={{ textAlign: "center", fontSize: 11, color: C.muted, fontWeight: 600, padding: "3px 0" }}>{w}</div>
               ))}
             </div>
@@ -790,7 +815,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
       </Field>
       <Field label="Notes">
         <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
-              </Field>
+      </Field>
       <button onClick={handleSave} disabled={!canSave} style={{
         width: "100%", padding: "14px 0", borderRadius: 12, border: "none",
         background: canSave ? C.ink : C.lineSoft, color: canSave ? C.paper : C.faint,
@@ -846,7 +871,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
             {t.notes && <div style={{ fontSize: 13, color: C.muted, marginTop: 10, fontStyle: "italic" }}>{t.notes}</div>}
             <button onClick={() => setConfirmId(t.id)} style={{
               marginTop: 14, background: "transparent", border: "none", color: C.faint, fontSize: 13,
-              display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: 0,
+  display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: 0,
             }}><Trash2 size={13} /> Delete</button>
           </div>
         );
@@ -894,7 +919,7 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
   const C = useTheme();
   const dx = x - cx, dy = y - cy;
   const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const push = 12;
+    const push = 12;
   const nx = x + (dx / dist) * push;
   const ny = y + (dy / dist) * push;
   const words = String(payload.value).split(" ");
@@ -988,4 +1013,4 @@ function Dashboard({ trades }) {
       )}
     </div>
   );
-        }
+                }
