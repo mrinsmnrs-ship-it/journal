@@ -183,7 +183,6 @@ export default function JournalChat({ user, trades, theme }) {
         flex: 1,
         background: C.paper,
         overflow: "hidden",
-        position: "relative",
       }}
     >
       <style>{`
@@ -210,10 +209,7 @@ export default function JournalChat({ user, trades, theme }) {
       `}</style>
 
       {/* Messages */}
-      <div
-        className="chat-messages"
-        style={{ flex: 1, minHeight: 0, overflowY: "auto", paddingTop: 16, paddingLeft: 20, paddingRight: 20, paddingBottom: 16, display: "flex", flexDirection: "column", gap: 10 }}
-      >
+      <div className="chat-messages" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
         {!loaded ? (
           <div style={{ color: C.faint, fontSize: 14 }}>Memuat...</div>
         ) : messages.length === 0 ? (
@@ -263,13 +259,13 @@ export default function JournalChat({ user, trades, theme }) {
         <div ref={scrollRef} />
       </div>
 
-      {/* Input — mengambang di atas area pesan (bukan elemen terpisah), jadi teks yang lewat kepotong tegas oleh kotak ini, tanpa gradasi */}
-      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "8px 20px 10px", background: C.paper, zIndex: 5 }}>
+      {/* Input — satu kotak border, textarea di atas, pill persona + tombol kirim di bawah (mirip layout Claude) */}
+      <div style={{ padding: "14px 4px 6px" }}>
         <div
           style={{
             border: `1px solid ${C.line}`,
             borderRadius: 24,
-            background: C.paper,
+            background: C.paperSoft,
             padding: "12px 10px 10px 16px",
           }}
         >
@@ -295,7 +291,7 @@ export default function JournalChat({ user, trades, theme }) {
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                background: "transparent",
+                background: "#ffffff",
                 border: `1px solid ${C.line}`,
                 borderRadius: 999,
                 padding: "5px 12px",
@@ -332,4 +328,4 @@ export default function JournalChat({ user, trades, theme }) {
       </div>
     </div>
   );
-        }
+    }
