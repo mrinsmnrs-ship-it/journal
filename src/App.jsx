@@ -988,4 +988,4 @@ function Dashboard({ trades }) {
       )}
     </div>
   );
-}
+        }
