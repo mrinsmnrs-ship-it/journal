@@ -754,7 +754,7 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
                 transition: "color .15s ease",
               }}
             >
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: tab === n.key ? 700 : 500, letterSpacing: "-0.01em" }}>{n.label}</span>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: tab === n.key ? 600 : 600, letterSpacing: "-0.01em" }}>{n.label}</span>
             </button>
           ))}
           <div style={{
