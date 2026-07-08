@@ -48,12 +48,12 @@ const LIGHT = {
 };
 const DARK = {
   bg: "#262624", paper: "#30302E", paperSoft: "#3A3A37",
-  paperSoftLight: "#3E3E3B", paperSoftStat: "#3C3C39",
+  paperSoftLight: "#3A3A37", paperSoftStat: "#3A3A37",
   ink: "#FAF9F5", inkSoft: "#D8D6CF", muted: "#9C9A93", faint: "#6E6C64",
   line: "#46453F", lineSoft: "#3A3A37",
   clay: "#D97757", clayDeep: "#E8926F", clayWash: "#3A2A21", clayOnWhite: "#E8926F",
   sage: "#788C5D", sageWash: "#232A1D", sageOnWhite: "#9CB27E",
-  rustRed: "#D28A7E", rustWash: "#3B2822", rustOnWhite: "#D28A7E", dangerBg: "#D28A7E",
+  rustRed: "#D28A7E", rustWash: "#3B2822", rustOnWhite: "#D28A7E", dangerBg: "#B85C50",
   amber: "#6A9BCC", amberWash: "#1E2A35", amberOnWhite: "#8FB8DE",
   inputBg: "#3A3A37", inputText: "#FAF9F5", inputPlaceholder: "#6E6C64", inputBorder: "#46453F",
 btnAccent: "#D97757", btnAccentBorder: "#D97757", btnAccentWash: "#3A2A21",
