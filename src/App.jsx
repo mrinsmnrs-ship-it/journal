@@ -46,7 +46,6 @@ const LIGHT = {
   btnAccentText: "#B85C3E", btnAccentTextActive: "#FFFFFF",
   ...SHADOW_LIGHT,
 };
-};
 const DARK = {
   bg: "#262624", paper: "#262624", paperSoft: "#262624",
   paperSoftLight: "#262624", paperSoftStat: "#262624",
