@@ -558,7 +558,7 @@ function RJournal({ user }) {
           @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
           @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&family=Inter:wght@700&display=swap');
           * { box-sizing: border-box; }
-          html, body { margin:0; }
+          html, body { margin:0; height: 100%; overflow: hidden; }
           button { -webkit-tap-highlight-color: transparent; transition: transform .1s ease; }
           button:active:not(:disabled) { transform: scale(0.96); }
           .no-press, .no-press:active { transform: none !important; }
@@ -569,7 +569,7 @@ function RJournal({ user }) {
           ::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 4px; }
           .recharts-wrapper, .recharts-wrapper svg, .recharts-surface { overflow: visible !important; }
 
-          .app-shell { display: flex; min-height: 100vh; }
+          .app-shell { display: flex; height: 100vh; }
 
           /* Sidebar desktop: fixed & tidak pernah bisa discroll — seluruh isi
              harus langsung terlihat. */
@@ -582,6 +582,7 @@ function RJournal({ user }) {
           .main-area {
             flex: 1; min-width: 0; padding: 40px 48px 60px;
             margin-left: 252px; margin-right: calc((100vw - 252px) / 2);
+            height: 100vh; overflow-y: auto; box-sizing: border-box;
           }
 
           /* Panel AI Chat permanen di kanan (desktop only) — dibuat
@@ -604,7 +605,8 @@ function RJournal({ user }) {
           /* Nav item sidebar desktop — tanpa ikon, indikator ada di kanan */
           .nav-item-desktop {
             display:flex; align-items:center; padding: 13px 6px; border-radius: 0;
-            font-size:16.5px; font-weight:600; cursor:pointer; border:none; background:transparent;
+            font-family: 'Inter', sans-serif; font-size:16px; font-weight:600; letter-spacing: -0.015em;
+            cursor:pointer; border:none; background:transparent;
             width:100%; text-align:left; margin-bottom:2px; transition: color .12s ease;
           }
           .nav-item-desktop:hover { color: ${C.ink}; }
@@ -751,7 +753,7 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
                 transition: "color .15s ease",
               }}
             >
-              <span style={{ fontSize: 13.5, fontWeight: 600 }}>{n.label}</span>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em" }}>{n.label}</span>
             </button>
           ))}
           <div style={{
