@@ -110,8 +110,8 @@ function Chip({ label, active, onClick }) {
     <button
       onClick={onClick}
       style={{
-        fontFamily: SANS, fontSize: 13, fontWeight: 600,
-        padding: "8px 15px", borderRadius: 999,
+        fontFamily: SANS, fontSize: 14, fontWeight: 600,
+        padding: "9px 17px", borderRadius: 999,
         border: `1px solid ${C.btnAccentBorder}`,
         background: active ? C.btnAccent : C.btnAccentWash,
         color: active ? C.btnAccentTextActive : C.btnAccentText,
@@ -125,10 +125,10 @@ function Chip({ label, active, onClick }) {
 function Field({ label, children }) {
   const C = useTheme();
   return (
-    <div style={{ marginBottom: 20 }}>
+    <div style={{ marginBottom: 22 }}>
       <div style={{
-        fontFamily: SANS, fontSize: 12, fontWeight: 600, letterSpacing: "0.04em",
-        color: C.muted, marginBottom: 8, textTransform: "uppercase",
+        fontFamily: SANS, fontSize: 13, fontWeight: 600, letterSpacing: "0.04em",
+        color: C.muted, marginBottom: 9, textTransform: "uppercase",
       }}>{label}</div>
       {children}
     </div>
@@ -138,8 +138,8 @@ function useInputStyle() {
   const C = useTheme();
   return {
     width: "100%", boxSizing: "border-box", background: C.inputBg,
-    border: `1px solid ${C.inputBorder}`, borderRadius: 12, padding: "12px 14px",
-    color: C.inputText, fontFamily: SANS, fontSize: 15, outline: "none",
+    border: `1px solid ${C.inputBorder}`, borderRadius: 12, padding: "14px 16px",
+    color: C.inputText, fontFamily: SANS, fontSize: 16, outline: "none",
   };
 }
 function Tag({ text }) {
@@ -147,9 +147,9 @@ function Tag({ text }) {
   const C = useTheme();
   return (
     <span style={{
-      fontFamily: SANS, fontSize: 12, fontWeight: 600, color: C.inkSoft,
+      fontFamily: SANS, fontSize: 13, fontWeight: 600, color: C.inkSoft,
       background: C.paperSoft, border: `1px solid ${C.line}`,
-      borderRadius: 999, padding: "4px 11px",
+      borderRadius: 999, padding: "5px 12px",
     }}>
       {text}
     </span>
@@ -159,8 +159,8 @@ function SectionLabel({ text }) {
   const C = useTheme();
   return (
     <div style={{
-      fontFamily: SANS, fontSize: 12, fontWeight: 700, letterSpacing: "0.06em",
-      color: C.muted, marginBottom: 14, textTransform: "uppercase",
+      fontFamily: SANS, fontSize: 13, fontWeight: 700, letterSpacing: "0.06em",
+      color: C.muted, marginBottom: 15, textTransform: "uppercase",
     }}>{text}</div>
   );
 }
@@ -181,11 +181,11 @@ function ThemeToggle({ mode, onToggle, compact }) {
       style={{
         display: "flex", alignItems: "center", gap: 9,
         background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 999,
-        padding: compact ? "8px" : "9px 14px", cursor: "pointer", color: C.inkSoft,
-        fontFamily: SANS, fontSize: 13, fontWeight: 600,
+        padding: compact ? "9px" : "10px 16px", cursor: "pointer", color: C.inkSoft,
+        fontFamily: SANS, fontSize: 14, fontWeight: 600,
       }}
     >
-      <Icon size={15} style={{ color: C.ink }} />
+      <Icon size={16} style={{ color: C.ink }} />
       {!compact && label}
     </button>
   );
@@ -569,26 +569,28 @@ function RJournal({ user }) {
           /* Sidebar desktop: fixed & tidak pernah bisa discroll — seluruh isi
              harus langsung terlihat. */
           .sidebar {
-            width: 232px; flex-shrink: 0; padding: 26px 18px;
+            width: 252px; flex-shrink: 0; padding: 28px 20px;
             border-right: 1px solid ${C.line}; display: flex; flex-direction: column;
             position: fixed; top: 0; left: 0; height: 100vh; overflow: hidden;
             background: ${C.bg}; z-index: 15;
           }
           .main-area {
-            flex: 1; min-width: 0; padding: 34px 40px 60px;
-            margin-left: 232px; margin-right: calc((100vw - 232px) / 2);
+            flex: 1; min-width: 0; padding: 40px 48px 60px;
+            margin-left: 252px; margin-right: calc((100vw - 252px) / 2);
           }
 
           /* Panel AI Chat permanen di kanan (desktop only) — dibuat
              sebanding (kurang lebih setengah) dengan sisa ruang setelah
-             sidebar, bukan lebar tetap yang sempit. */
+             sidebar, bukan lebar tetap yang sempit. Diisi penuh: flex
+             container + anak-anaknya harus stretch mengisi lebar panel. */
           .desktop-chat-panel {
-            width: calc((100vw - 232px) / 2);
+            width: calc((100vw - 252px) / 2);
             border-left: 1px solid ${C.line};
             position: fixed; top: 0; right: 0; height: 100vh;
             background: ${C.bg}; z-index: 15;
-            display: flex; flex-direction: column;
+            display: flex; flex-direction: column; align-items: stretch;
           }
+          .desktop-chat-panel > * { width: 100%; flex: 1; min-width: 0; }
 
           .bottom-nav { display: none; }
           .mobile-topbar { display: none; }
@@ -596,8 +598,8 @@ function RJournal({ user }) {
 
           /* Nav item sidebar desktop — tanpa ikon, indikator ada di kanan */
           .nav-item-desktop {
-            display:flex; align-items:center; padding: 11px 6px; border-radius: 0;
-            font-size:14.5px; font-weight:600; cursor:pointer; border:none; background:transparent;
+            display:flex; align-items:center; padding: 13px 6px; border-radius: 0;
+            font-size:16.5px; font-weight:600; cursor:pointer; border:none; background:transparent;
             width:100%; text-align:left; margin-bottom:2px; transition: color .12s ease;
           }
           .nav-item-desktop:hover { color: ${C.ink}; }
@@ -634,15 +636,20 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
         <div className="app-shell">
           {/* Sidebar (desktop) */}
           <div className="sidebar">
-            <div style={{ padding: "6px 10px 26px", display: "flex", alignItems: "center", gap: 9 }}>
-              <div style={{ color: C.ink, width: 40, height: 40, display: "flex", flexShrink: 0 }}>
-                <EyeLogo blinkFrame={blinkFrame} />
+            <div style={{ padding: "6px 10px 30px", display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{
+                color: C.ink, width: 46, height: 46, display: "flex", alignItems: "center",
+                justifyContent: "center", flexShrink: 0, overflow: "hidden",
+              }}>
+                <div style={{ width: "125%", height: "125%", display: "flex" }}>
+                  <EyeLogo blinkFrame={blinkFrame} size={46} />
+                </div>
               </div>
               <div>
-                <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink, lineHeight: 1.15 }}>
+                <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 21, textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink, lineHeight: 1.12 }}>
                   Apocalypse Archives
                 </div>
-                <div style={{ fontFamily: MONO, fontSize: 12, color: C.muted, marginTop: 4 }}>
+                <div style={{ fontFamily: MONO, fontSize: 13, color: C.muted, marginTop: 3, lineHeight: 1.1 }}>
                   {trades.length} trade{trades.length === 1 ? "" : "s"} logged
                 </div>
               </div>
@@ -667,7 +674,7 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
               }} />
             </div>
             <div style={{ flex: 1 }} />
-            <div style={{ padding: "0 2px", marginBottom: 10, display: "flex", gap: 8 }}>
+            <div style={{ padding: "0 2px", marginBottom: 12, display: "flex", gap: 8 }}>
               <ThemeToggle mode={themeMode} onToggle={toggleTheme} />
               <button
                 onClick={handleLogout}
@@ -675,13 +682,13 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "center",
                   background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 999,
-                  padding: "9px 12px", cursor: "pointer", color: C.inkSoft,
+                  padding: "10px 13px", cursor: "pointer", color: C.inkSoft,
                 }}
               >
-                <LogOut size={15} />
+                <LogOut size={16} />
               </button>
             </div>
-            <div style={{ fontSize: 12, color: C.faint, padding: "0 10px", lineHeight: 1.5 }}>
+            <div style={{ fontSize: 13, color: C.faint, padding: "0 10px", lineHeight: 1.5 }}>
               Signed in as {user.email}. Synced across your devices.
             </div>
             
@@ -803,7 +810,7 @@ function DateField({ value, onChange }) {
         onClick={() => setOpen((o) => !o)}
         style={{
           width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
-          borderRadius: 12, padding: "12px 14px", color: C.inputText, fontFamily: SANS, fontSize: 15,
+          borderRadius: 12, padding: "14px 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
           textAlign: "left", cursor: "pointer",
         }}
       >
@@ -813,22 +820,22 @@ function DateField({ value, onChange }) {
         <>
           <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
           <div style={{
-            position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: 272,
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: 14,
+            position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: 300,
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: 16,
             boxShadow: "0 10px 28px rgba(0,0,0,0.16)",
           }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
               <button type="button" onClick={prevMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
-                <ChevronLeft size={16} />
+                <ChevronLeft size={18} />
               </button>
-              <div style={{ fontWeight: 700, fontSize: 13.5, fontFamily: SANS }}>{MONTHS[viewMonth]} {viewYear}</div>
+              <div style={{ fontWeight: 700, fontSize: 15, fontFamily: SANS }}>{MONTHS[viewMonth]} {viewYear}</div>
               <button type="button" onClick={nextMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
-                <ChevronRight size={16} />
+                <ChevronRight size={18} />
                 </button>
             </div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 2 }}>
                           {WEEKDAYS.map((w, i) => (
-                <div key={i} style={{ textAlign: "center", fontSize: 11, color: C.muted, fontWeight: 600, padding: "3px 0" }}>{w}</div>
+                <div key={i} style={{ textAlign: "center", fontSize: 12, color: C.muted, fontWeight: 600, padding: "4px 0" }}>{w}</div>
               ))}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
@@ -845,7 +852,7 @@ function DateField({ value, onChange }) {
                       aspectRatio: "1", border: "none", borderRadius: 8, cursor: "pointer",
                       background: isSelected ? C.clay : "transparent",
                       color: isSelected ? C.paper : C.ink,
-                      fontSize: 13, fontFamily: SANS,
+                      fontSize: 14, fontFamily: SANS,
                     }}
                   >{d}</button>
                 );
@@ -862,7 +869,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
   const C = useTheme();
   const inputStyle = useInputStyle();
   return (
-    <div style={{ background: C.paper, borderRadius: 20, padding: 26, maxWidth: 560 }}>
+    <div style={{ background: C.paper, borderRadius: 20, padding: 30, maxWidth: 620, fontSize: 16 }}>
       <Field label="Date">
         <DateField value={form.date} onChange={(d) => updateForm("date", d)} />
       </Field>
@@ -870,15 +877,15 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
         <input type="text" placeholder="EURUSD, XAUUSD, ..." value={form.symbol} onChange={(e) => updateForm("symbol", e.target.value.toUpperCase())} style={{ ...inputStyle, textTransform: "uppercase" }} />
       </Field>
       <Field label="Direction">
-        <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ display: "flex", gap: 12 }}>
           {["Long", "Short"].map((d) => {
             const active = form.direction === d;
             return (
               <button key={d} onClick={() => updateForm("direction", d)} style={{
-                flex: 1, padding: "12px 0", borderRadius: 12,
+                flex: 1, padding: "14px 0", borderRadius: 12,
                 border: `1px solid ${C.btnAccentBorder}`,
                 background: active ? C.btnAccent : C.btnAccentWash,
-                color: active ? C.btnAccentTextActive : C.btnAccentText, fontWeight: 700, fontSize: 15, cursor: "pointer",
+                color: active ? C.btnAccentTextActive : C.btnAccentText, fontWeight: 700, fontSize: 16, cursor: "pointer",
               }}>{d}</button>
             );
           })}
@@ -887,7 +894,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
       <Field label="Reason / Setup">
         <input type="text" placeholder="Breakout retest, reversal, ..." value={form.reason} onChange={(e) => updateForm("reason", e.target.value)} style={inputStyle} />
       </Field>
-      <div style={{ display: "flex", gap: 14 }}>
+      <div style={{ display: "flex", gap: 16 }}>
         <div style={{ flex: 1 }}>
           <Field label="Risk %">
             <input type="number" inputMode="decimal" placeholder="1" value={form.riskPct} onChange={(e) => updateForm("riskPct", e.target.value)} style={inputStyle} />
@@ -903,7 +910,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
         <input type="number" inputMode="decimal" placeholder="2.3 or -1" value={form.rActual} onChange={(e) => updateForm("rActual", e.target.value)} style={inputStyle} />
       </Field>
       <Field label="Rules Compliance">
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           {["Yes", "Partial", "No"].map((r) => (
             <Chip key={r} label={r} active={form.rules === r} onClick={() => updateForm("rules", r)}
               activeColor={r === "Yes" ? C.sageOnWhite : r === "No" ? C.rustOnWhite : C.amberOnWhite}
@@ -912,7 +919,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
         </div>
       </Field>
       <Field label="Emotions">
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           {EMOTIONS.map((e) => (
             <Chip key={e} label={e} active={form.emotion === e} onClick={() => toggleEmotion(e)} />
           ))}
@@ -922,9 +929,9 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
         <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
       </Field>
       <button onClick={handleSave} disabled={!canSave} style={{
-  width: "100%", padding: "14px 0", borderRadius: 12, border: "none",
+  width: "100%", padding: "16px 0", borderRadius: 12, border: "none",
   background: canSave ? C.btnAccent : C.lineSoft, color: canSave ? C.btnAccentTextActive : C.faint,
-  fontWeight: 700, fontSize: 15.5, cursor: canSave ? "pointer" : "not-allowed",
+  fontWeight: 700, fontSize: 17, cursor: canSave ? "pointer" : "not-allowed",
 }}>Save Trade</button>
           </div>
   );
@@ -939,45 +946,45 @@ function JournalList({ trades, onDelete, onGoLog }) {
   if (trades.length === 0) {
     return (
       <div style={{ marginTop: 30, textAlign: "center", color: C.muted }}>
-        <div style={{ fontSize: 15, marginBottom: 14 }}>No trades logged yet.</div>
+        <div style={{ fontSize: 16, marginBottom: 16 }}>No trades logged yet.</div>
         <button onClick={onGoLog} style={{
           display: "inline-flex", alignItems: "center", gap: 8, background: C.clayWash,
-          border: `1px solid ${C.clay}`, color: C.clayOnWhite, borderRadius: 999, padding: "10px 18px",
-          fontWeight: 700, fontSize: 14, cursor: "pointer",
-        }}><Plus size={16} /> Log your first trade</button>
+          border: `1px solid ${C.clay}`, color: C.clayOnWhite, borderRadius: 999, padding: "12px 20px",
+          fontWeight: 700, fontSize: 15, cursor: "pointer",
+        }}><Plus size={18} /> Log your first trade</button>
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 640 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 720 }}>
       {trades.map((t) => {
         const win = t.rActual > 0;
         return (
           <div key={t.id} style={{
             background: C.paper, border: `1px solid ${C.line}`,
-            borderRadius: 16, padding: "18px 20px",
+            borderRadius: 16, padding: "20px 22px",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-  <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-    <div style={{ fontWeight: 700, fontSize: 17 }}>{t.symbol}</div>
-    <div style={{ fontFamily: SANS, fontSize: 13, color: C.faint }}>{t.date}</div>
+  <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
+    <div style={{ fontWeight: 700, fontSize: 19 }}>{t.symbol}</div>
+    <div style={{ fontFamily: SANS, fontSize: 14, color: C.faint }}>{t.date}</div>
   </div>
-  <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 15, color: win ? C.ink : C.faint }}>
+  <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 17, color: win ? C.ink : C.faint }}>
     {fmtR(t.rActual)}
   </div>
 </div>
-{t.reason && <div style={{ fontSize: 14, color: C.inkSoft, marginTop: 10 }}>{t.reason}</div>}
-<div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+{t.reason && <div style={{ fontSize: 15, color: C.inkSoft, marginTop: 11 }}>{t.reason}</div>}
+<div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginTop: 13 }}>
   {t.direction && <Tag text={`Direction: ${t.direction}`} />}
   {t.rules && <Tag text={`Rules: ${t.rules}`} />}
   {(t.emotions || []).map((e) => <Tag key={e} text={`Emotion: ${e}`} />)}
 </div>
-            {t.notes && <div style={{ fontSize: 13, color: C.muted, marginTop: 10, fontStyle: "italic" }}>{t.notes}</div>}
+            {t.notes && <div style={{ fontSize: 14, color: C.muted, marginTop: 11, fontStyle: "italic" }}>{t.notes}</div>}
             <button onClick={() => setConfirmId(t.id)} style={{
-              marginTop: 14, background: "transparent", border: "none", color: C.faint, fontSize: 13,
+              marginTop: 15, background: "transparent", border: "none", color: C.faint, fontSize: 14,
   display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: 0,
-            }}><Trash2 size={13} /> Delete</button>
+            }}><Trash2 size={14} /> Delete</button>
           </div>
         );
       })}
@@ -988,27 +995,27 @@ function JournalList({ trades, onDelete, onGoLog }) {
           }} />
           <div style={{
             position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
-            zIndex: 40, width: "min(340px, calc(100vw - 48px))",
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: 22,
+            zIndex: 40, width: "min(360px, calc(100vw - 48px))",
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: 24,
             boxShadow: "0 16px 40px rgba(0,0,0,0.25)",
           }}>
-            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 18, marginBottom: 8, letterSpacing: "-0.01em", color: C.ink }}>Delete this trade?</div>
-            <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.5, marginBottom: 20 }}>
+            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, marginBottom: 9, letterSpacing: "-0.01em", color: C.ink }}>Delete this trade?</div>
+            <div style={{ fontSize: 15, color: C.inkSoft, lineHeight: 1.5, marginBottom: 22 }}>
               {confirmTrade.symbol} &middot; {confirmTrade.date} &middot; {fmtR(confirmTrade.rActual)} will be permanently removed.
             </div>
             <div style={{ display: "flex", gap: 10 }}>
               <button
                 onClick={() => setConfirmId(null)}
                 style={{
-                  flex: 1, padding: "11px 0", borderRadius: 12, border: `1px solid ${C.line}`,
-                  background: C.paperSoft, color: C.ink, fontWeight: 700, fontSize: 14.5, cursor: "pointer",
+                  flex: 1, padding: "12px 0", borderRadius: 12, border: `1px solid ${C.line}`,
+                  background: C.paperSoft, color: C.ink, fontWeight: 700, fontSize: 15.5, cursor: "pointer",
                 }}
               >No</button>
               <button
                 onClick={() => { onDelete(confirmTrade.id); setConfirmId(null); }}
                 style={{
-                  flex: 1, padding: "11px 0", borderRadius: 12, border: "none",
-                  background: C.dangerBg, color: "#FFFFFF", fontWeight: 700, fontSize: 14.5, cursor: "pointer",
+                  flex: 1, padding: "12px 0", borderRadius: 12, border: "none",
+                  background: C.dangerBg, color: "#FFFFFF", fontWeight: 700, fontSize: 15.5, cursor: "pointer",
                 }}
               >Yes, Delete</button>
             </div>
@@ -1029,9 +1036,9 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
   const ny = y + (dy / dist) * push;
   const words = String(payload.value).split(" ");
   return (
-    <text x={nx} y={ny} textAnchor={textAnchor} fontFamily={SANS} fontSize={11} fontWeight={700} fill={C.inkSoft}>
+    <text x={nx} y={ny} textAnchor={textAnchor} fontFamily={SANS} fontSize={13} fontWeight={700} fill={C.inkSoft}>
       {words.map((w, i) => (
-        <tspan key={i} x={nx} dy={i === 0 ? (words.length > 1 ? -5 : 3.5) : 12}>{w}</tspan>
+        <tspan key={i} x={nx} dy={i === 0 ? (words.length > 1 ? -6 : 4) : 14}>{w}</tspan>
       ))}
     </text>
   );
@@ -1039,9 +1046,9 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
 function StatCard({ label, value, color }) {
   const C = useTheme();
   return (
-    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 12, padding: "10px 12px" }}>
-      <div style={{ fontFamily: SANS, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em", color: C.muted, textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
-      <div style={{ fontFamily: SANS, fontSize: 16, fontWeight: 700, color: C.ink }}>{value}</div>
+    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 12, padding: "13px 15px" }}>
+      <div style={{ fontFamily: SANS, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.04em", color: C.muted, textTransform: "uppercase", marginBottom: 5 }}>{label}</div>
+      <div style={{ fontFamily: SANS, fontSize: 19, fontWeight: 700, color: C.ink }}>{value}</div>
     </div>
   );
 }
@@ -1060,22 +1067,22 @@ function Dashboard({ trades }) {
   const stats = useMemo(() => computeStats(filteredTrades), [filteredTrades]);
 
   if (trades.length === 0) {
-    return <div style={{ marginTop: 30, color: C.muted, fontSize: 15 }}>Log a trade to see your performance dashboard.</div>;
+    return <div style={{ marginTop: 30, color: C.muted, fontSize: 16 }}>Log a trade to see your performance dashboard.</div>;
   }
 
   return (
-    <div style={{ maxWidth: 680 }}>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 22 }}>
+    <div style={{ maxWidth: 760 }}>
+      <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginBottom: 24 }}>
         {PERIODS.map((p) => (
           <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
         ))}
       </div>
       {filteredTrades.length === 0 ? (
-        <div style={{ color: C.muted, fontSize: 15, marginBottom: 26 }}>No trades logged in this period.</div>
+        <div style={{ color: C.muted, fontSize: 16, marginBottom: 28 }}>No trades logged in this period.</div>
       ) : (
         <>
           <SectionLabel text={`Summary \u00b7 ${filteredTrades.length} trade${filteredTrades.length === 1 ? "" : "s"}`} />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 22 }}>
             <StatCard label="Total Trades" value={stats.total} />
             <StatCard label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} color={C.clayDeep} />
             <StatCard label="Total R" value={fmtR(stats.totalR)} color={stats.totalR >= 0 ? C.sage : C.rustRed} />
@@ -1083,12 +1090,12 @@ function Dashboard({ trades }) {
             <StatCard label="Avg Win" value={`+${stats.avgWin.toFixed(2)}`} color={C.sage} />
             <StatCard label="Avg Loss" value={stats.avgLoss.toFixed(2)} color={C.rustRed} />
           </div>
-          <div style={{ marginBottom: 16, marginTop: -6 }}>
+          <div style={{ marginBottom: 18, marginTop: -6 }}>
   <div style={{ padding: "0 4px" }}>
-    <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 18, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
-    <div style={{ fontSize: 13, color: C.muted, marginTop: 2, marginBottom: 0 }}>Score 0–100 per dimension</div>
+    <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
+    <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Score 0–100 per dimension</div>
   </div>
-  <div style={{ width: "100%", height: 280, overflow: "visible" }}>
+  <div style={{ width: "100%", height: 320, overflow: "visible" }}>
     <ResponsiveContainer>
       <RadarChart data={stats.scorecard} outerRadius="72%" margin={{ top: 4, right: 32, bottom: 4, left: 46 }}>
                   <PolarGrid stroke={C.line} />
@@ -1100,14 +1107,14 @@ function Dashboard({ trades }) {
             </div>
           </div>
           <SectionLabel text="By Rules Compliance" />
-          <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: "2px 16px" }}>
+          <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: "4px 18px" }}>
   {["Yes", "Partial", "No"].map((r, i) => {
     const d = stats.byRules[r];
     const avg = d.count ? d.total / d.count : 0;
     return (
-      <div key={r} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderTop: i > 0 ? `1px solid ${C.lineSoft}` : "none" }}>
-        <div style={{ fontWeight: 700, fontSize: 13.5, color: C.ink, minWidth: 60 }}>{r}</div>
-        <div style={{ fontFamily: MONO, fontSize: 11.5, color: C.muted, textAlign: "right" }}>
+      <div key={r} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 0", borderTop: i > 0 ? `1px solid ${C.lineSoft}` : "none" }}>
+        <div style={{ fontWeight: 700, fontSize: 15, color: C.ink, minWidth: 64 }}>{r}</div>
+        <div style={{ fontFamily: MONO, fontSize: 13, color: C.muted, textAlign: "right" }}>
           {d.count} trade &middot; total {fmtR(d.total)} &middot; avg {avg.toFixed(2)}R
         </div>
       </div>
