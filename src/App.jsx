@@ -556,6 +556,7 @@ function RJournal({ user }) {
       <div className={isChatTab ? "chat-mode" : ""} style={{ ...getPageBackground(themeMode, C), minHeight: "100vh", color: C.ink, fontFamily: SANS, transition: "background .2s ease, color .2s ease" }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&family=Inter:wght@700&display=swap');
           * { box-sizing: border-box; }
           html, body { margin:0; }
           button { -webkit-tap-highlight-color: transparent; transition: transform .1s ease; }
@@ -640,16 +641,11 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
         <div className="app-shell">
           {/* Sidebar (desktop) */}
           <div className="sidebar">
-            <div style={{ padding: "6px 10px 26px", display: "flex", alignItems: "center", gap: 9 }}>
-              <div style={{
-                color: C.ink, width: 26, height: 26, display: "flex", alignItems: "center",
-                justifyContent: "center", flexShrink: 0,
-              }}>
-                <EyeLogo blinkFrame={blinkFrame} size={26} />
-              </div>
-              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink, lineHeight: 1, whiteSpace: "nowrap" }}>
-                Apocalypse Archives
-              </div>
+            <div style={{ padding: "6px 10px 26px" }}>
+              <span style={{ fontSize: 19, lineHeight: 1 }}>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Apocalypse</span>
+                <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Archives</span>
+              </span>
             </div>
             <div style={{ position: "relative" }}>
               {NAV_DESKTOP.map((n) => (
@@ -693,14 +689,10 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
 
           {/* Mobile top bar */}
           <div className="mobile-topbar">
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "nowrap" }}>
-              <div style={{ color: C.ink, flexShrink: 0, width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <EyeLogo blinkFrame={blinkFrame} size={22} />
-              </div>
-              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 17, textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink, lineHeight: 1, whiteSpace: "nowrap" }}>
-                Apocalypse Archives
-              </div>
-            </div>
+            <span style={{ fontSize: 17, lineHeight: 1 }}>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Apocalypse</span>
+              <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Archives</span>
+            </span>
             <div style={{ display: "flex", gap: 8 }}>
               <ThemeToggle mode={themeMode} onToggle={toggleTheme} compact />
               <button
