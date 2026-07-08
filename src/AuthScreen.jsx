@@ -6,17 +6,27 @@ import {
 } from "firebase/auth";
 import { auth } from "./firebase";
 
-const CHAT_FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
-const SERIF = CHAT_FONT; // now matches the AI Chat page font
-const SANS = CHAT_FONT;  // now matches the AI Chat page font
+// Font stack unified with App.jsx (Inter — the closest freely-licensed
+// match to Claude's UI sans) and the same serif for the wordmark.
+const CHAT_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const SERIF = CHAT_FONT;
+const SANS = CHAT_FONT;
 
+// Tokens copied 1:1 from App.jsx's LIGHT theme so the login page is
+// pixel-identical to the rest of the app — no drift, no separate palette.
 const C = {
-  bg: "#FAF9F5", paper: "#FFFFFF", ink: "#141413", inkSoft: "#3D3D3A",
-  muted: "#767470", faint: "#AFAEA9", line: "#E3E2DD", inputBg: "#F0EEE6",
+  bg: "#FAF9F5", paper: "#FFFFFF", paperSoft: "#F0EEE6",
+  ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
+  line: "#E5E4DF", lineSoft: "#EDECE8",
+  inputBg: "#F0EEE6",
   clay: "#D97757", clayDeep: "#B85C3E",
-  btnAccent: "#B98A72", btnAccentDeep: "#9C6F58",
+  btnAccent: "#D97757", btnAccentDeep: "#B85C3E",
   rustRed: "#B85C50", rustWash: "#F1E2DE",
   sage: "#788C5D", sageWash: "#E8ECE1",
+  shadowCard: "0 1px 2px rgba(20,20,19,0.04)",
+  shadowRaised: "0 1px 2px rgba(20,20,19,0.04), 0 1px 1px rgba(20,20,19,0.03)",
+  shadowPopover: "0 4px 8px -2px rgba(20,20,19,0.06), 0 12px 20px -6px rgba(20,20,19,0.10)",
+  shadowModal: "0 8px 12px -4px rgba(20,20,19,0.10), 0 24px 40px -8px rgba(20,20,19,0.18)",
 };
 
 function friendlyError(code) {
@@ -88,13 +98,14 @@ export default function AuthScreen() {
       fontFamily: SANS, color: C.ink,
     }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&family=Inter:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         * { box-sizing: border-box; }
         input::placeholder { color: ${C.faint}; }
         .auth-input { transition: border-color .12s ease, box-shadow .12s ease; box-shadow: inset 0 1px 2px rgba(20,20,19,0.06); }
-        .auth-input:focus { outline: none; border-color: ${C.ink} !important; }
-        .auth-submit { transition: background .12s ease, transform .1s ease; }
-        .auth-submit:hover:not(:disabled) { background: ${C.btnAccentDeep}; }
+        .auth-input:focus { outline: none; border-color: ${C.clay} !important; box-shadow: inset 0 1px 2px rgba(20,20,19,0.06), 0 0 0 3px rgba(217,119,87,0.15) !important; }
+        .auth-submit { transition: background .12s ease, transform .1s ease, box-shadow .12s ease; }
+        .auth-submit:hover:not(:disabled) { background: ${C.btnAccentDeep}; box-shadow: ${C.shadowRaised}; }
         .auth-submit:active:not(:disabled) { transform: scale(0.98); }
         .auth-tab { transition: color .12s ease; }
       `}</style>
@@ -103,7 +114,7 @@ export default function AuthScreen() {
       <div style={{
         width: "100%", maxWidth: 380, background: C.paper,
         border: `1px solid ${C.line}`, borderRadius: 20, padding: 32,
-        boxShadow: "0 12px 32px rgba(20,20,19,0.06)",
+        boxShadow: C.shadowRaised,
       }}>
         <div style={{ marginBottom: 4 }}>
           <span style={{ fontSize: "clamp(16px, 5.4vw, 22px)", lineHeight: 1 }}>
@@ -130,7 +141,7 @@ export default function AuthScreen() {
                 fontFamily: SANS, fontSize: 13.5, fontWeight: 700, cursor: "pointer",
                 background: mode === m ? C.paper : "transparent",
                 color: mode === m ? C.ink : C.muted,
-                boxShadow: mode === m ? "0 1px 3px rgba(20,20,19,0.08)" : "none",
+                boxShadow: mode === m ? C.shadowCard : "none",
               }}
             >
               {m === "login" ? "Log In" : "Sign Up"}
@@ -228,6 +239,7 @@ export default function AuthScreen() {
               width: "100%", padding: "13px 0", borderRadius: 12, border: "none",
               background: C.btnAccent, color: "#FFFFFF", fontWeight: 700, fontSize: 15,
               cursor: busy ? "not-allowed" : "pointer", opacity: busy ? 0.6 : 1,
+              boxShadow: C.shadowCard,
             }}
           >
             {busy ? "Please wait..." : mode === "login" ? "Log In" : "Sign Up"}
@@ -240,4 +252,4 @@ export default function AuthScreen() {
       </div>
     </div>
   );
-        }
+}
