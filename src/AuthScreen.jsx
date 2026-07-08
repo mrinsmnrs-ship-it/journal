@@ -16,6 +16,7 @@ const SANS = CHAT_FONT;
 // pixel-identical to the rest of the app — no drift, no separate palette.
 const C = {
   bg: "#FAF9F5", paper: "#FFFFFF", paperSoft: "#F0EEE6",
+  pageBg: "#FBF2E9",
   ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
   line: "#E5E4DF", lineSoft: "#EDECE8",
   inputBg: "#F0EEE6",
@@ -93,7 +94,7 @@ export default function AuthScreen() {
 
   return (
     <div style={{
-      minHeight: "100vh", background: C.paper, display: "flex",
+      minHeight: "100vh", background: C.pageBg, display: "flex",
       alignItems: "center", justifyContent: "center", padding: 20,
       fontFamily: SANS, color: C.ink,
     }}>
@@ -112,7 +113,7 @@ export default function AuthScreen() {
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", maxWidth: 380 }}>
       <div style={{
-        width: "100%", maxWidth: 380, background: C.paperSoft,
+        width: "100%", maxWidth: 380, background: C.paper,
         border: `1px solid ${C.line}`, borderRadius: 20, padding: 32,
         boxShadow: C.shadowRaised,
       }}>
