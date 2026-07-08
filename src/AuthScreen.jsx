@@ -91,7 +91,7 @@ export default function AuthScreen() {
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&family=Inter:wght@700&display=swap');
         * { box-sizing: border-box; }
         input::placeholder { color: ${C.faint}; }
-        .auth-input { transition: border-color .12s ease, box-shadow .12s ease; box-shadow: inset 0 1px 3px rgba(20,20,19,0.10), inset 0 0 0 1px rgba(20,20,19,0.02); }
+        .auth-input { transition: border-color .12s ease, box-shadow .12s ease; box-shadow: inset 0 1px 2px rgba(20,20,19,0.06); }
         .auth-input:focus { outline: none; border-color: ${C.ink} !important; }
         .auth-submit { transition: background .12s ease, transform .1s ease; }
         .auth-submit:hover:not(:disabled) { background: ${C.btnAccentDeep}; }
@@ -174,7 +174,7 @@ export default function AuthScreen() {
               placeholder="you@example.com"
               style={{
                 width: "100%", background: C.inputBg,
-                border: `1px solid ${error ? C.rustRed : C.line}`, borderRadius: 12, padding: "12px 14px",
+                border: error ? `1px solid ${C.rustRed}` : "1px solid transparent", borderRadius: 12, padding: "12px 14px",
                 fontSize: 15, color: C.ink, fontFamily: SANS,
               }}
             />
@@ -203,7 +203,7 @@ export default function AuthScreen() {
               placeholder="At least 6 characters"
               style={{
                 width: "100%", background: C.inputBg,
-                border: `1px solid ${error ? C.rustRed : C.line}`, borderRadius: 12, padding: "12px 14px",
+                border: error ? `1px solid ${C.rustRed}` : "1px solid transparent", borderRadius: 12, padding: "12px 14px",
                 fontSize: 15, color: C.ink, fontFamily: SANS,
               }}
             />
