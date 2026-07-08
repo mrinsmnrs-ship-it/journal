@@ -183,7 +183,7 @@ export default function JournalChat({ user, trades, theme }) {
         height: "100%",
         minHeight: 0,
         flex: 1,
-        background: C.paper,
+        background: "transparent",
         overflow: "hidden",
         boxSizing: "border-box",
       }}
@@ -290,7 +290,7 @@ export default function JournalChat({ user, trades, theme }) {
           style={{
             border: `1px solid ${C.line}`,
             borderRadius: 24,
-            background: C.paperSoft,
+            background: C.paper,
             padding: "14px 12px 12px 18px",
             width: "100%",
             boxSizing: "border-box",
@@ -318,9 +318,9 @@ export default function JournalChat({ user, trades, theme }) {
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                background: C.paper,
-                border: "none",
-                boxShadow: C.shadowCard,
+                background: C.paperSoft,
+                border: `1px solid ${C.line}`,
+                boxShadow: "none",
                 borderRadius: 999,
                 padding: "6px 13px",
                 height: 30,
