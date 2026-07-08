@@ -7,7 +7,7 @@
 // nyambung & kenal pengguna walau tampilan chat sudah bersih.
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Square } from "lucide-react";
 import { askGemini } from "./gemini";
 import { loadUserData, saveUserData } from "./store";
 
@@ -343,11 +343,15 @@ export default function JournalChat({ user, trades, theme }) {
                 width: 30, height: 30, flexShrink: 0,
                 background: C.ink, color: C.paper, border: "none", borderRadius: "50%",
                 cursor: isSending || !input.trim() ? "not-allowed" : "pointer",
-                opacity: isSending || !input.trim() ? 0.3 : 1,
+                opacity: isSending ? 1 : (!input.trim() ? 0.3 : 1),
                 boxShadow: !isSending && input.trim() ? C.shadowCard : "none",
               }}
             >
-              <ArrowUp size={14} strokeWidth={2.4} />
+              {isSending ? (
+                <Square size={11} strokeWidth={2.4} fill={C.paper} style={{ borderRadius: 3 }} />
+              ) : (
+                <ArrowUp size={14} strokeWidth={2.4} />
+              )}
             </button>
           </div>
         </div>
