@@ -522,12 +522,18 @@ function RJournal({ user }) {
   }, [tab]);
 
   // Indikator garis vertikal di sisi kanan sidebar desktop, mengikuti tab aktif.
+  // Tingginya sengaja dibuat cuma sedikit lebih tinggi dari teks label
+  // (bukan setinggi seluruh tombol), lalu diposisikan center secara vertikal.
   useEffect(() => {
+    const INDICATOR_HEIGHT = 18;
     function updateDesktopNavIndicator() {
       const activeKey = desktopNavRefs.current[tab] ? tab : "log";
       const el = desktopNavRefs.current[activeKey];
       if (el) {
-        setDesktopNavIndicator({ top: el.offsetTop, height: el.offsetHeight });
+        setDesktopNavIndicator({
+          top: el.offsetTop + (el.offsetHeight - INDICATOR_HEIGHT) / 2,
+          height: INDICATOR_HEIGHT,
+        });
       }
     }
     updateDesktopNavIndicator();
@@ -569,13 +575,15 @@ function RJournal({ user }) {
             background: ${C.bg}; z-index: 15;
           }
           .main-area {
-            flex: 1; min-width: 0; padding: 34px 40px 60px; max-width: 900px;
-            margin-left: 232px; margin-right: 380px;
+            flex: 1; min-width: 0; padding: 34px 40px 60px;
+            margin-left: 232px; margin-right: calc((100vw - 232px) / 2);
           }
 
-          /* Panel AI Chat permanen di kanan (desktop only) */
+          /* Panel AI Chat permanen di kanan (desktop only) — dibuat
+             sebanding (kurang lebih setengah) dengan sisa ruang setelah
+             sidebar, bukan lebar tetap yang sempit. */
           .desktop-chat-panel {
-            width: 380px; flex-shrink: 0;
+            width: calc((100vw - 232px) / 2);
             border-left: 1px solid ${C.line};
             position: fixed; top: 0; right: 0; height: 100vh;
             background: ${C.bg}; z-index: 15;
@@ -627,7 +635,7 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
           {/* Sidebar (desktop) */}
           <div className="sidebar">
             <div style={{ padding: "6px 10px 26px", display: "flex", alignItems: "center", gap: 9 }}>
-              <div style={{ color: C.ink, width: 26, height: 26, display: "flex", flexShrink: 0 }}>
+              <div style={{ color: C.ink, width: 40, height: 40, display: "flex", flexShrink: 0 }}>
                 <EyeLogo blinkFrame={blinkFrame} />
               </div>
               <div>
