@@ -140,6 +140,7 @@ function useInputStyle() {
     width: "100%", boxSizing: "border-box", background: C.inputBg,
     border: `1px solid ${C.inputBorder}`, borderRadius: 12, padding: "14px 16px",
     color: C.inputText, fontFamily: SANS, fontSize: 16, outline: "none",
+    boxShadow: "inset 0 1px 3px rgba(0,0,0,0.10), inset 0 0 0 1px rgba(0,0,0,0.02)",
   };
 }
 function Tag({ text }) {
@@ -803,6 +804,7 @@ function DateField({ value, onChange }) {
           width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
           borderRadius: 12, padding: "14px 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
           textAlign: "left", cursor: "pointer",
+          boxShadow: "inset 0 1px 3px rgba(0,0,0,0.10), inset 0 0 0 1px rgba(0,0,0,0.02)",
         }}
       >
         {value ? fmtDateDisplay(value) : "Select date"}
@@ -841,8 +843,8 @@ function DateField({ value, onChange }) {
                     onClick={() => selectDay(d)}
                     style={{
                       aspectRatio: "1", border: "none", borderRadius: 8, cursor: "pointer",
-                      background: isSelected ? C.clay : "transparent",
-                      color: isSelected ? C.paper : C.ink,
+                      background: isSelected ? C.btnAccent : "transparent",
+                      color: isSelected ? C.btnAccentTextActive : C.ink,
                       fontSize: 14, fontFamily: SANS,
                     }}
                   >{d}</button>
