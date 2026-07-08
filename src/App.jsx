@@ -47,9 +47,11 @@ const LIGHT = {
   ...SHADOW_LIGHT,
 };
 const DARK = {
- bg: "#262624", paper: "#30302E", paperSoft: "#46453F",
+  bg: "#262624", paper: "#30302E", paperSoft: "#46453F",
   paperSoftLight: "#3A3A37", paperSoftStat: "#3A3A37",
-  ink: "#FAF9F5", inkSoft: "#D8D6CF", muted: "#9C9A93", faint: "#6E6C64",
+  ink: "#FAF9F5", inkSoft: "#D8D6CF", 
+  muted: "#C5C3BC", // <--- UBAH DI BARIS 48 (Sebelumnya: "#9C9A93")
+  faint: "#6E6C64",
   line: "#46453F", lineSoft: "#3A3A37",
   clay: "#D97757", clayDeep: "#E8926F", clayWash: "#3A2A21", clayOnWhite: "#E8926F",
   sage: "#788C5D", sageWash: "#232A1D", sageOnWhite: "#9CB27E",
