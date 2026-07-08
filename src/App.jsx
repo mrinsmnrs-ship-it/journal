@@ -747,14 +747,14 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
               key={n.key}
               ref={(el) => { navRefs.current[n.key] = el; }}
               onClick={() => setTab(n.key)}
-              style={{
+             style={{
                 background: "transparent", border: "none", cursor: "pointer",
                 padding: "6px 6px 4px",
                 color: tab === n.key ? C.ink : C.faint,
                 transition: "color .15s ease",
               }}
             >
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em" }}>{n.label}</span>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: tab === n.key ? 700 : 600, letterSpacing: "-0.01em" }}>{n.label}</span>
             </button>
           ))}
           <div style={{
