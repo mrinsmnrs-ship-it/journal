@@ -36,7 +36,7 @@ const LIGHT = {
   bg: "#FAF9F5", paper: "#FAF9F5", paperSoft: "#FAF9F5",
   paperSoftLight: "#FAF9F5", paperSoftStat: "#FAF9F5",
   ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
-  line: "#C2C0B8", lineSoft: "#D3D1C8",,
+  line: "#C2C0B8", lineSoft: "#D3D1C8",
   clay: "#D97757", clayDeep: "#B85C3E", clayWash: "#FAF9F5", clayOnWhite: "#B85C3E",
   sage: "#788C5D", sageWash: "#FAF9F5", sageOnWhite: "#5F7048",
   rustRed: "#B85C50", rustWash: "#FAF9F5", rustOnWhite: "#B85C50", dangerBg: "#B85C50",
