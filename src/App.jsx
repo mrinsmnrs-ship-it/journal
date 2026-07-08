@@ -20,28 +20,28 @@ import JournalChat from "./JournalChat.jsx";
 // (a tight "contact" shadow + a looser "ambient" shadow), never a single
 // hard blur.
 const SHADOW_LIGHT = {
-  shadowCard: "0 1px 2px rgba(20,20,19,0.04)",
-  shadowRaised: "0 1px 2px rgba(20,20,19,0.04), 0 1px 1px rgba(20,20,19,0.03)",
-  shadowPopover: "0 4px 8px -2px rgba(20,20,19,0.06), 0 12px 20px -6px rgba(20,20,19,0.10)",
-  shadowModal: "0 8px 12px -4px rgba(20,20,19,0.10), 0 24px 40px -8px rgba(20,20,19,0.18)",
+  shadowCard: "none",
+  shadowRaised: "none",
+  shadowPopover: "none",
+  shadowModal: "none",
 };
 const SHADOW_DARK = {
-  shadowCard: "0 1px 2px rgba(0,0,0,0.20)",
-  shadowRaised: "0 1px 2px rgba(0,0,0,0.24), 0 1px 1px rgba(0,0,0,0.16)",
-  shadowPopover: "0 4px 8px -2px rgba(0,0,0,0.28), 0 12px 20px -6px rgba(0,0,0,0.40)",
-  shadowModal: "0 8px 12px -4px rgba(0,0,0,0.32), 0 24px 40px -8px rgba(0,0,0,0.55)",
+  shadowCard: "none",
+  shadowRaised: "none",
+  shadowPopover: "none",
+  shadowModal: "none",
 };
 
 const LIGHT = {
   bg: "#FAF9F5", paper: "#FAF9F5", paperSoft: "#FAF9F5",
   paperSoftLight: "#FAF9F5", paperSoftStat: "#FAF9F5",
   ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
-  line: "#E5E4DF", lineSoft: "#EDECE8",
+  line: "#C2C0B8", lineSoft: "#D3D1C8",,
   clay: "#D97757", clayDeep: "#B85C3E", clayWash: "#FAF9F5", clayOnWhite: "#B85C3E",
   sage: "#788C5D", sageWash: "#FAF9F5", sageOnWhite: "#5F7048",
   rustRed: "#B85C50", rustWash: "#FAF9F5", rustOnWhite: "#B85C50", dangerBg: "#B85C50",
   amber: "#6A9BCC", amberWash: "#FAF9F5", amberOnWhite: "#3D6C9C",
-  inputBg: "#FAF9F5", inputText: "#141413", inputPlaceholder: "#AFAEA9", inputBorder: "#E3E2DD",
+  inputBg: "#FAF9F5", inputText: "#141413", inputPlaceholder: "#AFAEA9", inputBorder: "#C2C0B8",
   btnAccent: "#D97757", btnAccentBorder: "#D97757", btnAccentWash: "#FAF9F5",
   btnAccentText: "#B85C3E", btnAccentTextActive: "#FFFFFF",
   ...SHADOW_LIGHT,
@@ -50,12 +50,12 @@ const DARK = {
   bg: "#262624", paper: "#262624", paperSoft: "#262624",
   paperSoftLight: "#262624", paperSoftStat: "#262624",
   ink: "#FAF9F5", inkSoft: "#D8D6CF", muted: "#9C9A93", faint: "#6E6C64",
-  line: "#46453F", lineSoft: "#3A3A37",
+  line: "#6E6C63", lineSoft: "#57564E",
   clay: "#D97757", clayDeep: "#E8926F", clayWash: "#262624", clayOnWhite: "#E8926F",
   sage: "#788C5D", sageWash: "#262624", sageOnWhite: "#9CB27E",
   rustRed: "#D28A7E", rustWash: "#262624", rustOnWhite: "#D28A7E", dangerBg: "#B85C50",
   amber: "#6A9BCC", amberWash: "#262624", amberOnWhite: "#8FB8DE",
-  inputBg: "#262624", inputText: "#FAF9F5", inputPlaceholder: "#6E6C64", inputBorder: "#39382F",
+  inputBg: "#262624", inputText: "#FAF9F5", inputPlaceholder: "#6E6C64", inputBorder: "#6E6C63",
   btnAccent: "#D97757", btnAccentBorder: "#D97757", btnAccentWash: "#262624",
   btnAccentText: "#E8926F", btnAccentTextActive: "#FFFFFF",
   ...SHADOW_DARK,
