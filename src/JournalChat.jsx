@@ -226,8 +226,7 @@ export default function JournalChat({ user, trades, theme }) {
           box-shadow: ${C.shadowCard};
         }
         .chat-input-box:focus-within {
-          border-color: ${C.clay} !important;
-          box-shadow: ${C.shadowRaised}, 0 0 0 3px rgba(217,119,87,0.15);
+          box-shadow: ${C.shadowRaised};
         }
       `}</style>
 
