@@ -73,7 +73,7 @@ const NAV = [
 const DESKTOP_BREAKPOINT = 820;
 
 function getPageBackground(themeMode, C) {
-  return { backgroundColor: C.paper };
+  return { backgroundColor: C.bg };
 }
 
 const EMOTIONS = ["Calm", "Confident", "Hesitant", "Bored", "FOMO", "Revenge", "Anxious"];
@@ -132,9 +132,9 @@ function Chip({ label, active, onClick }) {
       style={{
         fontFamily: SANS, fontSize: 14, fontWeight: 600,
         padding: "9px 17px", borderRadius: 999,
-        border: `1px solid ${C.btnAccentBorder}`,
-        background: active ? C.btnAccent : C.btnAccentWash,
-        color: active ? C.btnAccentTextActive : C.btnAccentText,
+        border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
+        background: active ? C.btnAccent : C.paper,
+        color: active ? C.btnAccentTextActive : C.inkSoft,
         cursor: "pointer", transition: "all .15s ease",
       }}
     >
@@ -157,10 +157,10 @@ function Field({ label, children }) {
 function useInputStyle() {
   const C = useTheme();
   return {
-    width: "100%", boxSizing: "border-box", background: C.inputBg,
-    border: "1px solid transparent", borderRadius: 12, padding: "14px 16px",
+    width: "100%", boxSizing: "border-box", background: C.paper,
+    border: `1px solid ${C.line}`, borderRadius: 12, padding: "14px 16px",
     color: C.inputText, fontFamily: SANS, fontSize: 16, outline: "none",
-    boxShadow: "inset 0 1px 2px rgba(0,0,0,0.06)",
+    boxShadow: "none",
   };
 }
 function Tag({ text }) {
@@ -799,10 +799,10 @@ function DateField({ value, onChange }) {
         className="no-press"
         onClick={() => setOpen((o) => !o)}
         style={{
-          width: "100%", boxSizing: "border-box", background: C.inputBg, border: "1px solid transparent",
+          width: "100%", boxSizing: "border-box", background: C.paper, border: `1px solid ${C.line}`,
           borderRadius: 12, padding: "14px 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
           textAlign: "left", cursor: "pointer",
-          boxShadow: "inset 0 1px 2px rgba(0,0,0,0.06)",
+          boxShadow: "none",
         }}
       >
         {value ? fmtDateDisplay(value) : "Select date"}
@@ -860,7 +860,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
   const C = useTheme();
   const inputStyle = useInputStyle();
   return (
-    <div style={{ background: C.paper, borderRadius: 20, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
+    <div style={{ background: C.paperSoft, borderRadius: 20, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
       <Field label="Date">
         <DateField value={form.date} onChange={(d) => updateForm("date", d)} />
       </Field>
@@ -874,9 +874,9 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
             return (
               <button key={d} onClick={() => updateForm("direction", d)} style={{
                 flex: 1, padding: "14px 0", borderRadius: 12,
-                border: `1px solid ${C.btnAccentBorder}`,
-                background: active ? C.btnAccent : C.btnAccentWash,
-                color: active ? C.btnAccentTextActive : C.btnAccentText, fontWeight: 700, fontSize: 16, cursor: "pointer",
+                border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
+                background: active ? C.btnAccent : C.paper,
+                color: active ? C.btnAccentTextActive : C.inkSoft, fontWeight: 700, fontSize: 16, cursor: "pointer",
               }}>{d}</button>
             );
           })}
@@ -954,7 +954,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
         const win = t.rActual > 0;
         return (
           <div key={t.id} style={{
-            background: C.paper, border: `1px solid ${C.line}`,
+            background: C.paperSoft, border: `1px solid ${C.line}`,
             borderRadius: 16, padding: "20px 22px", boxShadow: C.shadowCard,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -1038,7 +1038,7 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
 function StatCard({ label, value, color }) {
   const C = useTheme();
   return (
-    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 12, padding: "13px 15px", boxShadow: C.shadowCard }}>
+    <div style={{ background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 12, padding: "13px 15px", boxShadow: C.shadowCard }}>
       <div style={{ fontFamily: SANS, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.04em", color: C.muted, textTransform: "uppercase", marginBottom: 5 }}>{label}</div>
       <div style={{ fontFamily: SANS, fontSize: 19, fontWeight: 700, color: C.ink }}>{value}</div>
     </div>
@@ -1099,7 +1099,7 @@ function Dashboard({ trades }) {
             </div>
           </div>
           <SectionLabel text="By Rules Compliance" />
-          <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: "4px 18px", boxShadow: C.shadowCard }}>
+          <div style={{ background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 14, padding: "4px 18px", boxShadow: C.shadowCard }}>
   {["Yes", "Partial", "No"].map((r, i) => {
     const d = stats.byRules[r];
     const avg = d.count ? d.total / d.count : 0;
