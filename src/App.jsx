@@ -33,32 +33,34 @@ const SHADOW_DARK = {
 };
 
 const LIGHT = {
-  bg: "#FAF9F5", paper: "#FFFFFF", paperSoft: "#F0EEE6",
-  paperSoftLight: "#F8F7F2", paperSoftStat: "#F5F3ED",
+  bg: "#FAF9F5", paper: "#FAF9F5", paperSoft: "#FAF9F5",
+  paperSoftLight: "#FAF9F5", paperSoftStat: "#FAF9F5",
   ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
   line: "#E5E4DF", lineSoft: "#EDECE8",
-  clay: "#D97757", clayDeep: "#B85C3E", clayWash: "#F5E4DB", clayOnWhite: "#B85C3E",
-  sage: "#788C5D", sageWash: "#E8ECE1", sageOnWhite: "#5F7048",
-  rustRed: "#B85C50", rustWash: "#F1E2DE", rustOnWhite: "#B85C50", dangerBg: "#B85C50",
-  amber: "#6A9BCC", amberWash: "#E4ECF3", amberOnWhite: "#3D6C9C",
-  inputBg: "#F0EEE6", inputText: "#141413", inputPlaceholder: "#AFAEA9", inputBorder: "#E3E2DD",
-  btnAccent: "#D97757", btnAccentBorder: "#D97757", btnAccentWash: "#F0DECD",
+  clay: "#D97757", clayDeep: "#B85C3E", clayWash: "#FAF9F5", clayOnWhite: "#B85C3E",
+  sage: "#788C5D", sageWash: "#FAF9F5", sageOnWhite: "#5F7048",
+  rustRed: "#B85C50", rustWash: "#FAF9F5", rustOnWhite: "#B85C50", dangerBg: "#B85C50",
+  amber: "#6A9BCC", amberWash: "#FAF9F5", amberOnWhite: "#3D6C9C",
+  inputBg: "#FAF9F5", inputText: "#141413", inputPlaceholder: "#AFAEA9", inputBorder: "#E3E2DD",
+  btnAccent: "#D97757", btnAccentBorder: "#D97757", btnAccentWash: "#FAF9F5",
   btnAccentText: "#B85C3E", btnAccentTextActive: "#FFFFFF",
   ...SHADOW_LIGHT,
 };
+};
 const DARK = {
- bg: "#262624", paper: "#30302E", paperSoft: "#46453F",
-  paperSoftLight: "#2B2A27", paperSoftStat: "#3A3A37",
+  bg: "#262624", paper: "#262624", paperSoft: "#262624",
+  paperSoftLight: "#262624", paperSoftStat: "#262624",
   ink: "#FAF9F5", inkSoft: "#D8D6CF", muted: "#9C9A93", faint: "#6E6C64",
   line: "#46453F", lineSoft: "#3A3A37",
-  clay: "#D97757", clayDeep: "#E8926F", clayWash: "#3A2A21", clayOnWhite: "#E8926F",
-  sage: "#788C5D", sageWash: "#232A1D", sageOnWhite: "#9CB27E",
-  rustRed: "#D28A7E", rustWash: "#3B2822", rustOnWhite: "#D28A7E", dangerBg: "#B85C50",
-  amber: "#6A9BCC", amberWash: "#1E2A35", amberOnWhite: "#8FB8DE",
-  inputBg: "#2E2D2A", inputText: "#FAF9F5", inputPlaceholder: "#6E6C64", inputBorder: "#39382F",
-btnAccent: "#D97757", btnAccentBorder: "#D97757", btnAccentWash: "#3A2A21",
-btnAccentText: "#E8926F", btnAccentTextActive: "#FFFFFF",
+  clay: "#D97757", clayDeep: "#E8926F", clayWash: "#262624", clayOnWhite: "#E8926F",
+  sage: "#788C5D", sageWash: "#262624", sageOnWhite: "#9CB27E",
+  rustRed: "#D28A7E", rustWash: "#262624", rustOnWhite: "#D28A7E", dangerBg: "#B85C50",
+  amber: "#6A9BCC", amberWash: "#262624", amberOnWhite: "#8FB8DE",
+  inputBg: "#262624", inputText: "#FAF9F5", inputPlaceholder: "#6E6C64", inputBorder: "#39382F",
+  btnAccent: "#D97757", btnAccentBorder: "#D97757", btnAccentWash: "#262624",
+  btnAccentText: "#E8926F", btnAccentTextActive: "#FFFFFF",
   ...SHADOW_DARK,
+};
 };
 
 const CHAT_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
