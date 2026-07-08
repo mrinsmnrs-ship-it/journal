@@ -11,8 +11,10 @@ import { ArrowUp } from "lucide-react";
 import { askGemini } from "./gemini";
 import { loadUserData, saveUserData } from "./store";
 
-const SANS = "'Lora', 'Georgia', serif";
-const CHAT_FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+// Font disatukan dengan App.jsx & AuthScreen.jsx — Inter di semua tempat,
+// termasuk bubble chat, supaya tidak ada halaman yang terasa "beda app".
+const CHAT_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const SANS = CHAT_FONT;
 
 const PERSONA_NAME = "Nox Valerica";
 const PERSONA_TITLE = "Journal Assistant";
@@ -187,6 +189,7 @@ export default function JournalChat({ user, trades, theme }) {
       }}
     >
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         @keyframes typingBounce {
           0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
           30% { transform: translateY(-4px); opacity: 1; }
@@ -215,6 +218,17 @@ export default function JournalChat({ user, trades, theme }) {
         .chat-messages { padding: 18px clamp(14px, 5%, 56px); }
         .chat-input-wrap { padding: 14px clamp(6px, 3%, 40px) 8px; }
         .chat-bubble { max-width: min(80%, 720px); }
+
+        /* Kotak input: border hairline + shadow "raised" tipis khas Claude,
+           makin jelas begitu difokuskan (bukan cuma ganti warna border). */
+        .chat-input-box {
+          transition: box-shadow .15s ease, border-color .15s ease;
+          box-shadow: ${C.shadowCard};
+        }
+        .chat-input-box:focus-within {
+          border-color: ${C.clay} !important;
+          box-shadow: ${C.shadowRaised}, 0 0 0 3px rgba(217,119,87,0.15);
+        }
       `}</style>
 
       {/* Messages */}
@@ -235,6 +249,7 @@ export default function JournalChat({ user, trades, theme }) {
                   borderRadius: m.role === "user" ? 16 : 0,
                   background: m.role === "user" ? C.paperSoft : "transparent",
                   border: m.role === "user" ? `1px solid ${C.line}` : "none",
+                  boxShadow: m.role === "user" ? C.shadowCard : "none",
                   color: C.ink,
                   fontSize: 15,
                   fontFamily: CHAT_FONT,
@@ -271,6 +286,7 @@ export default function JournalChat({ user, trades, theme }) {
       {/* Input — satu kotak border, textarea di atas, pill persona + tombol kirim di bawah (mirip layout Claude) */}
       <div className="chat-input-wrap">
         <div
+          className="chat-input-box"
           style={{
             border: `1px solid ${C.line}`,
             borderRadius: 24,
@@ -304,7 +320,7 @@ export default function JournalChat({ user, trades, theme }) {
                 alignItems: "center",
                 background: C.paper,
                 border: "none",
-                boxShadow: "0 1px 4px rgba(20,20,19,0.14)",
+                boxShadow: C.shadowCard,
                 borderRadius: 999,
                 padding: "6px 13px",
                 height: 30,
@@ -328,6 +344,7 @@ export default function JournalChat({ user, trades, theme }) {
                 background: C.ink, color: C.paper, border: "none", borderRadius: "50%",
                 cursor: isSending || !input.trim() ? "not-allowed" : "pointer",
                 opacity: isSending || !input.trim() ? 0.3 : 1,
+                boxShadow: !isSending && input.trim() ? C.shadowCard : "none",
               }}
             >
               <ArrowUp size={14} strokeWidth={2.4} />
@@ -340,4 +357,4 @@ export default function JournalChat({ user, trades, theme }) {
       </div>
     </div>
   );
-    }
+}
