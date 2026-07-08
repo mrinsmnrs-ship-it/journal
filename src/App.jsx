@@ -14,32 +14,52 @@ import AuthScreen from "./AuthScreen.jsx";
 import JournalChat from "./JournalChat.jsx";
 
 // ---- Design tokens : Claude-matched palette (clay / sage / amber) ----
+// Shadow tokens: Claude.ai leans on hairline borders more than shadows —
+// shadows only show up on things that float above the page (dropdowns,
+// modals, the send button). They're soft, low-opacity, and layered
+// (a tight "contact" shadow + a looser "ambient" shadow), never a single
+// hard blur.
+const SHADOW_LIGHT = {
+  shadowCard: "0 1px 2px rgba(20,20,19,0.04)",
+  shadowRaised: "0 1px 2px rgba(20,20,19,0.04), 0 1px 1px rgba(20,20,19,0.03)",
+  shadowPopover: "0 4px 8px -2px rgba(20,20,19,0.06), 0 12px 20px -6px rgba(20,20,19,0.10)",
+  shadowModal: "0 8px 12px -4px rgba(20,20,19,0.10), 0 24px 40px -8px rgba(20,20,19,0.18)",
+};
+const SHADOW_DARK = {
+  shadowCard: "0 1px 2px rgba(0,0,0,0.20)",
+  shadowRaised: "0 1px 2px rgba(0,0,0,0.24), 0 1px 1px rgba(0,0,0,0.16)",
+  shadowPopover: "0 4px 8px -2px rgba(0,0,0,0.28), 0 12px 20px -6px rgba(0,0,0,0.40)",
+  shadowModal: "0 8px 12px -4px rgba(0,0,0,0.32), 0 24px 40px -8px rgba(0,0,0,0.55)",
+};
+
 const LIGHT = {
   bg: "#FAF9F5", paper: "#FFFFFF", paperSoft: "#F0EEE6",
   ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
-  line: "#E3E2DD", lineSoft: "#EDECE8",
+  line: "#E5E4DF", lineSoft: "#EDECE8",
   clay: "#D97757", clayDeep: "#B85C3E", clayWash: "#F5E4DB", clayOnWhite: "#B85C3E",
   sage: "#788C5D", sageWash: "#E8ECE1", sageOnWhite: "#5F7048",
   rustRed: "#B85C50", rustWash: "#F1E2DE", rustOnWhite: "#B85C50", dangerBg: "#B85C50",
   amber: "#6A9BCC", amberWash: "#E4ECF3", amberOnWhite: "#3D6C9C",
   inputBg: "#F0EEE6", inputText: "#141413", inputPlaceholder: "#AFAEA9", inputBorder: "#E3E2DD",
-  btnAccent: "#B98A72", btnAccentBorder: "#B98A72", btnAccentWash: "#EFE4DA",
-  btnAccentText: "#9C6F58", btnAccentTextActive: "#FFFFFF",
+  btnAccent: "#D97757", btnAccentBorder: "#D97757", btnAccentWash: "#F0DECD",
+  btnAccentText: "#B85C3E", btnAccentTextActive: "#FFFFFF",
+  ...SHADOW_LIGHT,
 };
 const DARK = {
-  bg: "#242424", paper: "#2D2D2D", paperSoft: "#363636",
+  bg: "#262624", paper: "#30302E", paperSoft: "#3A3A37",
   ink: "#FAF9F5", inkSoft: "#D8D6CF", muted: "#9C9A93", faint: "#6E6C64",
-  line: "#484848", lineSoft: "#383838",
+  line: "#46453F", lineSoft: "#3A3A37",
   clay: "#D97757", clayDeep: "#E8926F", clayWash: "#3A2A21", clayOnWhite: "#E8926F",
   sage: "#788C5D", sageWash: "#232A1D", sageOnWhite: "#9CB27E",
   rustRed: "#D28A7E", rustWash: "#3B2822", rustOnWhite: "#D28A7E", dangerBg: "#D28A7E",
   amber: "#6A9BCC", amberWash: "#1E2A35", amberOnWhite: "#8FB8DE",
-  inputBg: "#363636", inputText: "#FAF9F5", inputPlaceholder: "#6E6C64", inputBorder: "#484848",
-btnAccent: "#FAF9F5", btnAccentBorder: "#484848", btnAccentWash: "#363636",
-btnAccentText: "#D8D6CF", btnAccentTextActive: "#2D2D2D",
+  inputBg: "#3A3A37", inputText: "#FAF9F5", inputPlaceholder: "#6E6C64", inputBorder: "#46453F",
+btnAccent: "#D97757", btnAccentBorder: "#D97757", btnAccentWash: "#3A2A21",
+btnAccentText: "#E8926F", btnAccentTextActive: "#FFFFFF",
+  ...SHADOW_DARK,
 };
 
-const CHAT_FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const CHAT_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 const SERIF = CHAT_FONT; // font disatukan dengan halaman lain
 const SANS = CHAT_FONT;  // font disatukan dengan halaman lain
 const MONO = "'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace";
@@ -193,10 +213,6 @@ function ThemeToggle({ mode, onToggle, compact }) {
 }
 
 // ---- Reusable animated eye logo mark (same across mobile topbar, sidebar, login) ----
-// size = ukuran kotak dalam px (bukan em lagi, supaya presisi & gampang
-// disamakan tinggi dengan teks di sampingnya, tidak bergantung font-size
-// parent). Tidak ada overflow:hidden / wrapper scaling — svg langsung
-// dirender pada ukuran itu supaya tidak pernah terpotong/kacau.
 function EyeLogo({ blinkFrame, size = 22 }) {
   return (
     <svg viewBox="0 0 494 497" width={size} height={size} style={{ color: "inherit", flexShrink: 0, display: "block" }}>
@@ -430,8 +446,6 @@ function RJournal({ user }) {
     })();
   }, [user.uid]);
 
-  // Deteksi lebar layar untuk membedakan layout desktop (sidebar tetap +
-  // panel AI Chat permanen di kanan) vs mobile (bottom nav + tab AI Chat).
   useEffect(() => {
     function updateIsDesktop() {
       setIsDesktop(window.innerWidth > DESKTOP_BREAKPOINT);
@@ -441,7 +455,6 @@ function RJournal({ user }) {
     return () => window.removeEventListener("resize", updateIsDesktop);
   }, []);
 
-  // Animasi kedip untuk ikon mata di header — sama seperti di halaman login.
   useEffect(() => {
     let cancelled = false;
     const timeouts = [];
@@ -510,8 +523,6 @@ function RJournal({ user }) {
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { key: "chat", label: "AI Chat", icon: MessageCircle },
   ];
-  // Di desktop, AI Chat tidak lagi jadi tab terpisah — sudah permanen
-  // tampil sebagai panel di kanan, jadi dihilangkan dari daftar sidebar.
   const NAV_DESKTOP = NAV.filter((n) => n.key !== "chat");
 
   useEffect(() => {
@@ -526,9 +537,6 @@ function RJournal({ user }) {
     return () => window.removeEventListener("resize", updateNavIndicator);
   }, [tab]);
 
-  // Indikator garis vertikal di sisi kanan sidebar desktop, mengikuti tab aktif.
-  // Tingginya sengaja dibuat cuma sedikit lebih tinggi dari teks label
-  // (bukan setinggi seluruh tombol), lalu diposisikan center secara vertikal.
   useEffect(() => {
     const INDICATOR_HEIGHT = 18;
     function updateDesktopNavIndicator() {
@@ -547,9 +555,6 @@ function RJournal({ user }) {
   }, [tab, isDesktop]);
 
   const C = themeMode === "dark" ? DARK : LIGHT;
-  // Halaman AI Chat full-page hanya berlaku di mobile; di desktop, chat
-  // selalu tampil sebagai panel permanen di kanan, jadi tab "chat" tak
-  // memicu mode khusus ini.
   const isChatTab = !isDesktop && tab === "chat";
 
   return (
@@ -557,7 +562,8 @@ function RJournal({ user }) {
       <div className={isChatTab ? "chat-mode" : ""} style={{ ...getPageBackground(themeMode, C), minHeight: "100vh", color: C.ink, fontFamily: SANS, transition: "background .2s ease, color .2s ease" }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-          @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&family=Inter:wght@700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
           * { box-sizing: border-box; }
           html, body { margin:0; height: 100%; overflow: hidden; }
           button { -webkit-tap-highlight-color: transparent; transition: transform .1s ease; }
@@ -572,8 +578,6 @@ function RJournal({ user }) {
 
           .app-shell { display: flex; height: 100vh; }
 
-          /* Sidebar desktop: fixed & tidak pernah bisa discroll — seluruh isi
-             harus langsung terlihat. */
           .sidebar {
             width: 252px; flex-shrink: 0; padding: 28px 20px;
             border-right: 1px solid ${C.line}; display: flex; flex-direction: column;
@@ -586,10 +590,6 @@ function RJournal({ user }) {
             height: 100vh; overflow-y: auto; box-sizing: border-box;
           }
 
-          /* Panel AI Chat permanen di kanan (desktop only) — dibuat
-             sebanding (kurang lebih setengah) dengan sisa ruang setelah
-             sidebar, bukan lebar tetap yang sempit. Diisi penuh: flex
-             container + anak-anaknya harus stretch mengisi lebar panel. */
           .desktop-chat-panel {
             width: calc((100vw - 252px) / 2);
             border-left: 1px solid ${C.line};
@@ -603,7 +603,6 @@ function RJournal({ user }) {
           .mobile-topbar { display: none; }
           .app-footer-mobile { display: none; }
 
-          /* Nav item sidebar desktop — tanpa ikon, indikator ada di kanan */
           .nav-item-desktop {
             display:flex; align-items:center; padding: 13px 6px; border-radius: 0;
             font-family: 'Inter', sans-serif; font-size:16px; font-weight:600; letter-spacing: -0.015em;
@@ -612,7 +611,6 @@ function RJournal({ user }) {
           }
           .nav-item-desktop:hover { color: ${C.ink}; }
 
-          /* --- AI Chat tab (mobile only): page itself never scrolls, only the chat's message list does --- */
           .chat-mode { height: 100dvh; overflow: hidden; }
           .chat-mode .app-shell { height: 100%; }
           .chat-mode .main-area {
@@ -815,7 +813,7 @@ function DateField({ value, onChange }) {
           <div style={{
             position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: 300,
             background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: 16,
-            boxShadow: "0 10px 28px rgba(0,0,0,0.16)",
+            boxShadow: C.shadowPopover,
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
               <button type="button" onClick={prevMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
@@ -862,7 +860,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
   const C = useTheme();
   const inputStyle = useInputStyle();
   return (
-    <div style={{ background: C.paper, borderRadius: 20, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16 }}>
+    <div style={{ background: C.paper, borderRadius: 20, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
       <Field label="Date">
         <DateField value={form.date} onChange={(d) => updateForm("date", d)} />
       </Field>
@@ -925,6 +923,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
   width: "100%", padding: "16px 0", borderRadius: 12, border: "none",
   background: canSave ? C.btnAccent : C.lineSoft, color: canSave ? C.btnAccentTextActive : C.faint,
   fontWeight: 700, fontSize: 17, cursor: canSave ? "pointer" : "not-allowed",
+  boxShadow: canSave ? C.shadowCard : "none",
 }}>Save Trade</button>
           </div>
   );
@@ -956,7 +955,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
         return (
           <div key={t.id} style={{
             background: C.paper, border: `1px solid ${C.line}`,
-            borderRadius: 16, padding: "20px 22px",
+            borderRadius: 16, padding: "20px 22px", boxShadow: C.shadowCard,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
   <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
@@ -990,7 +989,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
             position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
             zIndex: 40, width: "min(360px, calc(100vw - 48px))",
             background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: 24,
-            boxShadow: "0 16px 40px rgba(0,0,0,0.25)",
+            boxShadow: C.shadowModal,
           }}>
             <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, marginBottom: 9, letterSpacing: "-0.01em", color: C.ink }}>Delete this trade?</div>
             <div style={{ fontSize: 15, color: C.inkSoft, lineHeight: 1.5, marginBottom: 22 }}>
@@ -1039,7 +1038,7 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
 function StatCard({ label, value, color }) {
   const C = useTheme();
   return (
-    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 12, padding: "13px 15px" }}>
+    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 12, padding: "13px 15px", boxShadow: C.shadowCard }}>
       <div style={{ fontFamily: SANS, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.04em", color: C.muted, textTransform: "uppercase", marginBottom: 5 }}>{label}</div>
       <div style={{ fontFamily: SANS, fontSize: 19, fontWeight: 700, color: C.ink }}>{value}</div>
     </div>
@@ -1100,7 +1099,7 @@ function Dashboard({ trades }) {
             </div>
           </div>
           <SectionLabel text="By Rules Compliance" />
-          <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: "4px 18px" }}>
+          <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: "4px 18px", boxShadow: C.shadowCard }}>
   {["Yes", "Partial", "No"].map((r, i) => {
     const d = stats.byRules[r];
     const avg = d.count ? d.total / d.count : 0;
