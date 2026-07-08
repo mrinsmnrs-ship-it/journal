@@ -93,7 +93,7 @@ export default function AuthScreen() {
 
   return (
     <div style={{
-      minHeight: "100vh", background: C.bg, display: "flex",
+      minHeight: "100vh", background: C.paper, display: "flex",
       alignItems: "center", justifyContent: "center", padding: 20,
       fontFamily: SANS, color: C.ink,
     }}>
