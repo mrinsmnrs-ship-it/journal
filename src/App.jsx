@@ -60,7 +60,6 @@ const DARK = {
   btnAccentText: "#E8926F", btnAccentTextActive: "#FFFFFF",
   ...SHADOW_DARK,
 };
-};
 
 const CHAT_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 const SERIF = CHAT_FONT; // font disatukan dengan halaman lain
