@@ -34,6 +34,7 @@ const SHADOW_DARK = {
 
 const LIGHT = {
   bg: "#FAF9F5", paper: "#FFFFFF", paperSoft: "#F0EEE6",
+  paperSoftLight: "#F8F7F2", paperSoftStat: "#F5F3ED",
   ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
   line: "#E5E4DF", lineSoft: "#EDECE8",
   clay: "#D97757", clayDeep: "#B85C3E", clayWash: "#F5E4DB", clayOnWhite: "#B85C3E",
@@ -47,6 +48,7 @@ const LIGHT = {
 };
 const DARK = {
   bg: "#262624", paper: "#30302E", paperSoft: "#3A3A37",
+  paperSoftLight: "#3E3E3B", paperSoftStat: "#3C3C39",
   ink: "#FAF9F5", inkSoft: "#D8D6CF", muted: "#9C9A93", faint: "#6E6C64",
   line: "#46453F", lineSoft: "#3A3A37",
   clay: "#D97757", clayDeep: "#E8926F", clayWash: "#3A2A21", clayOnWhite: "#E8926F",
@@ -655,7 +657,7 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
                   ref={(el) => { desktopNavRefs.current[n.key] = el; }}
                   className="nav-item-desktop"
                   onClick={() => setTab(n.key)}
-                  style={{ color: tab === n.key ? C.ink : C.inkSoft }}
+                  style={{ color: tab === n.key ? C.ink : C.faint }}
                 >
                   {n.label}
                 </button>
@@ -748,7 +750,7 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
               style={{
                 background: "transparent", border: "none", cursor: "pointer",
                 padding: "6px 6px 4px",
-                color: tab === n.key ? C.ink : C.muted,
+                color: tab === n.key ? C.ink : C.faint,
                 transition: "color .15s ease",
               }}
             >
@@ -860,7 +862,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
   const C = useTheme();
   const inputStyle = useInputStyle();
   return (
-    <div style={{ background: C.paperSoft, borderRadius: 20, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
+    <div style={{ background: C.paperSoftLight, borderRadius: 20, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
       <Field label="Date">
         <DateField value={form.date} onChange={(d) => updateForm("date", d)} />
       </Field>
@@ -954,7 +956,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
         const win = t.rActual > 0;
         return (
           <div key={t.id} style={{
-            background: C.paperSoft, border: `1px solid ${C.line}`,
+            background: C.paperSoftLight, border: `1px solid ${C.line}`,
             borderRadius: 16, padding: "20px 22px", boxShadow: C.shadowCard,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -1038,7 +1040,7 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
 function StatCard({ label, value, color }) {
   const C = useTheme();
   return (
-    <div style={{ background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 12, padding: "13px 15px", boxShadow: C.shadowCard }}>
+    <div style={{ background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 12, padding: "13px 15px", boxShadow: C.shadowCard }}>
       <div style={{ fontFamily: SANS, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.04em", color: C.muted, textTransform: "uppercase", marginBottom: 5 }}>{label}</div>
       <div style={{ fontFamily: SANS, fontSize: 19, fontWeight: 700, color: C.ink }}>{value}</div>
     </div>
@@ -1099,14 +1101,14 @@ function Dashboard({ trades }) {
             </div>
           </div>
           <SectionLabel text="By Rules Compliance" />
-          <div style={{ background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 14, padding: "4px 18px", boxShadow: C.shadowCard }}>
+          <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 14, padding: "4px 18px", boxShadow: C.shadowCard }}>
   {["Yes", "Partial", "No"].map((r, i) => {
     const d = stats.byRules[r];
     const avg = d.count ? d.total / d.count : 0;
     return (
       <div key={r} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 0", borderTop: i > 0 ? `1px solid ${C.lineSoft}` : "none" }}>
-        <div style={{ fontWeight: 700, fontSize: 15, color: C.ink, minWidth: 64 }}>{r}</div>
-        <div style={{ fontFamily: MONO, fontSize: 13, color: C.muted, textAlign: "right" }}>
+        <div style={{ fontWeight: 700, fontSize: 13, color: C.ink, minWidth: 64 }}>{r}</div>
+        <div style={{ fontFamily: MONO, fontSize: 11.5, color: C.muted, textAlign: "right" }}>
           {d.count} trade &middot; total {fmtR(d.total)} &middot; avg {avg.toFixed(2)}R
         </div>
       </div>
