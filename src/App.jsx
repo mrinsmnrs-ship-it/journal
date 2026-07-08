@@ -192,9 +192,13 @@ function ThemeToggle({ mode, onToggle, compact }) {
 }
 
 // ---- Reusable animated eye logo mark (same across mobile topbar, sidebar, login) ----
-function EyeLogo({ blinkFrame, size = 21 }) {
+// size = ukuran kotak dalam px (bukan em lagi, supaya presisi & gampang
+// disamakan tinggi dengan teks di sampingnya, tidak bergantung font-size
+// parent). Tidak ada overflow:hidden / wrapper scaling — svg langsung
+// dirender pada ukuran itu supaya tidak pernah terpotong/kacau.
+function EyeLogo({ blinkFrame, size = 22 }) {
   return (
-    <svg viewBox="0 0 494 497" style={{ color: "inherit", flexShrink: 0, width: "1.05em", height: "1.05em", fontSize: size }}>
+    <svg viewBox="0 0 494 497" width={size} height={size} style={{ color: "inherit", flexShrink: 0, display: "block" }}>
       {blinkFrame === "open" && (
         <g transform="translate(0.000000,497.000000) scale(0.100000,-0.100000)"
         fill="currentColor" stroke="none">
@@ -636,22 +640,15 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
         <div className="app-shell">
           {/* Sidebar (desktop) */}
           <div className="sidebar">
-            <div style={{ padding: "6px 10px 30px", display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ padding: "6px 10px 26px", display: "flex", alignItems: "center", gap: 9 }}>
               <div style={{
-                color: C.ink, width: 46, height: 46, display: "flex", alignItems: "center",
-                justifyContent: "center", flexShrink: 0, overflow: "hidden",
+                color: C.ink, width: 26, height: 26, display: "flex", alignItems: "center",
+                justifyContent: "center", flexShrink: 0,
               }}>
-                <div style={{ width: "125%", height: "125%", display: "flex" }}>
-                  <EyeLogo blinkFrame={blinkFrame} size={46} />
-                </div>
+                <EyeLogo blinkFrame={blinkFrame} size={26} />
               </div>
-              <div>
-                <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 21, textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink, lineHeight: 1.12 }}>
-                  Apocalypse Archives
-                </div>
-                <div style={{ fontFamily: MONO, fontSize: 13, color: C.muted, marginTop: 3, lineHeight: 1.1 }}>
-                  {trades.length} trade{trades.length === 1 ? "" : "s"} logged
-                </div>
+              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink, lineHeight: 1, whiteSpace: "nowrap" }}>
+                Apocalypse Archives
               </div>
             </div>
             <div style={{ position: "relative" }}>
@@ -696,11 +693,11 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
 
           {/* Mobile top bar */}
           <div className="mobile-topbar">
-            <div style={{ display: "flex", alignItems: "center", gap: 1, fontSize: 17, flexWrap: "nowrap" }}>
-              <div style={{ color: C.ink, flexShrink: 0, width: "1.05em", height: "1.05em" }}>
-                <EyeLogo blinkFrame={blinkFrame} />
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "nowrap" }}>
+              <div style={{ color: C.ink, flexShrink: 0, width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <EyeLogo blinkFrame={blinkFrame} size={22} />
               </div>
-              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: "1em", textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink, whiteSpace: "nowrap" }}>
+              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 17, textTransform: "uppercase", letterSpacing: "-0.01em", color: C.ink, lineHeight: 1, whiteSpace: "nowrap" }}>
                 Apocalypse Archives
               </div>
             </div>
@@ -869,7 +866,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
   const C = useTheme();
   const inputStyle = useInputStyle();
   return (
-    <div style={{ background: C.paper, borderRadius: 20, padding: 30, maxWidth: 620, fontSize: 16 }}>
+    <div style={{ background: C.paper, borderRadius: 20, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16 }}>
       <Field label="Date">
         <DateField value={form.date} onChange={(d) => updateForm("date", d)} />
       </Field>
@@ -957,7 +954,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 720 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%", maxWidth: "100%" }}>
       {trades.map((t) => {
         const win = t.rActual > 0;
         return (
@@ -1071,7 +1068,7 @@ function Dashboard({ trades }) {
   }
 
   return (
-    <div style={{ maxWidth: 760 }}>
+    <div style={{ width: "100%", maxWidth: "100%" }}>
       <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginBottom: 24 }}>
         {PERIODS.map((p) => (
           <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
