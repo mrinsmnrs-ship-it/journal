@@ -16,7 +16,7 @@ const SANS = CHAT_FONT;
 // pixel-identical to the rest of the app — no drift, no separate palette.
 const C = {
   bg: "#FAF9F5", paper: "#FFFFFF", paperSoft: "#F0EEE6",
-  pageBg: "#FBF2E9",
+  pageBg: "#F9EEE1",
   ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
   line: "#E5E4DF", lineSoft: "#EDECE8",
   inputBg: "#F0EEE6",
@@ -247,7 +247,7 @@ export default function AuthScreen() {
           </button>
         </form>
       </div>
-      <div style={{ fontSize: 9, color: C.faint, marginTop: 16, fontFamily: SANS, opacity: 0.7 }}>
+      <div style={{ fontSize: 9, color: C.ink, marginTop: 16, fontFamily: SANS, opacity: 0.6 }}>
         &copy; {new Date().getFullYear()} Apocalypse Archives. All rights reserved.
       </div>
       </div>
