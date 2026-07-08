@@ -102,8 +102,8 @@ export default function AuthScreen() {
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         * { box-sizing: border-box; }
         input::placeholder { color: ${C.faint}; }
-        .auth-input { transition: border-color .12s ease, box-shadow .12s ease; box-shadow: inset 0 1px 2px rgba(20,20,19,0.06); }
-        .auth-input:focus { outline: none; border-color: ${C.clay} !important; box-shadow: inset 0 1px 2px rgba(20,20,19,0.06), 0 0 0 3px rgba(217,119,87,0.15) !important; }
+        .auth-input { transition: border-color .12s ease, box-shadow .12s ease; box-shadow: none; }
+        .auth-input:focus { outline: none; border-color: ${C.clay} !important; box-shadow: 0 0 0 3px rgba(217,119,87,0.15) !important; }
         .auth-submit { transition: background .12s ease, transform .1s ease, box-shadow .12s ease; }
         .auth-submit:hover:not(:disabled) { background: ${C.btnAccentDeep}; box-shadow: ${C.shadowRaised}; }
         .auth-submit:active:not(:disabled) { transform: scale(0.98); }
@@ -112,7 +112,7 @@ export default function AuthScreen() {
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", maxWidth: 380 }}>
       <div style={{
-        width: "100%", maxWidth: 380, background: C.paper,
+        width: "100%", maxWidth: 380, background: C.paperSoft,
         border: `1px solid ${C.line}`, borderRadius: 20, padding: 32,
         boxShadow: C.shadowRaised,
       }}>
@@ -128,7 +128,7 @@ export default function AuthScreen() {
 
         {/* Segmented tabs — replaces the old bottom text-link switch */}
         <div style={{
-          display: "flex", background: C.inputBg, borderRadius: 12, padding: 4, marginBottom: 20,
+          display: "flex", background: "rgba(20,20,19,0.05)", borderRadius: 12, padding: 4, marginBottom: 20,
         }}>
           {["login", "signup"].map((m) => (
             <button
@@ -184,8 +184,8 @@ export default function AuthScreen() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               style={{
-                width: "100%", background: C.inputBg,
-                border: error ? `1px solid ${C.rustRed}` : "1px solid transparent", borderRadius: 12, padding: "12px 14px",
+                width: "100%", background: C.paper,
+                border: `1px solid ${error ? C.rustRed : C.line}`, borderRadius: 12, padding: "12px 14px",
                 fontSize: 15, color: C.ink, fontFamily: SANS,
               }}
             />
@@ -213,8 +213,8 @@ export default function AuthScreen() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 6 characters"
               style={{
-                width: "100%", background: C.inputBg,
-                border: error ? `1px solid ${C.rustRed}` : "1px solid transparent", borderRadius: 12, padding: "12px 14px",
+                width: "100%", background: C.paper,
+                border: `1px solid ${error ? C.rustRed : C.line}`, borderRadius: 12, padding: "12px 14px",
                 fontSize: 15, color: C.ink, fontFamily: SANS,
               }}
             />
