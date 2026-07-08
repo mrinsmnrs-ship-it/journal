@@ -1083,7 +1083,7 @@ function Dashboard({ trades }) {
           </div>
           <div style={{ marginBottom: 18, marginTop: -6 }}>
   <div style={{ padding: "0 4px" }}>
-    <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
+    <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
     <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Score 0–100 per dimension</div>
   </div>
   <div style={{ width: "100%", height: 320, overflow: "visible" }}>
