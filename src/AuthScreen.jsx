@@ -14,6 +14,7 @@ const C = {
   bg: "#FAF9F5", paper: "#FFFFFF", ink: "#141413", inkSoft: "#3D3D3A",
   muted: "#767470", faint: "#AFAEA9", line: "#E3E2DD", inputBg: "#F0EEE6",
   clay: "#D97757", clayDeep: "#B85C3E",
+  btnAccent: "#B98A72", btnAccentDeep: "#9C6F58",
   rustRed: "#B85C50", rustWash: "#F1E2DE",
   sage: "#788C5D", sageWash: "#E8ECE1",
 };
@@ -90,10 +91,10 @@ export default function AuthScreen() {
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&family=Inter:wght@700&display=swap');
         * { box-sizing: border-box; }
         input::placeholder { color: ${C.faint}; }
-        .auth-input { transition: border-color .12s ease, box-shadow .12s ease; }
-        .auth-input:focus { outline: none; border-color: ${C.ink} !important; box-shadow: 0 0 0 3px ${C.ink}22; }
+        .auth-input { transition: border-color .12s ease, box-shadow .12s ease; box-shadow: inset 0 1px 3px rgba(20,20,19,0.10), inset 0 0 0 1px rgba(20,20,19,0.02); }
+        .auth-input:focus { outline: none; border-color: ${C.ink} !important; }
         .auth-submit { transition: background .12s ease, transform .1s ease; }
-        .auth-submit:hover:not(:disabled) { background: #000000; }
+        .auth-submit:hover:not(:disabled) { background: ${C.btnAccentDeep}; }
         .auth-submit:active:not(:disabled) { transform: scale(0.98); }
         .auth-tab { transition: color .12s ease; }
       `}</style>
@@ -225,7 +226,7 @@ export default function AuthScreen() {
             className="auth-submit"
             style={{
               width: "100%", padding: "13px 0", borderRadius: 12, border: "none",
-              background: C.ink, color: "#FFFFFF", fontWeight: 700, fontSize: 15,
+              background: C.btnAccent, color: "#FFFFFF", fontWeight: 700, fontSize: 15,
               cursor: busy ? "not-allowed" : "pointer", opacity: busy ? 0.6 : 1,
             }}
           >
