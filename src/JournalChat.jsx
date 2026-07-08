@@ -174,8 +174,8 @@ export default function JournalChat({ user, trades, theme }) {
   return (
     <div
       style={{
-        maxWidth: 640,
         width: "100%",
+        maxWidth: "100%",
         display: "flex",
         flexDirection: "column",
         height: "100%",
@@ -183,6 +183,7 @@ export default function JournalChat({ user, trades, theme }) {
         flex: 1,
         background: C.paper,
         overflow: "hidden",
+        boxSizing: "border-box",
       }}
     >
       <style>{`
@@ -206,31 +207,39 @@ export default function JournalChat({ user, trades, theme }) {
         .chat-input::-webkit-scrollbar { width: 5px; }
         .chat-input::-webkit-scrollbar-track { background: transparent; }
         .chat-input::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 10px; }
+
+        /* Padding kiri-kanan bereskala mengikuti lebar panel (bukan angka
+           tetap), jadi tetap terasa penuh & seimbang di layar sempit
+           maupun sangat lebar. Lebar bubble juga proporsional lewat
+           persentase, bukan px tetap. */
+        .chat-messages { padding: 18px clamp(14px, 5%, 56px); }
+        .chat-input-wrap { padding: 14px clamp(6px, 3%, 40px) 8px; }
+        .chat-bubble { max-width: min(80%, 720px); }
       `}</style>
 
       {/* Messages */}
-      <div className="chat-messages" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="chat-messages" style={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
         {!loaded ? (
-          <div style={{ color: C.faint, fontSize: 14 }}>Memuat...</div>
+          <div style={{ color: C.faint, fontSize: 15 }}>Memuat...</div>
         ) : messages.length === 0 ? (
-          <div style={{ color: C.faint, fontSize: 14, textAlign: "center", marginTop: 40 }}>
+          <div style={{ color: C.faint, fontSize: 15, textAlign: "center", marginTop: 40 }}>
             Mulai obrolan dengan {PERSONA_NAME} — bebas ngobrol atau refleksi soal trading kamu.
           </div>
         ) : (
           messages.map((m, i) => (
             <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
               <div
+                className="chat-bubble"
                 style={{
-                  maxWidth: "78%",
-                  padding: m.role === "user" ? "10px 14px" : "0",
+                  padding: m.role === "user" ? "11px 16px" : "0",
                   borderRadius: m.role === "user" ? 16 : 0,
                   background: m.role === "user" ? C.paperSoft : "transparent",
                   border: m.role === "user" ? `1px solid ${C.line}` : "none",
                   color: C.ink,
-                  fontSize: 14,
+                  fontSize: 15,
                   fontFamily: CHAT_FONT,
                   whiteSpace: "pre-wrap",
-                  lineHeight: 1.5,
+                  lineHeight: 1.55,
                   overflowWrap: "anywhere",
                   wordBreak: "break-word",
                 }}
@@ -252,7 +261,7 @@ export default function JournalChat({ user, trades, theme }) {
         )}
 
         {error && (
-  <div style={{ color: C.faint, fontSize: 10, fontFamily: CHAT_FONT, textAlign: "center" }}>
+  <div style={{ color: C.faint, fontSize: 11, fontFamily: CHAT_FONT, textAlign: "center" }}>
     {error}
   </div>
 )}
@@ -260,13 +269,15 @@ export default function JournalChat({ user, trades, theme }) {
       </div>
 
       {/* Input — satu kotak border, textarea di atas, pill persona + tombol kirim di bawah (mirip layout Claude) */}
-      <div style={{ padding: "14px 4px 6px" }}>
+      <div className="chat-input-wrap">
         <div
           style={{
             border: `1px solid ${C.line}`,
             borderRadius: 24,
             background: C.paperSoft,
-            padding: "12px 10px 10px 16px",
+            padding: "14px 12px 12px 18px",
+            width: "100%",
+            boxSizing: "border-box",
           }}
         >
           <textarea
@@ -281,8 +292,8 @@ export default function JournalChat({ user, trades, theme }) {
               width: "100%",
               display: "block",
               resize: "none", background: "transparent", border: "none",
-              padding: "0 0 8px 0", color: C.inputText, fontFamily: CHAT_FONT, fontSize: 14, outline: "none",
-              lineHeight: 1.4, maxHeight: MAX_TEXTAREA_HEIGHT, overflowY: "hidden",
+              padding: "0 0 10px 0", color: C.inputText, fontFamily: CHAT_FONT, fontSize: 15, outline: "none",
+              lineHeight: 1.45, maxHeight: MAX_TEXTAREA_HEIGHT, overflowY: "hidden",
               overflowWrap: "anywhere", wordBreak: "break-word",
             }}
           />
@@ -294,11 +305,11 @@ export default function JournalChat({ user, trades, theme }) {
                 background: C.paper,
                 border: `1px solid ${C.line}`,
                 borderRadius: 999,
-                padding: "5px 12px",
-                height: 28,
+                padding: "6px 13px",
+                height: 30,
                 boxSizing: "border-box",
                 fontFamily: CHAT_FONT,
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: 400,
                 color: C.muted,
               }}
@@ -312,17 +323,17 @@ export default function JournalChat({ user, trades, theme }) {
               disabled={isSending || !input.trim()}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center",
-                width: 28, height: 28, flexShrink: 0,
+                width: 30, height: 30, flexShrink: 0,
                 background: C.ink, color: C.paper, border: "none", borderRadius: "50%",
                 cursor: isSending || !input.trim() ? "not-allowed" : "pointer",
                 opacity: isSending || !input.trim() ? 0.3 : 1,
               }}
             >
-              <ArrowUp size={13} strokeWidth={2.4} />
+              <ArrowUp size={14} strokeWidth={2.4} />
             </button>
           </div>
         </div>
-        <div style={{ textAlign: "center", fontSize: 10, color: C.faint, marginTop: 10, fontFamily: CHAT_FONT }}>
+        <div style={{ textAlign: "center", fontSize: 11, color: C.faint, marginTop: 11, fontFamily: CHAT_FONT }}>
           {PERSONA_NAME} adalah AI dan dapat melakukan kesalahan. Harap periksa kembali jawaban.
         </div>
       </div>
