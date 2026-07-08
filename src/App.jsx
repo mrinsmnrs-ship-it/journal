@@ -138,9 +138,9 @@ function useInputStyle() {
   const C = useTheme();
   return {
     width: "100%", boxSizing: "border-box", background: C.inputBg,
-    border: `1px solid ${C.inputBorder}`, borderRadius: 12, padding: "14px 16px",
+    border: "1px solid transparent", borderRadius: 12, padding: "14px 16px",
     color: C.inputText, fontFamily: SANS, fontSize: 16, outline: "none",
-    boxShadow: "inset 0 1px 3px rgba(0,0,0,0.10), inset 0 0 0 1px rgba(0,0,0,0.02)",
+    boxShadow: "inset 0 1px 2px rgba(0,0,0,0.06)",
   };
 }
 function Tag({ text }) {
@@ -801,10 +801,10 @@ function DateField({ value, onChange }) {
         className="no-press"
         onClick={() => setOpen((o) => !o)}
         style={{
-          width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
+          width: "100%", boxSizing: "border-box", background: C.inputBg, border: "1px solid transparent",
           borderRadius: 12, padding: "14px 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
           textAlign: "left", cursor: "pointer",
-          boxShadow: "inset 0 1px 3px rgba(0,0,0,0.10), inset 0 0 0 1px rgba(0,0,0,0.02)",
+          boxShadow: "inset 0 1px 2px rgba(0,0,0,0.06)",
         }}
       >
         {value ? fmtDateDisplay(value) : "Select date"}
