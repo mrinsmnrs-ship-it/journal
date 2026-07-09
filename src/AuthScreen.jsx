@@ -114,7 +114,7 @@ export default function AuthScreen() {
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", maxWidth: 380 }}>
       <div style={{
         width: "100%", maxWidth: 380, background: C.paper,
-        border: `1px solid ${C.line}`, borderRadius: 20, padding: 32,
+        border: `1px solid ${C.line}`, borderRadius: 10, padding: 32,
         boxShadow: C.shadowRaised,
       }}>
         <div style={{ marginBottom: 4 }}>
@@ -129,7 +129,7 @@ export default function AuthScreen() {
 
         {/* Segmented tabs — replaces the old bottom text-link switch */}
         <div style={{
-          display: "flex", background: "rgba(20,20,19,0.05)", borderRadius: 12, padding: 4, marginBottom: 20,
+          display: "flex", background: "rgba(20,20,19,0.05)", borderRadius: 8, padding: 4, marginBottom: 20,
         }}>
           {["login", "signup"].map((m) => (
             <button
@@ -138,7 +138,7 @@ export default function AuthScreen() {
               onClick={() => switchMode(m)}
               className="auth-tab"
               style={{
-                flex: 1, border: "none", borderRadius: 9, padding: "9px 0",
+                flex: 1, border: "none", borderRadius: 6, padding: "9px 0",
                 fontFamily: SANS, fontSize: 13.5, fontWeight: 700, cursor: "pointer",
                 background: mode === m ? C.paper : "transparent",
                 color: mode === m ? C.ink : C.muted,
@@ -165,7 +165,7 @@ export default function AuthScreen() {
           onContextMenu={(e) => e.preventDefault()}
           style={{
             width: "100%", height: 140, objectFit: "contain",
-            borderRadius: 14, display: "block", marginBottom: 20,
+            borderRadius: 8, display: "block", marginBottom: 20,
             background: C.paper,
             pointerEvents: "none",
             WebkitTouchCallout: "none",
@@ -186,7 +186,7 @@ export default function AuthScreen() {
               placeholder="you@example.com"
               style={{
                 width: "100%", background: C.paper,
-                border: `1px solid ${error ? C.rustRed : C.line}`, borderRadius: 12, padding: "12px 14px",
+                border: `1px solid ${error ? C.rustRed : C.line}`, borderRadius: 6, padding: "12px 14px",
                 fontSize: 15, color: C.ink, fontFamily: SANS,
               }}
             />
@@ -215,19 +215,19 @@ export default function AuthScreen() {
               placeholder="At least 6 characters"
               style={{
                 width: "100%", background: C.paper,
-                border: `1px solid ${error ? C.rustRed : C.line}`, borderRadius: 12, padding: "12px 14px",
+                border: `1px solid ${error ? C.rustRed : C.line}`, borderRadius: 6, padding: "12px 14px",
                 fontSize: 15, color: C.ink, fontFamily: SANS,
               }}
             />
           </div>
 
           {error && (
-            <div style={{ background: C.rustWash, color: C.rustRed, borderRadius: 10, padding: "10px 12px", fontSize: 13, marginBottom: 16 }}>
+            <div style={{ background: C.rustWash, color: C.rustRed, borderRadius: 6, padding: "10px 12px", fontSize: 13, marginBottom: 16 }}>
               {error}
             </div>
           )}
           {info && (
-            <div style={{ background: C.sageWash, color: C.sage, borderRadius: 10, padding: "10px 12px", fontSize: 13, marginBottom: 16 }}>
+            <div style={{ background: C.sageWash, color: C.sage, borderRadius: 6, padding: "10px 12px", fontSize: 13, marginBottom: 16 }}>
               {info}
             </div>
           )}
@@ -237,7 +237,7 @@ export default function AuthScreen() {
             disabled={busy}
             className="auth-submit"
             style={{
-              width: "100%", padding: "13px 0", borderRadius: 12, border: "none",
+              width: "100%", padding: "13px 0", borderRadius: 6, border: "none",
               background: C.btnAccent, color: "#FFFFFF", fontWeight: 700, fontSize: 15,
               cursor: busy ? "not-allowed" : "pointer", opacity: busy ? 0.6 : 1,
               boxShadow: C.shadowCard,
