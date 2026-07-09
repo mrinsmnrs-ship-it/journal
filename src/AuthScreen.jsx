@@ -5,6 +5,7 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { auth } from "./firebase";
+import BrandMark from "./BrandMark.jsx";
 
 // Font stack unified with App.jsx (Inter — the closest freely-licensed
 // match to Claude's UI sans) and the same serif for the wordmark.
@@ -16,12 +17,12 @@ const SANS = CHAT_FONT;
 // pixel-identical to the rest of the app — no drift, no separate palette.
 const C = {
   bg: "#FAF9F5", paper: "#FFFFFF", paperSoft: "#F0EEE6",
-  pageBg: "#F9EEE1",
+  pageBg: "#E5E4DF",
   ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
   line: "#E5E4DF", lineSoft: "#EDECE8",
   inputBg: "#F0EEE6",
-  clay: "#D97757", clayDeep: "#B85C3E",
-  btnAccent: "#D97757", btnAccentDeep: "#B85C3E",
+  clay: "#4A7DBD", clayDeep: "#3D6C9C",
+  btnAccent: "#4A7DBD", btnAccentDeep: "#3D6C9C",
   rustRed: "#B85C50", rustWash: "#F1E2DE",
   sage: "#788C5D", sageWash: "#E8ECE1",
   shadowCard: "0 1px 2px rgba(20,20,19,0.04)",
@@ -104,7 +105,7 @@ export default function AuthScreen() {
         * { box-sizing: border-box; }
         input::placeholder { color: ${C.faint}; }
         .auth-input { transition: border-color .12s ease, box-shadow .12s ease; box-shadow: none; }
-        .auth-input:focus { outline: none; border-color: ${C.clay} !important; box-shadow: 0 0 0 3px rgba(217,119,87,0.15) !important; }
+        .auth-input:focus { outline: none; border-color: ${C.clay} !important; box-shadow: 0 0 0 3px rgba(74,125,189,0.15) !important; }
         .auth-submit { transition: background .12s ease, transform .1s ease, box-shadow .12s ease; }
         .auth-submit:hover:not(:disabled) { background: ${C.btnAccentDeep}; box-shadow: ${C.shadowRaised}; }
         .auth-submit:active:not(:disabled) { transform: scale(0.98); }
@@ -117,11 +118,12 @@ export default function AuthScreen() {
         border: `1px solid ${C.line}`, borderRadius: 10, padding: 32,
         boxShadow: C.shadowRaised,
       }}>
-        <div style={{ marginBottom: 4 }}>
-          <span style={{ fontSize: "clamp(16px, 5.4vw, 22px)", lineHeight: 1 }}>
+        <div style={{ marginBottom: 4, display: "flex", alignItems: "center", gap: 3, fontSize: "clamp(16px, 5.4vw, 22px)" }}>
+          <span style={{ lineHeight: 1 }}>
             <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Aftermath</span>
             <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
           </span>
+          <BrandMark style={{ height: "0.72em", width: "auto", marginLeft: "0.08em", color: C.ink }} />
         </div>
         <div style={{ fontSize: 12, color: C.muted, marginBottom: 20 }}>
           {mode === "login" ? "Log in to sync your trades." : "Create an account to get started."}
