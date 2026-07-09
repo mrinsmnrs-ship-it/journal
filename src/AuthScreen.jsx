@@ -118,12 +118,12 @@ export default function AuthScreen() {
         border: `1px solid ${C.line}`, borderRadius: 10, padding: 32,
         boxShadow: C.shadowRaised,
       }}>
-        <div style={{ marginBottom: 4, display: "flex", alignItems: "center", gap: 3, fontSize: "clamp(16px, 5.4vw, 22px)" }}>
+        <div style={{ marginBottom: 4, display: "flex", alignItems: "center", gap: 6, fontSize: "clamp(16px, 5.4vw, 22px)" }}>
+          <BrandMark style={{ height: "1.15em", width: "auto", color: C.ink, flexShrink: 0 }} />
           <span style={{ lineHeight: 1 }}>
             <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Aftermath</span>
             <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
           </span>
-          <BrandMark style={{ height: "0.72em", width: "auto", marginLeft: "0.08em", color: C.ink }} />
         </div>
         <div style={{ fontSize: 12, color: C.muted, marginBottom: 20 }}>
           {mode === "login" ? "Log in to sync your trades." : "Create an account to get started."}
