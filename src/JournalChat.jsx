@@ -1,9 +1,9 @@
 // src/JournalChat.jsx
-// Komponen chat AI — persona "Nox Valerica" (Journal Assistant).
+// Komponen chat AI — persona "Rei" (Journal Assistant).
 // Konteks 5 trade terbaru otomatis disertakan ke AI kalau ada.
 // Riwayat chat disimpan permanen di users/{uid}.chatMessages, dan direset
 // setiap 24 jam sejak aktivitas terakhir — tapi sebelum direset, percakapan
-// diringkas jadi "chatMemory" yang tetap dipakai supaya Nox Valerica tetap
+// diringkas jadi "chatMemory" yang tetap dipakai supaya Rei tetap
 // nyambung & kenal pengguna walau tampilan chat sudah bersih.
 
 import { useState, useEffect, useRef } from "react";
@@ -16,7 +16,7 @@ import { loadUserData, saveUserData } from "./store";
 const CHAT_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 const SANS = CHAT_FONT;
 
-const PERSONA_NAME = "Nox Valerica";
+const PERSONA_NAME = "Rei";
 const PERSONA_TITLE = "Journal Assistant";
 
 const SYSTEM_PROMPT_BASE =
@@ -219,14 +219,15 @@ export default function JournalChat({ user, trades, theme }) {
         .chat-input-wrap { padding: 14px clamp(6px, 3%, 40px) 8px; }
         .chat-bubble { max-width: min(80%, 720px); }
 
-        /* Kotak input: border hairline + shadow "raised" tipis khas Claude,
-           makin jelas begitu difokuskan (bukan cuma ganti warna border). */
+        /* Kotak input: radius disamakan dengan kotak-kotak lain di app
+           (card/date-box = 8px), dan diberi shadow "raised" tipis khas
+           Claude yang keluar (bukan inset), makin jelas saat difokuskan. */
         .chat-input-box {
           transition: box-shadow .15s ease, border-color .15s ease;
-          box-shadow: ${C.shadowCard};
+          box-shadow: 0 1px 2px rgba(20,20,19,0.06), 0 1px 1px rgba(20,20,19,0.04);
         }
         .chat-input-box:focus-within {
-          box-shadow: ${C.shadowRaised};
+          box-shadow: 0 1px 3px rgba(20,20,19,0.08), 0 3px 8px rgba(20,20,19,0.07);
         }
       `}</style>
 
@@ -245,10 +246,10 @@ export default function JournalChat({ user, trades, theme }) {
                 className="chat-bubble"
                 style={{
                   padding: m.role === "user" ? "11px 16px" : "0",
-                  borderRadius: m.role === "user" ? 16 : 0,
+                  borderRadius: m.role === "user" ? 8 : 0,
                   background: m.role === "user" ? C.paperSoft : "transparent",
                   border: m.role === "user" ? `1px solid ${C.line}` : "none",
-                  boxShadow: m.role === "user" ? C.shadowCard : "none",
+                  boxShadow: m.role === "user" ? "0 1px 2px rgba(20,20,19,0.05)" : "none",
                   color: C.ink,
                   fontSize: 15,
                   fontFamily: CHAT_FONT,
@@ -288,7 +289,7 @@ export default function JournalChat({ user, trades, theme }) {
           className="chat-input-box"
           style={{
             border: `1px solid ${C.line}`,
-            borderRadius: 24,
+            borderRadius: 8,
             background: C.paper,
             padding: "14px 12px 12px 18px",
             width: "100%",
@@ -320,7 +321,7 @@ export default function JournalChat({ user, trades, theme }) {
                 background: C.paperSoft,
                 border: `1px solid ${C.line}`,
                 boxShadow: "none",
-                borderRadius: 999,
+                borderRadius: 6,
                 padding: "6px 13px",
                 height: 30,
                 boxSizing: "border-box",
@@ -343,7 +344,7 @@ export default function JournalChat({ user, trades, theme }) {
                 background: C.ink, color: C.paper, border: "none", borderRadius: "50%",
                 cursor: isSending || !input.trim() ? "not-allowed" : "pointer",
                 opacity: isSending ? 1 : (!input.trim() ? 0.3 : 1),
-                boxShadow: !isSending && input.trim() ? C.shadowCard : "none",
+                boxShadow: !isSending && input.trim() ? "0 1px 2px rgba(20,20,19,0.08)" : "none",
               }}
             >
               {isSending ? (
@@ -355,7 +356,7 @@ export default function JournalChat({ user, trades, theme }) {
           </div>
         </div>
         <div style={{ textAlign: "center", fontSize: 11, color: C.faint, marginTop: 11, fontFamily: CHAT_FONT }}>
-          {PERSONA_NAME} adalah AI dan dapat melakukan kesalahan. Harap periksa kembali jawaban.
+          {PERSONA_NAME} is an AI and can make mistakes. Please double-check important information.
         </div>
       </div>
     </div>
