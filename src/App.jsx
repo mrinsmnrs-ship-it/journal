@@ -12,6 +12,7 @@ import { auth } from "./firebase";
 import { loadUserData, saveUserData } from "./store";
 import AuthScreen from "./AuthScreen.jsx";
 import JournalChat from "./JournalChat.jsx";
+import BrandMark from "./BrandMark.jsx";
 
 // ---- Design tokens : Claude-matched palette (blue / sage / amber) ----
 // Shadow tokens: Claude.ai leans on hairline borders more than shadows —
@@ -39,7 +40,7 @@ const LIGHT = {
   line: "#C2C0B8", lineSoft: "#D3D1C8",
   clay: "#4A7DBD", clayDeep: "#3D6C9C", clayWash: "#FAF9F5", clayOnWhite: "#3D6C9C",
   sage: "#788C5D", sageWash: "#FAF9F5", sageOnWhite: "#5F7048",
-  rustRed: "#B85C50", rustWash: "#FAF9F5", rustOnWhite: "#B85C50", dangerBg: "#B85C50",
+  rustRed: "#B85C50", rustWash: "#FAF9F5", rustOnWhite: "#B85C50", dangerBg: "#DC2626",
   amber: "#6A9BCC", amberWash: "#FAF9F5", amberOnWhite: "#3D6C9C",
   inputBg: "#FAF9F5", inputText: "#141413", inputPlaceholder: "#AFAEA9", inputBorder: "#C2C0B8",
   btnAccent: "#4A7DBD", btnAccentBorder: "#4A7DBD", btnAccentWash: "#FAF9F5",
@@ -54,7 +55,7 @@ const DARK = {
   line: "#6E6C63", lineSoft: "#57564E",
   clay: "#6A9BCC", clayDeep: "#8FB8DE", clayWash: "#262624", clayOnWhite: "#8FB8DE",
   sage: "#788C5D", sageWash: "#262624", sageOnWhite: "#9CB27E",
-  rustRed: "#D28A7E", rustWash: "#262624", rustOnWhite: "#D28A7E", dangerBg: "#B85C50",
+  rustRed: "#D28A7E", rustWash: "#262624", rustOnWhite: "#D28A7E", dangerBg: "#E23F3F",
   amber: "#6A9BCC", amberWash: "#262624", amberOnWhite: "#8FB8DE",
   inputBg: "#262624", inputText: "#FAF9F5", inputPlaceholder: "#6E6C64", inputBorder: "#6E6C63",
   btnAccent: "#6A9BCC", btnAccentBorder: "#6A9BCC", btnAccentWash: "#262624",
@@ -139,7 +140,7 @@ function Chip({ label, active, onClick }) {
         border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
         background: active ? C.btnAccent : C.paper,
         color: active ? C.btnAccentTextActive : C.inkSoft,
-        cursor: "pointer", transition: "all .15s ease",
+        cursor: "pointer", transition: "none",
       }}
     >
       {label}
@@ -680,11 +681,12 @@ function RJournal({ user }) {
         <div className="app-shell">
           {/* Sidebar (desktop) */}
           <div className="sidebar">
-            <div style={{ padding: "6px 10px 26px" }}>
-              <span style={{ fontSize: 19, lineHeight: 1 }}>
+            <div style={{ padding: "6px 10px 26px", display: "flex", alignItems: "center", gap: 3, fontSize: 19 }}>
+              <span style={{ lineHeight: 1 }}>
                 <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Aftermath</span>
                 <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
               </span>
+              <BrandMark style={{ height: "0.72em", width: "auto", marginLeft: "0.08em", color: C.ink }} />
             </div>
             <div style={{ position: "relative" }}>
               {NAV_DESKTOP.map((n) => (
@@ -731,10 +733,13 @@ function RJournal({ user }) {
 
           {/* Mobile top bar */}
           <div className="mobile-topbar">
-            <span style={{ fontSize: 17, lineHeight: 1 }}>
-              <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Aftermath</span>
-              <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
-            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 17 }}>
+              <span style={{ lineHeight: 1 }}>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Aftermath</span>
+                <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
+              </span>
+              <BrandMark style={{ height: "0.72em", width: "auto", marginLeft: "0.08em", color: C.ink }} />
+            </div>
             <div style={{ display: "flex", gap: 8 }}>
               <ThemeToggle mode={themeMode} onToggle={toggleTheme} compact />
               <button
@@ -843,7 +848,7 @@ function DateField({ value, onChange }) {
           width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
           borderRadius: 6, padding: "14px 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
           textAlign: "left", cursor: "pointer",
-          boxShadow: "0 1px 2px rgba(20,20,19,0.08), 0 1px 1px rgba(20,20,19,0.05)",
+          boxShadow: "none",
         }}
       >
         {value ? fmtDateDisplay(value) : "Select date"}
