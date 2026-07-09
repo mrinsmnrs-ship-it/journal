@@ -543,14 +543,13 @@ function RJournal({ user }) {
   }, [tab]);
 
   useEffect(() => {
-    const INDICATOR_HEIGHT = 18;
     function updateDesktopNavIndicator() {
       const activeKey = desktopNavRefs.current[tab] ? tab : "log";
       const el = desktopNavRefs.current[activeKey];
       if (el) {
         setDesktopNavIndicator({
-          top: el.offsetTop + (el.offsetHeight - INDICATOR_HEIGHT) / 2,
-          height: INDICATOR_HEIGHT,
+          top: el.offsetTop,
+          height: el.offsetHeight,
         });
       }
     }
@@ -609,10 +608,10 @@ function RJournal({ user }) {
           .app-footer-mobile { display: none; }
 
           .nav-item-desktop {
-            display:flex; align-items:center; padding: 13px 12px; border-radius: 6px;
+            display:flex; align-items:center; padding: 11px 12px; border-radius: 6px;
             font-family: 'Inter', sans-serif; font-size:16px; font-weight:600; letter-spacing: -0.015em;
             cursor:pointer; border:none; background:transparent;
-            width:100%; text-align:left; margin-bottom:2px; transition: color .12s ease, background .12s ease;
+            width: calc(100% - 16px); text-align:left; margin-bottom:2px; transition: color .12s ease, background .12s ease;
           }
           .nav-item-desktop:hover { color: ${C.ink}; }
 
