@@ -563,7 +563,7 @@ function RJournal({ user }) {
 
   return (
     <ThemeContext.Provider value={C}>
-      <div className={isChatTab ? "chat-mode" : ""} style={{ ...getPageBackground(themeMode, C), minHeight: "100vh", color: C.ink, fontFamily: SANS }}>
+      <div className={`app-root${isChatTab ? " chat-mode" : ""}`} style={{ ...getPageBackground(themeMode, C), minHeight: "100vh", color: C.ink, fontFamily: SANS }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
           @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&display=swap');
@@ -616,31 +616,46 @@ function RJournal({ user }) {
           .nav-item-desktop:hover { color: ${C.ink}; }
 
           .chat-mode { height: 100dvh; overflow: hidden; }
-          .chat-mode .app-shell { height: 100%; }
           .chat-mode .main-area {
             display: flex; flex-direction: column; overflow: hidden;
-            height: 100%;
           }
 
+          /* Mobile: everything sized by real flex layout instead of guessed
+             pixel offsets, so the topbar can never clip the top of the
+             content and the bottom nav can never leave a leftover gap
+             (this was the root cause of both issues — fixed-position bars
+             paired with padding values that didn't exactly match their
+             real rendered height). */
           @media (max-width: 820px) {
+            .app-root {
+              display: flex; flex-direction: column;
+              height: 100dvh; overflow: hidden;
+            }
+            .app-shell {
+              flex: 1; min-height: 0; height: auto;
+              flex-direction: column;
+            }
             .sidebar { display: none; }
             .desktop-chat-panel { display: none; }
-            .main-area { padding: 74px 16px 100px; max-width: 100%; margin-left: 0; margin-right: 0; }
-                        .bottom-nav {
-              display: flex; position: fixed; bottom: 0; left: 0; right: 0;
-              background: ${C.bg}; border-top: 1px solid ${C.line};
-justify-content: space-around; padding: 10px 0 14px; z-index: 20;
-            }
             .mobile-topbar {
-              display: flex; position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+              display: flex; position: static; flex-shrink: 0;
               justify-content: space-between; align-items: center;
               background: ${C.bg}; padding: 14px 16px; border-bottom: 1px solid ${C.line};
+            }
+            .main-area {
+              flex: 1; min-height: 0; height: auto; overflow-y: auto;
+              padding: 16px; max-width: 100%; margin-left: 0; margin-right: 0;
+            }
+            .bottom-nav {
+              display: flex; position: relative; flex-shrink: 0;
+              background: ${C.bg}; border-top: 1px solid ${C.line};
+              justify-content: space-around; padding: 10px 0 14px;
             }
             .app-footer-mobile {
               display: block; text-align: center; font-size: 11px; color: ${C.faint};
               opacity: 0.7; margin-top: 32px; padding-bottom: 8px;
             }
-            .chat-mode .main-area { padding: 74px 16px 96px; }
+            .chat-mode .main-area { padding: 16px 16px 0; }
           }
         `}</style>
         <div className="app-shell">
@@ -746,7 +761,7 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
         </div>
 
         {/* Bottom nav (mobile) */}
-        <div className="bottom-nav" style={{ position: "fixed", alignItems: "center" }}>
+        <div className="bottom-nav" style={{ alignItems: "center" }}>
           {NAV.map((n) => (
             <button
               key={n.key}
