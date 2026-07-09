@@ -460,6 +460,25 @@ function RJournal({ user }) {
     return () => window.removeEventListener("resize", updateIsDesktop);
   }, []);
 
+  // Fix: tinggi viewport mobile dihitung ulang lewat JS (bukan hanya
+  // mengandalkan 100dvh), karena sejumlah browser/WebView Android masih
+  // salah menghitung dvh saat address bar muncul/hilang — akibatnya
+  // elemen di bagian paling bawah (bottom nav) bisa terdorong keluar
+  // layar dan tak terjangkau karena overflow di-hidden.
+  useEffect(() => {
+    function setAppHeight() {
+      const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      document.documentElement.style.setProperty("--app-vh", `${h}px`);
+    }
+    setAppHeight();
+    window.addEventListener("resize", setAppHeight);
+    window.visualViewport?.addEventListener("resize", setAppHeight);
+    return () => {
+      window.removeEventListener("resize", setAppHeight);
+      window.visualViewport?.removeEventListener("resize", setAppHeight);
+    };
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     const timeouts = [];
@@ -569,7 +588,7 @@ function RJournal({ user }) {
           @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&display=swap');
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
           * { box-sizing: border-box; }
-          html, body { margin:0; height: 100%; overflow: hidden; }
+          html, body { margin:0; height: 100%; }
           button { -webkit-tap-highlight-color: transparent; transition: transform .1s ease; }
           button:active:not(:disabled) { transform: scale(0.96); }
           .no-press, .no-press:active { transform: none !important; }
@@ -615,7 +634,7 @@ function RJournal({ user }) {
           }
           .nav-item-desktop:hover { color: ${C.ink}; }
 
-          .chat-mode { height: 100dvh; overflow: hidden; }
+          .chat-mode { height: var(--app-vh, 100dvh); overflow: hidden; }
           .chat-mode .main-area {
             display: flex; flex-direction: column; overflow: hidden;
           }
@@ -629,7 +648,7 @@ function RJournal({ user }) {
           @media (max-width: 820px) {
             .app-root {
               display: flex; flex-direction: column;
-              height: 100dvh; overflow: hidden;
+              height: var(--app-vh, 100dvh); overflow: hidden;
             }
             .app-shell {
               flex: 1; min-height: 0; height: auto;
