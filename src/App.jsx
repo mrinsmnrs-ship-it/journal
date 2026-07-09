@@ -681,12 +681,12 @@ function RJournal({ user }) {
         <div className="app-shell">
           {/* Sidebar (desktop) */}
           <div className="sidebar">
-            <div style={{ padding: "6px 10px 26px", display: "flex", alignItems: "center", gap: 3, fontSize: 19 }}>
+            <div style={{ padding: "6px 10px 26px", display: "flex", alignItems: "center", gap: 6, fontSize: 19 }}>
+              <BrandMark style={{ height: "1.15em", width: "auto", color: C.ink, flexShrink: 0 }} />
               <span style={{ lineHeight: 1 }}>
                 <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Aftermath</span>
                 <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
               </span>
-              <BrandMark style={{ height: "0.72em", width: "auto", marginLeft: "0.08em", color: C.ink }} />
             </div>
             <div style={{ position: "relative" }}>
               {NAV_DESKTOP.map((n) => (
@@ -733,12 +733,12 @@ function RJournal({ user }) {
 
           {/* Mobile top bar */}
           <div className="mobile-topbar">
-            <div style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 17 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 17 }}>
+              <BrandMark style={{ height: "1.15em", width: "auto", color: C.ink, flexShrink: 0 }} />
               <span style={{ lineHeight: 1 }}>
                 <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Aftermath</span>
                 <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
               </span>
-              <BrandMark style={{ height: "0.72em", width: "auto", marginLeft: "0.08em", color: C.ink }} />
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <ThemeToggle mode={themeMode} onToggle={toggleTheme} compact />
