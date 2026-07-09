@@ -119,8 +119,8 @@ export default function AuthScreen() {
       }}>
         <div style={{ marginBottom: 4 }}>
           <span style={{ fontSize: "clamp(16px, 5.4vw, 22px)", lineHeight: 1 }}>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Apocalypse</span>
-            <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Archives</span>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Aftermath</span>
+            <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
           </span>
         </div>
         <div style={{ fontSize: 12, color: C.muted, marginBottom: 20 }}>
@@ -248,7 +248,7 @@ export default function AuthScreen() {
         </form>
       </div>
       <div style={{ fontSize: 9, color: C.ink, marginTop: 16, fontFamily: SANS, opacity: 0.6 }}>
-        &copy; {new Date().getFullYear()} Apocalypse Archives. All rights reserved.
+        &copy; {new Date().getFullYear()} Aftermath Journey. All rights reserved.
       </div>
       </div>
     </div>
