@@ -563,7 +563,7 @@ function RJournal({ user }) {
 
   return (
     <ThemeContext.Provider value={C}>
-      <div className={isChatTab ? "chat-mode" : ""} style={{ ...getPageBackground(themeMode, C), minHeight: "100vh", color: C.ink, fontFamily: SANS, transition: "background .2s ease, color .2s ease" }}>
+      <div className={isChatTab ? "chat-mode" : ""} style={{ ...getPageBackground(themeMode, C), minHeight: "100vh", color: C.ink, fontFamily: SANS }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
           @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&display=swap');
@@ -809,7 +809,7 @@ function DateField({ value, onChange }) {
           width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
           borderRadius: 6, padding: "14px 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
           textAlign: "left", cursor: "pointer",
-          boxShadow: "none",
+          boxShadow: "0 1px 2px rgba(20,20,19,0.08), 0 1px 1px rgba(20,20,19,0.05)",
         }}
       >
         {value ? fmtDateDisplay(value) : "Select date"}
@@ -820,7 +820,7 @@ function DateField({ value, onChange }) {
           <div style={{
             position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: 300,
             background: C.paper, border: `1px solid ${C.line}`, borderRadius: 8, padding: 16,
-            boxShadow: C.shadowPopover,
+            boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
               <button type="button" onClick={prevMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
