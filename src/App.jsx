@@ -13,7 +13,7 @@ import { loadUserData, saveUserData } from "./store";
 import AuthScreen from "./AuthScreen.jsx";
 import JournalChat from "./JournalChat.jsx";
 
-// ---- Design tokens : Claude-matched palette (clay / sage / amber) ----
+// ---- Design tokens : Claude-matched palette (blue / sage / amber) ----
 // Shadow tokens: Claude.ai leans on hairline borders more than shadows —
 // shadows only show up on things that float above the page (dropdowns,
 // modals, the send button). They're soft, low-opacity, and layered
@@ -37,13 +37,14 @@ const LIGHT = {
   paperSoftLight: "#FAF9F5", paperSoftStat: "#FAF9F5",
   ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
   line: "#C2C0B8", lineSoft: "#D3D1C8",
-  clay: "#D97757", clayDeep: "#B85C3E", clayWash: "#FAF9F5", clayOnWhite: "#B85C3E",
+  clay: "#4A7DBD", clayDeep: "#3D6C9C", clayWash: "#FAF9F5", clayOnWhite: "#3D6C9C",
   sage: "#788C5D", sageWash: "#FAF9F5", sageOnWhite: "#5F7048",
   rustRed: "#B85C50", rustWash: "#FAF9F5", rustOnWhite: "#B85C50", dangerBg: "#B85C50",
   amber: "#6A9BCC", amberWash: "#FAF9F5", amberOnWhite: "#3D6C9C",
   inputBg: "#FAF9F5", inputText: "#141413", inputPlaceholder: "#AFAEA9", inputBorder: "#C2C0B8",
-  btnAccent: "#D97757", btnAccentBorder: "#D97757", btnAccentWash: "#FAF9F5",
-  btnAccentText: "#B85C3E", btnAccentTextActive: "#FFFFFF",
+  btnAccent: "#4A7DBD", btnAccentBorder: "#4A7DBD", btnAccentWash: "#FAF9F5",
+  btnAccentText: "#3D6C9C", btnAccentTextActive: "#FFFFFF",
+  navActiveBg: "rgba(74, 125, 189, 0.12)",
   ...SHADOW_LIGHT,
 };
 const DARK = {
@@ -51,13 +52,14 @@ const DARK = {
   paperSoftLight: "#262624", paperSoftStat: "#262624",
   ink: "#FAF9F5", inkSoft: "#D8D6CF", muted: "#9C9A93", faint: "#6E6C64",
   line: "#6E6C63", lineSoft: "#57564E",
-  clay: "#D97757", clayDeep: "#E8926F", clayWash: "#262624", clayOnWhite: "#E8926F",
+  clay: "#6A9BCC", clayDeep: "#8FB8DE", clayWash: "#262624", clayOnWhite: "#8FB8DE",
   sage: "#788C5D", sageWash: "#262624", sageOnWhite: "#9CB27E",
   rustRed: "#D28A7E", rustWash: "#262624", rustOnWhite: "#D28A7E", dangerBg: "#B85C50",
   amber: "#6A9BCC", amberWash: "#262624", amberOnWhite: "#8FB8DE",
   inputBg: "#262624", inputText: "#FAF9F5", inputPlaceholder: "#6E6C64", inputBorder: "#6E6C63",
-  btnAccent: "#D97757", btnAccentBorder: "#D97757", btnAccentWash: "#262624",
-  btnAccentText: "#E8926F", btnAccentTextActive: "#FFFFFF",
+  btnAccent: "#6A9BCC", btnAccentBorder: "#6A9BCC", btnAccentWash: "#262624",
+  btnAccentText: "#8FB8DE", btnAccentTextActive: "#FFFFFF",
+  navActiveBg: "rgba(106, 155, 204, 0.18)",
   ...SHADOW_DARK,
 };
 
@@ -133,7 +135,7 @@ function Chip({ label, active, onClick }) {
       onClick={onClick}
       style={{
         fontFamily: SANS, fontSize: 14, fontWeight: 600,
-        padding: "9px 17px", borderRadius: 999,
+        padding: "9px 17px", borderRadius: 6,
         border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
         background: active ? C.btnAccent : C.paper,
         color: active ? C.btnAccentTextActive : C.inkSoft,
@@ -160,20 +162,20 @@ function useInputStyle() {
   const C = useTheme();
   return {
     width: "100%", boxSizing: "border-box", background: C.inputBg,
-    border: `1px solid ${C.inputBorder}`, borderRadius: 12, padding: "14px 16px",
+    border: `1px solid ${C.inputBorder}`, borderRadius: 6, padding: "14px 16px",
     color: C.inputText, fontFamily: SANS, fontSize: 16, outline: "none",
     boxShadow: "none",
   };
 }
 function Tag({ text }) {
-  // Monokrom: satu warna netral saja, tidak lagi per-kategori (clay/sage/rust/amber)
+  // Monokrom: satu warna netral saja, tidak lagi per-kategori (blue/sage/rust/amber)
   // Warna & style disamakan persis dengan pill persona "Nox Valerica" di chat.
   const C = useTheme();
   return (
     <span style={{
       fontFamily: SANS, fontSize: 12, fontWeight: 400, color: C.muted,
       background: C.paperSoft, border: `1px solid ${C.line}`,
-      borderRadius: 999, padding: "6px 13px",
+      borderRadius: 6, padding: "6px 13px",
     }}>
       {text}
     </span>
@@ -204,7 +206,7 @@ function ThemeToggle({ mode, onToggle, compact }) {
       title={`Switch to ${nextLabel} theme`}
       style={{
         display: "flex", alignItems: "center", gap: 9,
-        background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 999,
+        background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 6,
         padding: compact ? "9px" : "10px 16px", cursor: "pointer", color: C.inkSoft,
         fontFamily: SANS, fontSize: 14, fontWeight: 600,
       }}
@@ -607,10 +609,10 @@ function RJournal({ user }) {
           .app-footer-mobile { display: none; }
 
           .nav-item-desktop {
-            display:flex; align-items:center; padding: 13px 6px; border-radius: 0;
+            display:flex; align-items:center; padding: 13px 12px; border-radius: 6px;
             font-family: 'Inter', sans-serif; font-size:16px; font-weight:600; letter-spacing: -0.015em;
             cursor:pointer; border:none; background:transparent;
-            width:100%; text-align:left; margin-bottom:2px; transition: color .12s ease;
+            width:100%; text-align:left; margin-bottom:2px; transition: color .12s ease, background .12s ease;
           }
           .nav-item-desktop:hover { color: ${C.ink}; }
 
@@ -647,8 +649,8 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
           <div className="sidebar">
             <div style={{ padding: "6px 10px 26px" }}>
               <span style={{ fontSize: 19, lineHeight: 1 }}>
-                <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Apocalypse</span>
-                <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Archives</span>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Aftermath</span>
+                <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
               </span>
             </div>
             <div style={{ position: "relative" }}>
@@ -658,15 +660,18 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
                   ref={(el) => { desktopNavRefs.current[n.key] = el; }}
                   className="nav-item-desktop"
                   onClick={() => setTab(n.key)}
-                  style={{ color: tab === n.key ? C.ink : C.faint }}
+                  style={{
+                    color: tab === n.key ? C.ink : C.faint,
+                    background: tab === n.key ? C.navActiveBg : "transparent",
+                  }}
                 >
                   {n.label}
                 </button>
               ))}
               <div style={{
                 position: "absolute", top: desktopNavIndicator.top, right: 0,
-                width: 3, height: desktopNavIndicator.height, borderRadius: 999,
-                background: C.ink,
+                width: 3, height: desktopNavIndicator.height, borderRadius: 2,
+                background: C.btnAccent,
                 transition: "top .28s cubic-bezier(.4,0,.2,1), height .28s cubic-bezier(.4,0,.2,1)",
               }} />
             </div>
@@ -678,7 +683,7 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
                 title="Log out"
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 999,
+                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 6,
                   padding: "10px 13px", cursor: "pointer", color: C.inkSoft,
                 }}
               >
@@ -694,8 +699,8 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
           {/* Mobile top bar */}
           <div className="mobile-topbar">
             <span style={{ fontSize: 17, lineHeight: 1 }}>
-              <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Apocalypse</span>
-              <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Archives</span>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Aftermath</span>
+              <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
             </span>
             <div style={{ display: "flex", gap: 8 }}>
               <ThemeToggle mode={themeMode} onToggle={toggleTheme} compact />
@@ -704,7 +709,7 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
                 title="Log out"
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 999,
+                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 6,
                   padding: 8, cursor: "pointer", color: C.inkSoft,
                 }}
               >
@@ -749,18 +754,18 @@ justify-content: space-around; padding: 10px 0 14px; z-index: 20;
               ref={(el) => { navRefs.current[n.key] = el; }}
               onClick={() => setTab(n.key)}
              style={{
-                background: "transparent", border: "none", cursor: "pointer",
-                padding: "6px 6px 4px",
+                background: tab === n.key ? C.navActiveBg : "transparent", border: "none", cursor: "pointer",
+                padding: "6px 10px 4px", borderRadius: 6,
                 color: tab === n.key ? C.ink : C.faint,
-                transition: "color .15s ease",
+                transition: "color .15s ease, background .15s ease",
               }}
             >
               <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: tab === n.key ? 600 : 600, letterSpacing: "-0.01em" }}>{n.label}</span>
             </button>
           ))}
           <div style={{
-            position: "absolute", top: 0, height: 3, borderRadius: 999,
-            background: C.ink,
+            position: "absolute", top: 0, height: 3, borderRadius: 2,
+            background: C.btnAccent,
             left: navIndicator.left, width: navIndicator.width,
             transition: "left .28s cubic-bezier(.4,0,.2,1), width .28s cubic-bezier(.4,0,.2,1)",
           }} />
@@ -803,7 +808,7 @@ function DateField({ value, onChange }) {
         onClick={() => setOpen((o) => !o)}
         style={{
           width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
-          borderRadius: 12, padding: "14px 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
+          borderRadius: 6, padding: "14px 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
           textAlign: "left", cursor: "pointer",
           boxShadow: "none",
         }}
@@ -815,7 +820,7 @@ function DateField({ value, onChange }) {
           <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
           <div style={{
             position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: 300,
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: 16,
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 8, padding: 16,
             boxShadow: C.shadowPopover,
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
@@ -843,7 +848,7 @@ function DateField({ value, onChange }) {
                     key={i}
                     onClick={() => selectDay(d)}
                     style={{
-                      aspectRatio: "1", border: "none", borderRadius: 8, cursor: "pointer",
+                      aspectRatio: "1", border: "none", borderRadius: 6, cursor: "pointer",
                       background: isSelected ? C.btnAccent : "transparent",
                       color: isSelected ? C.btnAccentTextActive : C.ink,
                       fontSize: 14, fontFamily: SANS,
@@ -863,7 +868,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
   const C = useTheme();
   const inputStyle = useInputStyle();
   return (
-    <div style={{ background: C.paperSoftLight, borderRadius: 20, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
+    <div style={{ background: C.paperSoftLight, borderRadius: 10, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
       <Field label="Date">
         <DateField value={form.date} onChange={(d) => updateForm("date", d)} />
       </Field>
@@ -876,7 +881,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
             const active = form.direction === d;
             return (
               <button key={d} onClick={() => updateForm("direction", d)} style={{
-                flex: 1, padding: "14px 0", borderRadius: 12,
+                flex: 1, padding: "14px 0", borderRadius: 6,
                 border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
                 background: active ? C.btnAccent : C.paper,
                 color: active ? C.btnAccentTextActive : C.inkSoft, fontWeight: 700, fontSize: 16, cursor: "pointer",
@@ -923,7 +928,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
         <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
       </Field>
       <button onClick={handleSave} disabled={!canSave} style={{
-  width: "100%", padding: "16px 0", borderRadius: 12, border: "none",
+  width: "100%", padding: "16px 0", borderRadius: 6, border: "none",
   background: canSave ? C.btnAccent : C.lineSoft, color: canSave ? C.btnAccentTextActive : C.faint,
   fontWeight: 700, fontSize: 17, cursor: canSave ? "pointer" : "not-allowed",
   boxShadow: canSave ? C.shadowCard : "none",
@@ -944,7 +949,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
         <div style={{ fontSize: 16, marginBottom: 16 }}>No trades logged yet.</div>
         <button onClick={onGoLog} style={{
           display: "inline-flex", alignItems: "center", gap: 8, background: C.clayWash,
-          border: `1px solid ${C.clay}`, color: C.clayOnWhite, borderRadius: 999, padding: "12px 20px",
+          border: `1px solid ${C.clay}`, color: C.clayOnWhite, borderRadius: 6, padding: "12px 20px",
           fontWeight: 700, fontSize: 15, cursor: "pointer",
         }}><Plus size={18} /> Log your first trade</button>
       </div>
@@ -958,7 +963,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
         return (
           <div key={t.id} style={{
             background: C.paperSoftLight, border: `1px solid ${C.line}`,
-            borderRadius: 16, padding: "20px 22px", boxShadow: C.shadowCard,
+            borderRadius: 8, padding: "20px 22px", boxShadow: C.shadowCard,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
   <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
@@ -991,7 +996,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
           <div style={{
             position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
             zIndex: 40, width: "min(360px, calc(100vw - 48px))",
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: 24,
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 10, padding: 24,
             boxShadow: C.shadowModal,
           }}>
             <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, marginBottom: 9, letterSpacing: "-0.01em", color: C.ink }}>Delete this trade?</div>
@@ -1002,14 +1007,14 @@ function JournalList({ trades, onDelete, onGoLog }) {
               <button
                 onClick={() => setConfirmId(null)}
                 style={{
-                  flex: 1, padding: "12px 0", borderRadius: 12, border: `1px solid ${C.line}`,
+                  flex: 1, padding: "12px 0", borderRadius: 6, border: `1px solid ${C.line}`,
                   background: C.paperSoft, color: C.ink, fontWeight: 700, fontSize: 15.5, cursor: "pointer",
                 }}
               >No</button>
               <button
                 onClick={() => { onDelete(confirmTrade.id); setConfirmId(null); }}
                 style={{
-                  flex: 1, padding: "12px 0", borderRadius: 12, border: "none",
+                  flex: 1, padding: "12px 0", borderRadius: 6, border: "none",
                   background: C.dangerBg, color: "#FFFFFF", fontWeight: 700, fontSize: 15.5, cursor: "pointer",
                 }}
               >Yes, Delete</button>
@@ -1041,7 +1046,7 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
 function StatCard({ label, value, color }) {
   const C = useTheme();
   return (
-    <div style={{ background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 12, padding: "13px 15px", boxShadow: C.shadowCard }}>
+    <div style={{ background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 6, padding: "13px 15px", boxShadow: C.shadowCard }}>
       <div style={{ fontFamily: SANS, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.04em", color: C.muted, textTransform: "uppercase", marginBottom: 5 }}>{label}</div>
       <div style={{ fontFamily: SANS, fontSize: 19, fontWeight: 700, color: C.ink }}>{value}</div>
     </div>
@@ -1102,7 +1107,7 @@ function Dashboard({ trades }) {
             </div>
           </div>
           <SectionLabel text="By Rules Compliance" />
-          <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 14, padding: "4px 18px", boxShadow: C.shadowCard }}>
+          <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 8, padding: "4px 18px", boxShadow: C.shadowCard }}>
   {["Yes", "Partial", "No"].map((r, i) => {
     const d = stats.byRules[r];
     const avg = d.count ? d.total / d.count : 0;
