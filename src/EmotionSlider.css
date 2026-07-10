@@ -3,10 +3,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.5rem;
   width: 100%;
   max-width: 22rem;
   margin: 0 auto;
+
+  /* fallback kalau prop theme belum dioper */
+  --es-ink: #767470;
+  --es-track-bg: rgba(128, 128, 128, 0.4);
+  --es-icon-bg: transparent;
+  --es-icon-border: transparent;
 }
 
 .slider-wrapper {
@@ -46,44 +52,45 @@
   flex-grow: 1;
   overflow: hidden;
   border-radius: 9999px;
-  background-color: rgba(128, 128, 128, 0.4);
+  background-color: var(--es-track-bg);
 }
 
 .slider-range {
   position: absolute;
   height: 100%;
   border-radius: 9999px;
-  transition: background-color 0.2s ease;
+  background-color: var(--es-ink);
 }
 
-.slider-range-negative {
-  background-color: #B85C50;
-}
-
-.slider-range-positive {
-  background-color: #788C5D;
-}
-
+/* Label emosi (mis. "Calm") sekarang ada di alur normal dokumen,
+   langsung di bawah baris slider — bukan absolute lagi, jadi tidak
+   nyangkut di tempat lain dan tidak menambah ruang kosong. */
 .value-indicator {
-  position: absolute;
-  transform: translateY(-1.6rem);
+  margin: 0;
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.03em;
   white-space: nowrap;
+  color: var(--es-ink);
 }
 
-.value-indicator-negative {
-  color: #B85C50;
-}
-
-.value-indicator-positive {
-  color: #788C5D;
+/* Lingkaran background di belakang ikon Frown/Smile, warnanya
+   mengikuti background form (paperSoft) sesuai tema aktif. */
+.icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: var(--es-icon-bg);
+  border: 1px solid var(--es-icon-border);
 }
 
 .icon {
-  width: 22px;
-  height: 22px;
-  color: #888;
+  width: 18px;
+  height: 18px;
+  color: var(--es-ink);
   flex-shrink: 0;
 }
