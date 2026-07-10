@@ -234,32 +234,28 @@ function RiskRPanel({ form, updateForm }) {
           );
         })}
       </div>
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <div style={{
-          display: "flex", border: `1px solid ${C.line}`, borderRadius: 20,
-          overflow: "hidden", width: "fit-content",
-        }}>
-          {[
-            { label: "-0.1", delta: -0.1 },
-            { label: "-", delta: -1 },
-            { label: "+", delta: 1 },
-            { label: "+0.1", delta: 0.1 },
-          ].map(({ label, delta }, i) => (
-            <button
-              key={label}
-              type="button"
-              onClick={() => adjust(delta)}
-              style={{
-                padding: "7px 14px", fontSize: 12, fontWeight: 600,
-                background: C.paper, color: C.inkSoft, cursor: "pointer",
-                border: "none", borderRight: i < 3 ? `1px solid ${C.line}` : "none",
-                fontFamily: SANS,
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+      <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
+        {[
+          { label: "-0.1", delta: -0.1 },
+          { label: "-", delta: -1 },
+          { label: "+", delta: 1 },
+          { label: "+0.1", delta: 0.1 },
+        ].map(({ label, delta }) => (
+          <button
+            key={label}
+            type="button"
+            onClick={() => adjust(delta)}
+            style={{
+              width: 30, height: 26, padding: 0, borderRadius: 4,
+              border: `1px solid ${C.line}`, background: C.paper,
+              color: C.inkSoft, fontWeight: 600, fontSize: 10, cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: SANS, lineHeight: 1,
+            }}
+          >
+            {label}
+          </button>
+        ))}
       </div>
     </div>
   );
