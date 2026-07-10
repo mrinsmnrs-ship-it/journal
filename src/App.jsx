@@ -210,23 +210,22 @@ function RiskRPanel({ form, updateForm }) {
                 style={{
                   width: "100%", boxSizing: "border-box", background: C.inputBg,
                   border: `1px solid ${active ? C.btnAccentBorder : C.inputBorder}`,
-                  borderRadius: 6, padding: "12px 8px", cursor: "pointer",
-                  display: "flex", justifyContent: "center", alignItems: "center", gap: 2,
-                  minHeight: 52,
+                  borderRadius: 6, padding: "9px 6px", cursor: "pointer",
+                  display: "flex", justifyContent: "center", alignItems: "center", gap: 1,
                 }}
               >
                 {isNegative && (
-                  <span style={{ fontSize: 20, fontWeight: 700, color: C.inputText, lineHeight: 1 }}>&minus;</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: C.inputText, lineHeight: 1 }}>&minus;</span>
                 )}
                 <Counter
                   value={Math.abs(numeric)}
                   places={[10, 1, ".", 0.1]}
-                  fontSize={20}
-                  padding={2}
+                  fontSize={14}
+                  padding={1}
                   gap={1}
                   horizontalPadding={0}
                   textColor={C.inputText}
-                  fontWeight={700}
+                  fontWeight={600}
                   topGradientStyle={{ display: "none" }}
                   bottomGradientStyle={{ display: "none" }}
                 />
@@ -235,32 +234,34 @@ function RiskRPanel({ form, updateForm }) {
           );
         })}
       </div>
-      <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-        <RStepButton label="-0.1" onClick={() => adjust(-0.1)} />
-        <RStepButton label="-" onClick={() => adjust(-1)} />
-        <RStepButton label="+" onClick={() => adjust(1)} />
-        <RStepButton label="+0.1" onClick={() => adjust(0.1)} />
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <div style={{
+          display: "flex", border: `1px solid ${C.line}`, borderRadius: 20,
+          overflow: "hidden", width: "fit-content",
+        }}>
+          {[
+            { label: "-0.1", delta: -0.1 },
+            { label: "-", delta: -1 },
+            { label: "+", delta: 1 },
+            { label: "+0.1", delta: 0.1 },
+          ].map(({ label, delta }, i) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => adjust(delta)}
+              style={{
+                padding: "7px 14px", fontSize: 12, fontWeight: 600,
+                background: C.paper, color: C.inkSoft, cursor: "pointer",
+                border: "none", borderRight: i < 3 ? `1px solid ${C.line}` : "none",
+                fontFamily: SANS,
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
-  );
-}
-
-function RStepButton({ label, onClick }) {
-  const C = useTheme();
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        width: 38, height: 38, minWidth: 38, padding: 0, borderRadius: "50%",
-        border: `1px solid ${C.line}`, background: C.paper,
-        color: C.inkSoft, fontWeight: 700, fontSize: 11, cursor: "pointer",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        lineHeight: 1,
-      }}
-    >
-      {label}
-    </button>
   );
 }
 
