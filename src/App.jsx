@@ -14,6 +14,7 @@ import AuthScreen from "./AuthScreen.jsx";
 import JournalChat from "./JournalChat.jsx";
 import BrandMark from "./BrandMark.jsx";
 import EmotionSlider from "./EmotionSlider.jsx";
+import Counter from "./Counter.jsx";
 
 // ---- Design tokens : Claude-matched palette (blue / sage / amber) ----
 // Shadow tokens: Claude.ai leans on hairline borders more than shadows —
@@ -169,6 +170,96 @@ function useInputStyle() {
     boxShadow: "none",
   };
 }
+// Shared Risk % / R Planned / R Actual panel.
+// Tap a box to select it, then use the single set of -0.1 / - / + / +0.1
+// buttons to adjust whichever field is currently selected — no need for
+// three separate +/- controls.
+const R_FIELDS = [
+  { key: "riskPct", label: "Risk" },
+  { key: "rPlanned", label: "R Planned" },
+  { key: "rActual", label: "R Actual" },
+];
+
+function RiskRPanel({ form, updateForm }) {
+  const C = useTheme();
+  const [activeField, setActiveField] = useState("rActual");
+
+  const adjust = (delta) => {
+    const current = Number(form[activeField]) || 0;
+    const next = Math.round((current + delta) * 100) / 100;
+    updateForm(activeField, String(next));
+  };
+
+  return (
+    <div style={{ marginBottom: 22 }}>
+      <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
+        {R_FIELDS.map(({ key, label }) => {
+          const active = activeField === key;
+          const raw = form[key];
+          const numeric = raw === "" || raw === undefined || raw === null || isNaN(Number(raw)) ? 0 : Number(raw);
+          const isNegative = numeric < 0;
+          return (
+            <div key={key} style={{ flex: 1 }}>
+              <div style={{
+                fontFamily: SANS, fontSize: 13, fontWeight: 600, letterSpacing: "0.04em",
+                color: C.muted, marginBottom: 9, textTransform: "uppercase",
+              }}>{label}</div>
+              <button
+                type="button"
+                onClick={() => setActiveField(key)}
+                style={{
+                  width: "100%", boxSizing: "border-box", background: C.inputBg,
+                  border: `1px solid ${active ? C.btnAccentBorder : C.inputBorder}`,
+                  borderRadius: 6, padding: "12px 8px", cursor: "pointer",
+                  display: "flex", justifyContent: "center", alignItems: "center", gap: 2,
+                  minHeight: 52,
+                }}
+              >
+                {isNegative && (
+                  <span style={{ fontSize: 20, fontWeight: 700, color: C.inputText, lineHeight: 1 }}>&minus;</span>
+                )}
+                <Counter
+                  value={Math.abs(numeric)}
+                  places={[10, 1, ".", 0.1]}
+                  fontSize={20}
+                  padding={2}
+                  gap={1}
+                  horizontalPadding={0}
+                  textColor={C.inputText}
+                  fontWeight={700}
+                />
+              </button>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+        <RStepButton label="-0.1" onClick={() => adjust(-0.1)} />
+        <RStepButton label="-" onClick={() => adjust(-1)} />
+        <RStepButton label="+" onClick={() => adjust(1)} />
+        <RStepButton label="+0.1" onClick={() => adjust(0.1)} />
+      </div>
+    </div>
+  );
+}
+
+function RStepButton({ label, onClick }) {
+  const C = useTheme();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        width: 60, padding: "12px 0", borderRadius: 6,
+        border: `1px solid ${C.line}`, background: C.paper,
+        color: C.inkSoft, fontWeight: 700, fontSize: 16, cursor: "pointer",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
 function Tag({ text }) {
   // Monokrom: satu warna netral saja, tidak lagi per-kategori (blue/sage/rust/amber)
   // Warna & style disamakan persis dengan pill persona "Nox Valerica" di chat.
@@ -932,21 +1023,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
       <Field label="Reason / Setup">
         <input type="text" placeholder="Breakout retest, reversal, ..." value={form.reason} onChange={(e) => updateForm("reason", e.target.value)} style={inputStyle} />
       </Field>
-      <div style={{ display: "flex", gap: 16 }}>
-        <div style={{ flex: 1 }}>
-          <Field label="Risk %">
-            <input type="number" inputMode="decimal" placeholder="1" value={form.riskPct} onChange={(e) => updateForm("riskPct", e.target.value)} style={inputStyle} />
-          </Field>
-        </div>
-        <div style={{ flex: 1 }}>
-          <Field label="R Planned">
-            <input type="number" inputMode="decimal" placeholder="2" value={form.rPlanned} onChange={(e) => updateForm("rPlanned", e.target.value)} style={inputStyle} />
-          </Field>
-        </div>
-      </div>
-      <Field label="R Actual">
-        <input type="number" inputMode="decimal" placeholder="2.3 or -1" value={form.rActual} onChange={(e) => updateForm("rActual", e.target.value)} style={inputStyle} />
-      </Field>
+      <RiskRPanel form={form} updateForm={updateForm} />
       <Field label="Rules Compliance">
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           {["Yes", "Partial", "No"].map((r) => (
