@@ -957,7 +957,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
         </div>
       </Field>
       <Field label="Emotions">
-        <EmotionSlider value={form.emotion} onChange={(e) => updateForm("emotion", e)} />
+        <EmotionSlider value={form.emotion} onChange={(e) => updateForm("emotion", e)} theme={C} />
       </Field>
       <Field label="Notes">
         <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
