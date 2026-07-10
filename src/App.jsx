@@ -227,13 +227,15 @@ function RiskRPanel({ form, updateForm }) {
                   horizontalPadding={0}
                   textColor={C.inputText}
                   fontWeight={700}
+                  topGradientStyle={{ display: "none" }}
+                  bottomGradientStyle={{ display: "none" }}
                 />
               </button>
             </div>
           );
         })}
       </div>
-      <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+      <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
         <RStepButton label="-0.1" onClick={() => adjust(-0.1)} />
         <RStepButton label="-" onClick={() => adjust(-1)} />
         <RStepButton label="+" onClick={() => adjust(1)} />
@@ -250,9 +252,11 @@ function RStepButton({ label, onClick }) {
       type="button"
       onClick={onClick}
       style={{
-        width: 60, padding: "12px 0", borderRadius: 6,
+        width: 38, height: 38, minWidth: 38, padding: 0, borderRadius: "50%",
         border: `1px solid ${C.line}`, background: C.paper,
-        color: C.inkSoft, fontWeight: 700, fontSize: 16, cursor: "pointer",
+        color: C.inkSoft, fontWeight: 700, fontSize: 11, cursor: "pointer",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        lineHeight: 1,
       }}
     >
       {label}
