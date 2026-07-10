@@ -13,6 +13,7 @@ import { loadUserData, saveUserData } from "./store";
 import AuthScreen from "./AuthScreen.jsx";
 import JournalChat from "./JournalChat.jsx";
 import BrandMark from "./BrandMark.jsx";
+import EmotionSlider from "./EmotionSlider.jsx";
 
 // ---- Design tokens : Claude-matched palette (blue / sage / amber) ----
 // Shadow tokens: Claude.ai leans on hairline borders more than shadows —
@@ -956,11 +957,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
         </div>
       </Field>
       <Field label="Emotions">
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          {EMOTIONS.map((e) => (
-            <Chip key={e} label={e} active={form.emotion === e} onClick={() => toggleEmotion(e)} />
-          ))}
-        </div>
+        <EmotionSlider value={form.emotion} onChange={(e) => updateForm("emotion", e)} />
       </Field>
       <Field label="Notes">
         <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
