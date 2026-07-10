@@ -9,11 +9,21 @@ const MAX_OVERFLOW = 50;
 // kanan = paling tenang/percaya diri. Ganti urutan array ini kalau
 // mau susunan lain — index 0 selalu jadi ujung kiri.
 const EMOTION_ORDER = ["Revenge", "Anxious", "FOMO", "Hesitant", "Bored", "Confident", "Calm"];
-const POSITIVE = new Set(["Calm", "Confident"]);
 
-export default function EmotionSlider({ value, onChange, className = '' }) {
+// theme: objek warna dari ThemeContext (C) milik App.jsx, dioper sebagai prop
+// supaya slider ini otomatis ikut tema light/dark tanpa hardcode warna.
+export default function EmotionSlider({ value, onChange, className = '', theme }) {
+  const cssVars = theme
+    ? {
+        '--es-ink': theme.ink,
+        '--es-track-bg': theme.lineSoft,
+        '--es-icon-bg': theme.paperSoft,
+        '--es-icon-border': theme.line,
+      }
+    : undefined;
+
   return (
-    <div className={`slider-container ${className}`}>
+    <div className={`slider-container ${className}`} style={cssVars}>
       <Slider value={value} onChange={onChange} />
     </div>
   );
@@ -85,7 +95,6 @@ function Slider({ value, onChange }) {
 
   const getRangePercentage = () => (index / maxIndex) * 100;
   const label = EMOTION_ORDER[index];
-  const isPositive = POSITIVE.has(label);
 
   return (
     <>
@@ -101,6 +110,7 @@ function Slider({ value, onChange }) {
         className="slider-wrapper"
       >
         <motion.div
+          className="icon-circle"
           animate={{
             scale: region === 'left' ? [1, 1.4, 1] : 1,
             transition: { duration: 0.25 }
@@ -144,7 +154,7 @@ function Slider({ value, onChange }) {
           >
             <div className="slider-track">
               <div
-                className={`slider-range ${isPositive ? 'slider-range-positive' : 'slider-range-negative'}`}
+                className="slider-range"
                 style={{ width: `${getRangePercentage()}%` }}
               />
             </div>
@@ -152,6 +162,7 @@ function Slider({ value, onChange }) {
         </div>
 
         <motion.div
+          className="icon-circle"
           animate={{
             scale: region === 'right' ? [1, 1.4, 1] : 1,
             transition: { duration: 0.25 }
@@ -163,7 +174,7 @@ function Slider({ value, onChange }) {
           <Smile className="icon" />
         </motion.div>
       </motion.div>
-      <p className={`value-indicator ${isPositive ? 'value-indicator-positive' : 'value-indicator-negative'}`}>{label}</p>
+      <p className="value-indicator">{label}</p>
     </>
   );
 }
