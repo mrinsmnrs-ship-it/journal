@@ -313,8 +313,8 @@ function SectionLabel({ text }) {
   const C = useTheme();
   return (
     <div style={{
-      fontFamily: SANS, fontSize: 13, fontWeight: 700, letterSpacing: "0.06em",
-      color: C.muted, marginBottom: 15, textTransform: "uppercase",
+      fontFamily: SANS, fontSize: 10, fontWeight: 700, letterSpacing: "0.06em",
+      color: C.muted, marginBottom: 15, textTransform: "capitalize",
     }}>{text}</div>
   );
 }
@@ -1104,7 +1104,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
   <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
     <div style={{ fontWeight: 700, fontSize: 19 }}>{t.symbol}</div>
-    <div style={{ fontFamily: SANS, fontSize: 14, color: C.faint }}>{t.date}</div>
+    <div style={{ fontFamily: SANS, fontSize: 10, color: C.faint }}>{t.date}</div>
   </div>
   <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 17, color: win ? C.ink : C.faint }}>
     {fmtR(t.rActual)}
@@ -1118,9 +1118,9 @@ function JournalList({ trades, onDelete, onGoLog }) {
 </div>
             {t.notes && <div style={{ fontSize: 14, color: C.muted, marginTop: 11, fontStyle: "italic" }}>{t.notes}</div>}
             <button onClick={() => setConfirmId(t.id)} style={{
-              marginTop: 15, background: "transparent", border: "none", color: C.faint, fontSize: 14,
+              marginTop: 15, background: "transparent", border: "none", color: C.faint, fontSize: 10,
   display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: 0,
-            }}><Trash2 size={14} /> Delete</button>
+            }}><Trash2 size={11} /> Delete</button>
           </div>
         );
       })}
