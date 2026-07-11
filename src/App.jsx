@@ -69,6 +69,7 @@ const DARK = {
 
 const CHAT_FONT = "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 const LOGO_FONT = "'Inter', sans-serif"; // reserved for the "Aftermath" wordmark only
+const LABEL_FONT = "'Geist Pixel', 'Manrope', sans-serif"; // dipakai khusus untuk label field di form Log Trade
 const SERIF = CHAT_FONT; // font disatukan dengan halaman lain
 const SANS = CHAT_FONT;  // font disatukan dengan halaman lain
 const MONO = "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
@@ -182,8 +183,8 @@ function Field({ label, children }) {
   return (
     <div style={{ marginBottom: 22 }}>
       <div style={{
-        fontFamily: SANS, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
-        color: C.muted, marginBottom: 9, textTransform: "uppercase",
+        fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
+        color: C.muted, marginBottom: 9, textTransform: "capitalize",
       }}>{label}</div>
       {children}
     </div>
@@ -229,8 +230,8 @@ function RiskRPanel({ form, updateForm }) {
           return (
             <div key={key} style={{ flex: 1 }}>
               <div style={{
-                fontFamily: SANS, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
-                color: C.muted, marginBottom: 9, textTransform: "uppercase",
+                fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
+                color: C.muted, marginBottom: 9, textTransform: "capitalize",
               }}>{label}</div>
               <button
                 type="button"
@@ -709,6 +710,7 @@ function RJournal({ user }) {
           @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
           @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&display=swap');
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Geist+Pixel&display=swap');
           * { box-sizing: border-box; }
           html, body { margin:0; height: 100%; }
           button { -webkit-tap-highlight-color: transparent; transition: transform .1s ease; }
