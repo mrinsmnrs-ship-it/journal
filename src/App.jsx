@@ -67,10 +67,11 @@ const DARK = {
   ...SHADOW_DARK,
 };
 
-const CHAT_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const CHAT_FONT = "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const LOGO_FONT = "'Inter', sans-serif"; // reserved for the "Aftermath" wordmark only
 const SERIF = CHAT_FONT; // font disatukan dengan halaman lain
 const SANS = CHAT_FONT;  // font disatukan dengan halaman lain
-const MONO = "'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace";
+const MONO = "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 const NAV = [
   { key: "log", label: "Log Trade", icon: PencilLine },
   { key: "journal", label: "Journal", icon: BookOpen },
@@ -705,9 +706,9 @@ function RJournal({ user }) {
     <ThemeContext.Provider value={C}>
       <div className={`app-root${isChatTab ? " chat-mode" : ""}`} style={{ ...getPageBackground(themeMode, C), minHeight: "100vh", color: C.ink, fontFamily: SANS }}>
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
           @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&display=swap');
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
           * { box-sizing: border-box; }
           html, body { margin:0; height: 100%; }
           button { -webkit-tap-highlight-color: transparent; transition: transform .1s ease; }
@@ -749,7 +750,7 @@ function RJournal({ user }) {
 
           .nav-item-desktop {
             display:flex; align-items:center; padding: 11px 12px; border-radius: 6px;
-            font-family: 'Inter', sans-serif; font-size:16px; font-weight:600; letter-spacing: -0.015em;
+            font-family: 'Manrope', sans-serif; font-size:16px; font-weight:600; letter-spacing: -0.015em;
             cursor:pointer; border:none; background:transparent;
             width: calc(100% - 16px); text-align:left; margin-bottom:2px; transition: color .12s ease, background .12s ease;
           }
@@ -918,7 +919,7 @@ function RJournal({ user }) {
                 transition: "color .15s ease, background .15s ease",
               }}
             >
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: tab === n.key ? 600 : 600, letterSpacing: "-0.01em" }}>{n.label}</span>
+              <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: 13, fontWeight: tab === n.key ? 600 : 600, letterSpacing: "-0.01em" }}>{n.label}</span>
             </button>
           ))}
           <div style={{
