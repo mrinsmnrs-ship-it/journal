@@ -75,7 +75,7 @@ export default function Counter({
     }
   }),
   gap = 8,
-  borderRadius = 4,
+  borderRadius = 0,
   horizontalPadding = 8,
   textColor = 'inherit',
   fontWeight = 'inherit',
