@@ -1465,6 +1465,7 @@ function EquityCurve({ trades }) {
             contentStyle={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, fontFamily: SANS, fontSize: 12 }}
             labelFormatter={(v, payload) => (payload && payload[0] ? `${payload[0].payload.symbol} \u00b7 ${fmtDateDisplay(payload[0].payload.date)}` : v)}
             formatter={(value) => [fmtR(value), "Cumulative R"]}
+            cursor={{ stroke: C.faint, strokeWidth: 1 }}
           />
           <ReferenceLine y={0} stroke={C.line} />
           <Area type="monotone" dataKey="cum" stroke={color} strokeWidth={2} fill="url(#equityFill)" dot={false} activeDot={{ r: 4 }} />
@@ -1474,6 +1475,18 @@ function EquityCurve({ trades }) {
   );
 }
 
+function TradeRTooltip({ active, payload }) {
+  const C = useTheme();
+  if (!active || !payload || !payload.length) return null;
+  const d = payload[0].payload;
+  const color = d.r >= 0 ? C.sage : C.rustRed;
+  return (
+    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: "9px 12px", fontFamily: SANS, fontSize: 12, boxShadow: C.shadowPopover }}>
+      <div style={{ color: C.muted, marginBottom: 3 }}>{d.symbol} &middot; {fmtDateDisplay(d.date)}</div>
+      <div style={{ color, fontWeight: 700, fontSize: 13 }}>{fmtR(d.r)}</div>
+    </div>
+  );
+}
 function TradeRBarChart({ trades }) {
   const C = useTheme();
   const data = useMemo(() => {
@@ -1487,11 +1500,7 @@ function TradeRBarChart({ trades }) {
           <CartesianGrid stroke={C.lineSoft} strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="index" tick={{ fontFamily: SANS, fontSize: 11, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
           <YAxis tick={{ fontFamily: MONO, fontSize: 11, fill: C.muted }} axisLine={false} tickLine={false} width={40} />
-          <Tooltip
-            contentStyle={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, fontFamily: SANS, fontSize: 12 }}
-            labelFormatter={(v, payload) => (payload && payload[0] ? `${payload[0].payload.symbol} \u00b7 ${fmtDateDisplay(payload[0].payload.date)}` : v)}
-            formatter={(value) => [fmtR(value), "R"]}
-          />
+          <Tooltip content={<TradeRTooltip />} cursor={{ fill: C.line, opacity: 0.18 }} />
           <ReferenceLine y={0} stroke={C.line} />
           <Bar dataKey="r" radius={[3, 3, 3, 3]}>
             {data.map((d, i) => (
@@ -1607,6 +1616,19 @@ function CalendarHeatmap({ trades, year }) {
   );
 }
 
+function SymbolTooltip({ active, payload }) {
+  const C = useTheme();
+  if (!active || !payload || !payload.length) return null;
+  const d = payload[0].payload;
+  const color = d.totalR >= 0 ? C.sage : C.rustRed;
+  return (
+    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: "9px 12px", fontFamily: SANS, fontSize: 12, boxShadow: C.shadowPopover }}>
+      <div style={{ color: C.ink, fontWeight: 700, marginBottom: 3 }}>{d.symbol}</div>
+      <div style={{ color, fontWeight: 700, fontSize: 13 }}>{fmtR(d.totalR)}</div>
+      <div style={{ color: C.muted, marginTop: 3 }}>{d.winRate.toFixed(0)}% win rate &middot; {d.count} trade{d.count === 1 ? "" : "s"}</div>
+    </div>
+  );
+}
 function SymbolPerformanceChart({ trades }) {
   const C = useTheme();
   const data = useMemo(() => computeSymbolStats(trades), [trades]);
@@ -1623,13 +1645,7 @@ function SymbolPerformanceChart({ trades }) {
             tick={{ fontFamily: SANS, fontSize: 12.5, fontWeight: 700, fill: C.ink }}
             axisLine={false} tickLine={false}
           />
-          <Tooltip
-            contentStyle={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, fontFamily: SANS, fontSize: 12 }}
-            formatter={(value, name, props) => [
-              `${fmtR(props.payload.totalR)} \u00b7 ${props.payload.winRate.toFixed(0)}% win rate \u00b7 ${props.payload.count} trade${props.payload.count === 1 ? "" : "s"}`,
-              "Total R",
-            ]}
-          />
+          <Tooltip content={<SymbolTooltip />} cursor={{ fill: C.line, opacity: 0.18 }} />
           <ReferenceLine x={0} stroke={C.line} />
           <Bar dataKey="totalR" radius={[3, 3, 3, 3]} barSize={18}>
             {data.map((d, i) => (
@@ -1685,6 +1701,20 @@ function Dashboard({ trades }) {
     background: C.paper, color: C.ink, cursor: "pointer",
   });
 
+  // Only one chart's tooltip should be visible at a time. Recharts keeps its
+  // hover/tap state internally per-chart, so tapping chart B doesn't close
+  // chart A's tooltip on its own. We force-remount every OTHER chart whenever
+  // a new one is tapped, which resets its internal tooltip state to closed.
+  const [activeChart, setActiveChart] = useState(null);
+  const [chartGen, setChartGen] = useState(0);
+  const activateChart = (id) => {
+    setActiveChart((prev) => {
+      if (prev !== id) setChartGen((g) => g + 1);
+      return id;
+    });
+  };
+  const chartKey = (id) => (activeChart === id ? `${id}-active` : `${id}-idle-${chartGen}`);
+
   return (
     <div style={{ width: "100%", maxWidth: "100%" }}>
       <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginBottom: 10, alignItems: "center" }}>
@@ -1725,31 +1755,37 @@ function Dashboard({ trades }) {
           </div>
 
           <div style={{ marginBottom: 22 }}>
-            <div style={{ padding: "0 4px" }}>
+            <div style={{ padding: "0 4px", marginBottom: 16 }}>
               <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Equity Curve</div>
               <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Cumulative R, trade by trade</div>
             </div>
-            <EquityCurve trades={filteredTrades} />
+            <div onPointerDown={() => activateChart("equity")}>
+              <EquityCurve key={chartKey("equity")} trades={filteredTrades} />
+            </div>
           </div>
 
           <div style={{ marginBottom: 22 }}>
-            <div style={{ padding: "0 4px" }}>
+            <div style={{ padding: "0 4px", marginBottom: 16 }}>
               <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>R per Trade</div>
               <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Green = win, red = loss</div>
             </div>
-            <TradeRBarChart trades={filteredTrades} />
+            <div onPointerDown={() => activateChart("rbar")}>
+              <TradeRBarChart key={chartKey("rbar")} trades={filteredTrades} />
+            </div>
           </div>
 
           <div style={{ marginBottom: 22 }}>
-            <div style={{ padding: "0 4px" }}>
+            <div style={{ padding: "0 4px", marginBottom: 16 }}>
               <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Performance by Symbol</div>
               <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Total R per simbol, diurutkan dari yang paling profitable</div>
             </div>
-            <SymbolPerformanceChart trades={filteredTrades} />
+            <div onPointerDown={() => activateChart("symbol")}>
+              <SymbolPerformanceChart key={chartKey("symbol")} trades={filteredTrades} />
+            </div>
           </div>
 
           <div style={{ marginBottom: 18, marginTop: -6 }}>
-  <div style={{ padding: "0 4px" }}>
+  <div style={{ padding: "0 4px", marginBottom: 16 }}>
     <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
     <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Score 0–100 per dimension</div>
   </div>
@@ -1782,7 +1818,7 @@ function Dashboard({ trades }) {
 
           {availableYears.length > 0 && (
             <div style={{ marginTop: 22 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", padding: "0 4px", marginBottom: 10, flexWrap: "wrap", gap: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", padding: "0 4px", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
                 <div>
                   <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trade Calendar</div>
                   <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Daily P&amp;L for {heatmapYear}</div>
