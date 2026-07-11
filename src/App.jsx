@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
+import React, { useState, useEffect, useLayoutEffect, useMemo, useRef, createContext, useContext } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "motion/react";
 import {
   Trash2, Plus, PencilLine, BookOpen, LayoutDashboard,
@@ -1067,7 +1068,7 @@ function DateField({ value, onChange, align = "left" }) {
   // sempit kayak di form Custom Range). Posisi atasnya dihitung dari
   // bounding rect field-nya sendiri, dan dihitung ulang tiap scroll/resize
   // selama kalender terbuka, supaya tetap nempel tepat di bawah field-nya.
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!open) { setMobilePos(null); return; }
 
     function recompute() {
@@ -1086,6 +1087,88 @@ function DateField({ value, onChange, align = "left" }) {
     };
   }, [open]);
 
+  const popupContent = (
+    <AnimatePresence>
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+            style={mobilePos ? {
+              position: "fixed", top: mobilePos.top,
+              left: "50%", right: "auto", transform: "translateX(-50%)",
+              zIndex: 30, width: "min(80vw, 260px)", maxWidth: 260,
+              background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
+              boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
+            } : {
+              position: "absolute", top: "calc(100% + 6px)",
+              left: align === "left" ? 0 : "auto",
+              right: align === "right" ? 0 : "auto",
+              zIndex: 30, width: "min(300px, calc(100vw - 32px))",
+              background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
+              boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
+            }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <button type="button" onClick={prevMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
+              <ChevronLeft size={18} />
+            </button>
+            <div style={{ fontWeight: 700, fontSize: 15, fontFamily: SANS }}>{MONTHS[viewMonth]} {viewYear}</div>
+            <button type="button" onClick={nextMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
+              <ChevronRight size={18} />
+              </button>
+          </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 2 }}>
+                        {WEEKDAYS.map((w, i) => (
+              <div key={i} style={{ textAlign: "center", fontSize: 12, color: C.muted, fontWeight: 600, padding: "4px 0" }}>{w}</div>
+            ))}
+          </div>
+          <div style={{ position: "relative", overflow: "hidden" }}>
+            <AnimatePresence initial={false} custom={slideDir} mode="popLayout">
+              <motion.div
+                key={`${viewYear}-${viewMonth}`}
+                custom={slideDir}
+                variants={calendarSlideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                style={{
+                  width: "100%",
+                  display: "grid", gridTemplateColumns: "repeat(7, 1fr)",
+                  gridAutoRows: "1fr", gridTemplateRows: `repeat(${CALENDAR_ROWS}, 1fr)`,
+                  gap: 2,
+                }}
+              >
+                {cells.map((d, i) => {
+                  if (!d) return <div key={i} style={{ aspectRatio: "1" }} />;
+                  const iso = `${viewYear}-${pad(viewMonth + 1)}-${pad(d)}`;
+                  const isSelected = iso === value;
+                  return (
+                    <button
+                      type="button"
+                      key={i}
+                      onClick={() => selectDay(d)}
+                      style={{
+                        aspectRatio: "1", border: "none", borderRadius: 0, cursor: "pointer",
+                        background: isSelected ? C.btnAccent : "transparent",
+                        color: isSelected ? C.btnAccentTextActive : C.ink,
+                        fontSize: 14, fontFamily: SANS,
+                      }}
+                    >{d}</button>
+                  );
+                })}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <div ref={wrapperRef} style={{ position: "relative" }}>
       <button
@@ -1101,85 +1184,7 @@ function DateField({ value, onChange, align = "left" }) {
       >
         {value ? fmtDateDisplay(value) : "Select date"}
       </button>
-      <AnimatePresence>
-        {open && (
-          <>
-            <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-              style={mobilePos ? {
-                position: "fixed", top: mobilePos.top,
-                left: "50%", right: "auto", transform: "translateX(-50%)",
-                zIndex: 30, width: "min(80vw, 260px)", maxWidth: 260,
-                background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
-                boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
-              } : {
-                position: "absolute", top: "calc(100% + 6px)",
-                left: align === "left" ? 0 : "auto",
-                right: align === "right" ? 0 : "auto",
-                zIndex: 30, width: "min(300px, calc(100vw - 32px))",
-                background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
-                boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
-              }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-              <button type="button" onClick={prevMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
-                <ChevronLeft size={18} />
-              </button>
-              <div style={{ fontWeight: 700, fontSize: 15, fontFamily: SANS }}>{MONTHS[viewMonth]} {viewYear}</div>
-              <button type="button" onClick={nextMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
-                <ChevronRight size={18} />
-                </button>
-            </div>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 2 }}>
-                          {WEEKDAYS.map((w, i) => (
-                <div key={i} style={{ textAlign: "center", fontSize: 12, color: C.muted, fontWeight: 600, padding: "4px 0" }}>{w}</div>
-              ))}
-            </div>
-            <div style={{ position: "relative", overflow: "hidden" }}>
-              <AnimatePresence initial={false} custom={slideDir} mode="popLayout">
-                <motion.div
-                  key={`${viewYear}-${viewMonth}`}
-                  custom={slideDir}
-                  variants={calendarSlideVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  style={{
-                    width: "100%",
-                    display: "grid", gridTemplateColumns: "repeat(7, 1fr)",
-                    gridAutoRows: "1fr", gridTemplateRows: `repeat(${CALENDAR_ROWS}, 1fr)`,
-                    gap: 2,
-                  }}
-                >
-                  {cells.map((d, i) => {
-                    if (!d) return <div key={i} style={{ aspectRatio: "1" }} />;
-                    const iso = `${viewYear}-${pad(viewMonth + 1)}-${pad(d)}`;
-                    const isSelected = iso === value;
-                    return (
-                      <button
-                        type="button"
-                        key={i}
-                        onClick={() => selectDay(d)}
-                        style={{
-                          aspectRatio: "1", border: "none", borderRadius: 0, cursor: "pointer",
-                          background: isSelected ? C.btnAccent : "transparent",
-                          color: isSelected ? C.btnAccentTextActive : C.ink,
-                          fontSize: 14, fontFamily: SANS,
-                        }}
-                      >{d}</button>
-                    );
-                  })}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {mobilePos ? createPortal(popupContent, document.body) : popupContent}
     </div>
   );
 }
