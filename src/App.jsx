@@ -181,7 +181,7 @@ function Field({ label, children }) {
   return (
     <div style={{ marginBottom: 22 }}>
       <div style={{
-        fontFamily: SANS, fontSize: 13, fontWeight: 600, letterSpacing: "0.04em",
+        fontFamily: SANS, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
         color: C.muted, marginBottom: 9, textTransform: "uppercase",
       }}>{label}</div>
       {children}
@@ -228,7 +228,7 @@ function RiskRPanel({ form, updateForm }) {
           return (
             <div key={key} style={{ flex: 1 }}>
               <div style={{
-                fontFamily: SANS, fontSize: 13, fontWeight: 600, letterSpacing: "0.04em",
+                fontFamily: SANS, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
                 color: C.muted, marginBottom: 9, textTransform: "uppercase",
               }}>{label}</div>
               <button
