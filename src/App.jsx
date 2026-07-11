@@ -1062,23 +1062,31 @@ function DateField({ value, onChange, align = "left" }) {
     if (viewMonth === 11) { setViewMonth(0); setViewYear(viewYear + 1); } else setViewMonth(viewMonth + 1);
   }
 
-  // Kalender selalu tampil sebagai popup "mobile style": fixed di tengah
-  // layar (bukan nempel di bawah field), biar simpel dan konsisten di
-  // semua ukuran layar. Selalu di-portal ke <body> supaya tidak kepotong
-  // overflow/parent manapun.
+  // Kalender selalu tampil sebagai popup "mobile style": overlay fixed
+  // full-screen yang nge-center isinya pakai flexbox (bukan top/left 50%
+  // + translate), supaya nggak meleset di browser/HP manapun. Selalu
+  // di-portal ke <body> supaya tidak kepotong overflow/parent manapun —
+  // makanya warna teks (C.ink) juga di-set eksplisit di sini, karena di
+  // luar #root popup ini nggak lagi otomatis ikut warna tema app.
   const popupContent = (
     <AnimatePresence>
       {open && (
-        <>
-          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
+        <div
+          onClick={() => setOpen(false)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 29,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: 16, boxSizing: "border-box",
+          }}
+        >
           <motion.div
+            onClick={(e) => e.stopPropagation()}
             initial={{ opacity: 0, scale: 0.94, filter: "blur(14px)" }}
             animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
             exit={{ opacity: 0, scale: 0.94, filter: "blur(14px)" }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             style={{
-              position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
-              zIndex: 30, width: "min(85vw, 280px)", maxWidth: 280,
+              width: "min(85vw, 280px)", maxWidth: 280, color: C.ink,
               background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
               boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
             }}>
@@ -1135,7 +1143,7 @@ function DateField({ value, onChange, align = "left" }) {
             </AnimatePresence>
           </div>
           </motion.div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   );
