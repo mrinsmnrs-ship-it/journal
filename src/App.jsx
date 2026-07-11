@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "motion/react";
 import {
   Trash2, Plus, PencilLine, BookOpen, LayoutDashboard,
   Sun, Moon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, LogOut, MessageCircle,
@@ -29,47 +29,46 @@ import "./PillToggle.css";
 // GitHub bersandar pada border tipis, bukan shadow, untuk kartu/panel biasa.
 // Shadow cuma muncul di elemen yang "melayang" di atas halaman (dropdown, modal).
 const SHADOW_LIGHT = {
-  shadowCard: "0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)",
-  shadowRaised: "0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)",
-  shadowPopover: "0 8px 24px rgba(0,0,0,0.12)",
-  shadowModal: "0 16px 40px rgba(0,0,0,0.18)",
+  shadowCard: "none",
+  shadowRaised: "0 1px 0 rgba(31,35,40,0.04)",
+  shadowPopover: "0 8px 24px rgba(140,149,159,0.2)",
+  shadowModal: "0 8px 24px rgba(140,149,159,0.3)",
 };
 const SHADOW_DARK = {
-  shadowCard: "0 1px 2px rgba(0,0,0,0.3), 0 2px 10px rgba(0,0,0,0.35)",
-  shadowRaised: "0 1px 2px rgba(0,0,0,0.3), 0 2px 10px rgba(0,0,0,0.35)",
-  shadowPopover: "0 8px 24px rgba(0,0,0,0.5)",
-  shadowModal: "0 16px 40px rgba(0,0,0,0.6)",
+  shadowCard: "none",
+  shadowRaised: "none",
+  shadowPopover: "0 8px 24px rgba(1,4,9,0.85)",
+  shadowModal: "0 8px 24px rgba(1,4,9,0.9)",
 };
 
-// ---- Design tokens : "Lyra" palette (blue primary + teal accent) ----
 const LIGHT = {
-  bg: "#ffffff", paper: "#ffffff", paperSoft: "#f5f5f5",
-  paperSoftLight: "#f5f5f5", paperSoftStat: "#f5f5f5",
-  ink: "#0a0a0a", inkSoft: "#737373", muted: "#737373", faint: "#a3a3a3",
-  line: "#e5e5e5", lineSoft: "#ececec",
-  clay: "#2563eb", clayDeep: "#1d4ed8", clayWash: "#dbeafe", clayOnWhite: "#2563eb",
-  sage: "#0d9488", sageWash: "#ccfbf1", sageOnWhite: "#0d9488",
-  rustRed: "#dc2626", rustWash: "#fee2e2", rustOnWhite: "#dc2626", dangerBg: "#dc2626",
-  amber: "#b45309", amberWash: "#fef3c7", amberOnWhite: "#b45309",
-  inputBg: "#ffffff", inputText: "#0a0a0a", inputPlaceholder: "#a3a3a3", inputBorder: "#e5e5e5",
-  btnAccent: "#2563eb", btnAccentBorder: "#2563eb", btnAccentWash: "#dbeafe",
-  btnAccentText: "#2563eb", btnAccentTextActive: "#ffffff",
-  navActiveBg: "rgba(37, 99, 235, 0.1)",
+  bg: "#ffffff", paper: "#ffffff", paperSoft: "#f6f8fa",
+  paperSoftLight: "#f6f8fa", paperSoftStat: "#f6f8fa",
+  ink: "#1f2328", inkSoft: "#656d76", muted: "#656d76", faint: "#8c959f",
+  line: "#d0d7de", lineSoft: "#d8dee4",
+  clay: "#0969da", clayDeep: "#0552a5", clayWash: "#ddf4ff", clayOnWhite: "#0969da",
+  sage: "#1a7f37", sageWash: "#dafbe1", sageOnWhite: "#1a7f37",
+  rustRed: "#d1242f", rustWash: "#ffebe9", rustOnWhite: "#d1242f", dangerBg: "#d1242f",
+  amber: "#9a6700", amberWash: "#fff8c5", amberOnWhite: "#9a6700",
+  inputBg: "#ffffff", inputText: "#1f2328", inputPlaceholder: "#6e7781", inputBorder: "#d0d7de",
+  btnAccent: "#0969da", btnAccentBorder: "#0969da", btnAccentWash: "#ddf4ff",
+  btnAccentText: "#0969da", btnAccentTextActive: "#ffffff",
+  navActiveBg: "rgba(9, 105, 218, 0.1)",
   ...SHADOW_LIGHT,
 };
 const DARK = {
-  bg: "#0a0a0a", paper: "#171717", paperSoft: "#1f1f1f",
-  paperSoftLight: "#1f1f1f", paperSoftStat: "#1f1f1f",
-  ink: "#fafafa", inkSoft: "#a3a3a3", muted: "#a3a3a3", faint: "#737373",
-  line: "rgba(255,255,255,0.1)", lineSoft: "rgba(255,255,255,0.06)",
-  clay: "#3b82f6", clayDeep: "#2563eb", clayWash: "rgba(59,130,246,0.15)", clayOnWhite: "#60a5fa",
-  sage: "#2dd4bf", sageWash: "rgba(45,212,191,0.15)", sageOnWhite: "#2dd4bf",
-  rustRed: "#f87171", rustWash: "rgba(248,113,113,0.15)", rustOnWhite: "#f87171", dangerBg: "#f87171",
-  amber: "#fbbf24", amberWash: "rgba(251,191,36,0.15)", amberOnWhite: "#fbbf24",
-  inputBg: "#0a0a0a", inputText: "#fafafa", inputPlaceholder: "#737373", inputBorder: "rgba(255,255,255,0.15)",
-  btnAccent: "#3b82f6", btnAccentBorder: "#3b82f6", btnAccentWash: "rgba(59,130,246,0.15)",
-  btnAccentText: "#60a5fa", btnAccentTextActive: "#ffffff",
-  navActiveBg: "rgba(59, 130, 246, 0.15)",
+  bg: "#0d1117", paper: "#0d1117", paperSoft: "#161b22",
+  paperSoftLight: "#161b22", paperSoftStat: "#161b22",
+  ink: "#e6edf3", inkSoft: "#848d97", muted: "#848d97", faint: "#6e7681",
+  line: "#30363d", lineSoft: "#21262d",
+  clay: "#2f81f7", clayDeep: "#1f6feb", clayWash: "rgba(56,139,253,0.15)", clayOnWhite: "#2f81f7",
+  sage: "#3fb950", sageWash: "rgba(46,160,67,0.15)", sageOnWhite: "#3fb950",
+  rustRed: "#f85149", rustWash: "rgba(248,81,73,0.15)", rustOnWhite: "#f85149", dangerBg: "#f85149",
+  amber: "#d29922", amberWash: "rgba(187,128,9,0.15)", amberOnWhite: "#d29922",
+  inputBg: "#0d1117", inputText: "#e6edf3", inputPlaceholder: "#6e7681", inputBorder: "#30363d",
+  btnAccent: "#1f6feb", btnAccentBorder: "#1f6feb", btnAccentWash: "rgba(56,139,253,0.15)",
+  btnAccentText: "#2f81f7", btnAccentTextActive: "#ffffff",
+  navActiveBg: "rgba(47, 129, 247, 0.15)",
   ...SHADOW_DARK,
 };
 
@@ -187,7 +186,7 @@ function PillToggle({ label, active, onClick }) {
       data-active={active}
       className="pill-toggle"
       style={{
-        flex: 1, height: 40, padding: 0, borderRadius: 12,
+        flex: 1, height: 40, padding: 0, borderRadius: 6,
         border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
         background: C.paper, fontFamily: SANS, fontWeight: 700, fontSize: 16,
         "--pill-fill": C.btnAccent,
@@ -214,7 +213,7 @@ function Chip({ label, active, onClick }) {
       className="pill-toggle"
       style={{
         fontFamily: SANS, fontSize: 14, fontWeight: 600,
-        padding: "9px 17px", borderRadius: 12,
+        padding: "9px 17px", borderRadius: 6,
         border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
         background: C.paper,
         cursor: "pointer",
@@ -247,7 +246,7 @@ function useInputStyle() {
   const C = useTheme();
   return {
     width: "100%", boxSizing: "border-box", background: C.inputBg,
-    border: `1px solid ${C.inputBorder}`, borderRadius: 12, padding: "14px 16px",
+    border: `1px solid ${C.inputBorder}`, borderRadius: 6, padding: "14px 16px",
     color: C.inputText, fontFamily: SANS, fontSize: 16, outline: "none",
     boxShadow: "none",
   };
@@ -292,7 +291,7 @@ function RiskRPanel({ form, updateForm }) {
                 style={{
                   width: "100%", boxSizing: "border-box", background: C.inputBg,
                   border: `1px solid ${active ? C.btnAccentBorder : C.inputBorder}`,
-                  borderRadius: 12, height: 40, padding: "0 6px", cursor: "pointer",
+                  borderRadius: 6, height: 40, padding: "0 6px", cursor: "pointer",
                   display: "flex", justifyContent: "center", alignItems: "center", gap: 1,
                 }}
               >
@@ -328,7 +327,7 @@ function RiskRPanel({ form, updateForm }) {
             type="button"
             onClick={() => adjust(delta)}
             style={{
-              width: 30, height: 26, padding: 0, borderRadius: 8,
+              width: 30, height: 26, padding: 0, borderRadius: 4,
               border: `1px solid ${C.line}`, background: C.paper,
               color: C.inkSoft, fontWeight: 600, fontSize: 10, cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -351,7 +350,7 @@ function Tag({ text }) {
     <span style={{
       fontFamily: SANS, fontSize: 12, fontWeight: 400, color: C.muted,
       background: C.paperSoft, border: `1px solid ${C.line}`,
-      borderRadius: 12, padding: "6px 13px",
+      borderRadius: 6, padding: "6px 13px",
     }}>
       {text}
     </span>
@@ -382,7 +381,7 @@ function ThemeToggle({ mode, onToggle, compact }) {
       title={`Switch to ${nextLabel} theme`}
       style={{
         display: "flex", alignItems: "center", gap: 9,
-        background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 12,
+        background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 6,
         padding: compact ? "9px" : "10px 16px", cursor: "pointer", color: C.inkSoft,
         fontFamily: SANS, fontSize: 14, fontWeight: 600,
       }}
@@ -821,7 +820,7 @@ function RJournal({ user }) {
           .app-footer-mobile { display: none; }
 
           .nav-item-desktop {
-            display:flex; align-items:center; padding: 11px 12px; border-radius: 12px;
+            display:flex; align-items:center; padding: 11px 12px; border-radius: 6px;
             font-family: ${SANS}; font-size:16px; font-weight:600; letter-spacing: -0.015em;
             cursor:pointer; border:none; background:transparent;
             width: calc(100% - 16px); text-align:left; margin-bottom:2px; transition: color .12s ease, background .12s ease;
@@ -911,7 +910,7 @@ function RJournal({ user }) {
                 title="Log out"
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 12,
+                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 6,
                   padding: "10px 13px", cursor: "pointer", color: C.inkSoft,
                 }}
               >
@@ -940,7 +939,7 @@ function RJournal({ user }) {
                 title="Log out"
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 12,
+                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 6,
                   padding: 8, cursor: "pointer", color: C.inkSoft,
                 }}
               >
@@ -996,9 +995,9 @@ const CALENDAR_ROWS = 6;
 const CALENDAR_CELLS = CALENDAR_ROWS * 7;
 
 const calendarSlideVariants = {
-  enter: { opacity: 0 },
-  center: { opacity: 1 },
-  exit: { opacity: 0 },
+  enter: (dir) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0 }),
 };
 
 function DateField({ value, onChange }) {
@@ -1042,7 +1041,7 @@ function DateField({ value, onChange }) {
         onClick={() => setOpen((o) => !o)}
         style={{
           width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
-          borderRadius: 12, height: 40, padding: "0 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
+          borderRadius: 6, height: 40, padding: "0 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
           textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center",
           boxShadow: "none",
         }}
@@ -1054,7 +1053,7 @@ function DateField({ value, onChange }) {
           <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
           <div style={{
             position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: 300,
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 12, padding: 16,
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: 16,
             boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
@@ -1072,14 +1071,15 @@ function DateField({ value, onChange }) {
               ))}
             </div>
             <div style={{ position: "relative", overflow: "hidden" }}>
-              <AnimatePresence initial={false} mode="popLayout">
+              <AnimatePresence initial={false} custom={slideDir} mode="popLayout">
                 <motion.div
                   key={`${viewYear}-${viewMonth}`}
+                  custom={slideDir}
                   variants={calendarSlideVariants}
                   initial="enter"
                   animate="center"
                   exit="exit"
-                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   style={{
                     width: "100%",
                     display: "grid", gridTemplateColumns: "repeat(7, 1fr)",
@@ -1097,7 +1097,7 @@ function DateField({ value, onChange }) {
                         key={i}
                         onClick={() => selectDay(d)}
                         style={{
-                          aspectRatio: "1", border: "none", borderRadius: 12, cursor: "pointer",
+                          aspectRatio: "1", border: "none", borderRadius: 6, cursor: "pointer",
                           background: isSelected ? C.btnAccent : "transparent",
                           color: isSelected ? C.btnAccentTextActive : C.ink,
                           fontSize: 14, fontFamily: SANS,
@@ -1176,7 +1176,7 @@ function TagSelect({ value, onChange, options, onAddOption, placeholder, upperca
           <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
           <div style={{
             position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: "100%", minWidth: 220,
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 12, padding: 8,
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: 8,
             boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
             maxHeight: 240, overflowY: "auto",
           }}>
@@ -1225,7 +1225,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
   const C = useTheme();
   const inputStyle = useInputStyle();
   return (
-    <div style={{ background: C.paperSoftLight, borderRadius: 12, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
+    <div style={{ background: C.paperSoftLight, borderRadius: 6, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
       <Field label="Date">
         <DateField value={form.date} onChange={(d) => updateForm("date", d)} />
       </Field>
@@ -1294,7 +1294,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
         data-active={canSave}
         className="pill-toggle"
         style={{
-          width: "100%", padding: "16px 0", borderRadius: 12, border: "none",
+          width: "100%", padding: "16px 0", borderRadius: 6, border: "none",
           background: C.lineSoft,
           fontWeight: 700, fontSize: 17, cursor: canSave ? "pointer" : "not-allowed",
           boxShadow: canSave ? C.shadowCard : "none",
@@ -1325,7 +1325,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
         <div style={{ fontSize: 16, marginBottom: 16 }}>No trades logged yet.</div>
         <button onClick={onGoLog} style={{
           display: "inline-flex", alignItems: "center", gap: 8, background: C.clayWash,
-          border: `1px solid ${C.clay}`, color: C.clayOnWhite, borderRadius: 12, padding: "12px 20px",
+          border: `1px solid ${C.clay}`, color: C.clayOnWhite, borderRadius: 6, padding: "12px 20px",
           fontWeight: 700, fontSize: 15, cursor: "pointer",
         }}><Plus size={18} /> Log your first trade</button>
       </div>
@@ -1339,7 +1339,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
         return (
           <div key={t.id} style={{
             background: C.paperSoftLight, border: `1px solid ${C.line}`,
-            borderRadius: 12, padding: "20px 22px", boxShadow: C.shadowCard,
+            borderRadius: 6, padding: "20px 22px", boxShadow: C.shadowCard,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
   <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
@@ -1372,7 +1372,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
           <div style={{
             position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
             zIndex: 40, width: "min(360px, calc(100vw - 48px))",
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 12, padding: 24,
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: 24,
             boxShadow: C.shadowModal,
           }}>
             <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, marginBottom: 9, letterSpacing: "-0.01em", color: C.ink }}>Delete this trade?</div>
@@ -1383,14 +1383,14 @@ function JournalList({ trades, onDelete, onGoLog }) {
               <button
                 onClick={() => setConfirmId(null)}
                 style={{
-                  flex: 1, padding: "12px 0", borderRadius: 12, border: `1px solid ${C.line}`,
+                  flex: 1, padding: "12px 0", borderRadius: 6, border: `1px solid ${C.line}`,
                   background: C.paperSoft, color: C.ink, fontWeight: 700, fontSize: 15.5, cursor: "pointer",
                 }}
               >No</button>
               <button
                 onClick={() => { onDelete(confirmTrade.id); setConfirmId(null); }}
                 style={{
-                  flex: 1, padding: "12px 0", borderRadius: 12, border: "none",
+                  flex: 1, padding: "12px 0", borderRadius: 6, border: "none",
                   background: C.dangerBg, color: "#FFFFFF", fontWeight: 700, fontSize: 15.5, cursor: "pointer",
                 }}
               >Yes, Delete</button>
@@ -1422,7 +1422,7 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
 function StatCard({ label, value, color }) {
   const C = useTheme();
   return (
-    <div style={{ background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 12, padding: "13px 15px", boxShadow: C.shadowCard }}>
+    <div style={{ background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 6, padding: "13px 15px", boxShadow: C.shadowCard }}>
       <div style={{ fontFamily: SANS, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.04em", color: C.muted, textTransform: "uppercase", marginBottom: 5 }}>{label}</div>
       <div style={{ fontFamily: SANS, fontSize: 19, fontWeight: 700, color: C.ink }}>{value}</div>
     </div>
@@ -1447,7 +1447,7 @@ function EquityCurve({ trades }) {
           <XAxis dataKey="index" tick={{ fontFamily: SANS, fontSize: 11, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
           <YAxis tick={{ fontFamily: MONO, fontSize: 11, fill: C.muted }} axisLine={false} tickLine={false} width={40} />
           <Tooltip
-            contentStyle={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 12, fontFamily: SANS, fontSize: 12 }}
+            contentStyle={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, fontFamily: SANS, fontSize: 12 }}
             labelFormatter={(v, payload) => (payload && payload[0] ? `${payload[0].payload.symbol} \u00b7 ${fmtDateDisplay(payload[0].payload.date)}` : v)}
             formatter={(value) => [fmtR(value), "Cumulative R"]}
             cursor={{ stroke: C.faint, strokeWidth: 1 }}
@@ -1466,7 +1466,7 @@ function TradeRTooltip({ active, payload }) {
   const d = payload[0].payload;
   const color = d.r >= 0 ? C.sage : C.rustRed;
   return (
-    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 12, padding: "9px 12px", fontFamily: SANS, fontSize: 12, boxShadow: C.shadowPopover }}>
+    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: "9px 12px", fontFamily: SANS, fontSize: 12, boxShadow: C.shadowPopover }}>
       <div style={{ color: C.muted, marginBottom: 3 }}>{d.symbol} &middot; {fmtDateDisplay(d.date)}</div>
       <div style={{ color, fontWeight: 700, fontSize: 13 }}>{fmtR(d.r)}</div>
     </div>
@@ -1607,7 +1607,7 @@ function SymbolTooltip({ active, payload }) {
   const d = payload[0].payload;
   const color = d.totalR >= 0 ? C.sage : C.rustRed;
   return (
-    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 12, padding: "9px 12px", fontFamily: SANS, fontSize: 12, boxShadow: C.shadowPopover }}>
+    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: "9px 12px", fontFamily: SANS, fontSize: 12, boxShadow: C.shadowPopover }}>
       <div style={{ color: C.ink, fontWeight: 700, marginBottom: 3 }}>{d.symbol}</div>
       <div style={{ color, fontWeight: 700, fontSize: 13 }}>{fmtR(d.totalR)}</div>
       <div style={{ color: C.muted, marginTop: 3 }}>{d.winRate.toFixed(0)}% win rate &middot; {d.count} trade{d.count === 1 ? "" : "s"}</div>
@@ -1664,7 +1664,7 @@ function YearStepper({ year, years, onChange }) {
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "center",
         height: stepHeight, minWidth: 90, padding: "0 14px",
-        background: C.inputBg, border: `1px solid ${C.btnAccentBorder}`, borderRadius: 12,
+        background: C.inputBg, border: `1px solid ${C.btnAccentBorder}`, borderRadius: 6,
       }}>
         <Counter
           value={year}
@@ -1681,7 +1681,7 @@ function YearStepper({ year, years, onChange }) {
       </div>
       <div style={{
         display: "flex", flexDirection: "column", height: stepHeight, width: 32,
-        borderRadius: 12, overflow: "hidden", border: `1px solid ${C.line}`,
+        borderRadius: 6, overflow: "hidden", border: `1px solid ${C.line}`,
       }}>
         <button type="button" onClick={goUp} disabled={!canUp} style={{ ...btnStyle(canUp), borderBottom: `1px solid ${C.line}` }}>
           <ChevronUp size={14} strokeWidth={2.5} />
@@ -1694,48 +1694,77 @@ function YearStepper({ year, years, onChange }) {
   );
 }
 
-// ---- Bottom nav (mobile): clean icon + label pill, active state via background + indicator bar ----
-function MobileDockItem({ label, icon: Icon, active, onClick, registerRef }) {
+// ---- Bottom nav (mobile) with a Dock-style magnify effect, but text labels ----
+// Adapted from the reactbits.dev "Dock" pattern: items scale up the closer
+// the pointer/finger gets to their center. On touch devices there's no
+// hover, so we track the live touch position while the finger is dragging
+// across the bar (onTouchMove) and relax back to normal size on release.
+function MobileDockItem({ label, active, onClick, mouseX, spring, distance, magnification, registerRef }) {
   const C = useTheme();
+  const localRef = useRef(null);
+  const setRef = (el) => {
+    localRef.current = el;
+    if (registerRef) registerRef(el);
+  };
+  const mouseDistance = useTransform(mouseX, (val) => {
+    const rect = localRef.current?.getBoundingClientRect() ?? { x: 0, width: 60 };
+    return val - rect.x - rect.width / 2;
+  });
+  const targetScale = useTransform(mouseDistance, [-distance, 0, distance], [1, magnification, 1]);
+  const scale = useSpring(targetScale, spring);
+
   return (
-    <button
-      ref={registerRef}
+    <motion.button
+      ref={setRef}
       onClick={onClick}
       style={{
-        display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+        scale,
+        transformOrigin: "bottom center",
         background: active ? C.navActiveBg : "transparent",
         border: "none", cursor: "pointer",
-        padding: "7px 14px 6px", borderRadius: 12,
-        color: active ? C.btnAccent : C.faint,
-        transition: "color .15s ease, background .15s ease",
+        padding: "6px 10px 4px", borderRadius: 6,
+        color: active ? C.ink : C.faint,
       }}
     >
-      {Icon && <Icon size={19} strokeWidth={active ? 2.3 : 2} />}
-      <span style={{ fontFamily: SANS, fontSize: 11, fontWeight: 600, letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
+      <span style={{ fontFamily: SANS, fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
         {label}
       </span>
-    </button>
+    </motion.button>
   );
 }
 
 function MobileDockNav({ items, activeKey, onSelect, registerItemRef, indicator, accentColor }) {
+  const mouseX = useMotionValue(Infinity);
+  const spring = { mass: 0.15, stiffness: 160, damping: 14 };
+
   return (
-    <div className="bottom-nav" style={{ alignItems: "center" }}>
+    <div
+      className="bottom-nav"
+      style={{ alignItems: "center" }}
+      onMouseMove={(e) => mouseX.set(e.clientX)}
+      onMouseLeave={() => mouseX.set(Infinity)}
+      onTouchMove={(e) => { if (e.touches && e.touches[0]) mouseX.set(e.touches[0].clientX); }}
+      onTouchEnd={() => mouseX.set(Infinity)}
+      onTouchCancel={() => mouseX.set(Infinity)}
+    >
       {items.map((n) => (
         <MobileDockItem
           key={n.key}
           label={n.label}
-          icon={n.icon}
           active={activeKey === n.key}
           onClick={() => onSelect(n.key)}
+          mouseX={mouseX}
+          spring={spring}
+          distance={85}
+          magnification={1.32}
           registerRef={(el) => registerItemRef(n.key, el)}
         />
       ))}
       <div style={{
-        position: "absolute", top: 0, height: 2.5, borderRadius: 2,
+        position: "absolute", top: 0, height: 3, borderRadius: 2,
         background: accentColor,
         left: indicator.left, width: indicator.width,
-        transition: "left .22s ease, width .22s ease",
+        transition: "left .28s cubic-bezier(.4,0,.2,1), width .28s cubic-bezier(.4,0,.2,1)",
       }} />
     </div>
   );
@@ -1779,7 +1808,7 @@ function Dashboard({ trades }) {
   }
 
   const selectStyle = (active) => ({
-    fontFamily: SANS, fontSize: 14, fontWeight: 600, padding: "9px 12px", borderRadius: 12,
+    fontFamily: SANS, fontSize: 14, fontWeight: 600, padding: "9px 12px", borderRadius: 6,
     border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
     background: C.paper, color: C.ink, cursor: "pointer",
   });
@@ -1884,7 +1913,7 @@ function Dashboard({ trades }) {
             </div>
           </div>
           <SectionLabel text="By Rules Compliance" />
-          <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 12, padding: "4px 18px", boxShadow: C.shadowCard }}>
+          <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 6, padding: "4px 18px", boxShadow: C.shadowCard }}>
   {["Yes", "Partial", "No"].map((r, i) => {
     const d = stats.byRules[r];
     const avg = d.count ? d.total / d.count : 0;
@@ -1908,7 +1937,7 @@ function Dashboard({ trades }) {
                 </div>
                 <YearStepper year={heatmapYear} years={availableYears} onChange={setHeatmapYear} />
               </div>
-              <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 12, padding: "14px 18px", boxShadow: C.shadowCard }}>
+              <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 6, padding: "14px 18px", boxShadow: C.shadowCard }}>
                 <CalendarHeatmap trades={trades} year={heatmapYear} />
               </div>
             </div>
