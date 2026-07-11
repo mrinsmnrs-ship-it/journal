@@ -1082,8 +1082,12 @@ function DateField({ value, onChange, align = "left" }) {
   const popupContent = (
     <AnimatePresence>
       {open && (
-        <div
+        <motion.div
           onClick={() => setOpen(false)}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           style={{
             position: "fixed", inset: 0, zIndex: 29,
             display: "flex", alignItems: "center", justifyContent: "center",
@@ -1155,7 +1159,7 @@ function DateField({ value, onChange, align = "left" }) {
             </AnimatePresence>
           </div>
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
@@ -1441,9 +1445,13 @@ function JournalList({ trades, onDelete, onGoLog }) {
       })}
       <AnimatePresence>
         {confirmTrade && (
-          <div
+          <motion.div
             key="delete-confirm-overlay"
             onClick={() => setConfirmId(null)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             style={{
               position: "fixed", inset: 0, zIndex: 39,
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -1484,7 +1492,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
                 >Yes, Delete</button>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
