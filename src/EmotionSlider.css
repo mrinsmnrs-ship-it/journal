@@ -51,14 +51,14 @@
   height: 100%;
   flex-grow: 1;
   overflow: hidden;
-  border-radius: 9999px;
+  border-radius: 0;
   background-color: var(--es-track-bg);
 }
 
 .slider-range {
   position: absolute;
   height: 100%;
-  border-radius: 9999px;
+  border-radius: 0;
   background-color: var(--es-ink);
 }
 
@@ -83,7 +83,7 @@
   flex-shrink: 0;
   width: 34px;
   height: 34px;
-  border-radius: 50%;
+  border-radius: 0;
   background-color: var(--es-icon-bg);
   border: 1px solid var(--es-icon-border);
 }
