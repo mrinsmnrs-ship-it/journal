@@ -859,7 +859,7 @@ function RJournal({ user }) {
               display: block; position: static; flex-shrink: 0;
               overflow: hidden; white-space: nowrap;
               background: ${C.bg}; border-bottom: 1px solid ${C.line};
-              padding: 10px 0;
+              padding: 6px 0;
             }
             .perf-marquee-track {
               display: inline-flex; width: max-content;
@@ -965,7 +965,7 @@ function RJournal({ user }) {
 
           {/* Performance marquee — scrolling stats summary, mobile only */}
           <div className="perf-marquee">
-            <div className="perf-marquee-track" style={{ fontFamily: SANS, fontSize: 16, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.02em", color: C.inkSoft }}>
+            <div className="perf-marquee-track" style={{ fontFamily: SANS, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.02em", color: C.inkSoft, lineHeight: 1 }}>
               {[0, 1].map((rep) => (
                 <span key={rep} style={{ display: "inline-flex", alignItems: "center" }}>
                   <span style={{ padding: "0 14px" }}>Total Trades {stats.total}</span>
