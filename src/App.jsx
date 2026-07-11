@@ -188,7 +188,7 @@ function PillToggle({ label, active, onClick }) {
       style={{
         flex: 1, height: 40, padding: 0, borderRadius: 0,
         border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
-        background: C.paper, fontFamily: SANS, fontWeight: 700, fontSize: 16,
+        background: C.paperSoft, fontFamily: SANS, fontWeight: 700, fontSize: 16,
         "--pill-fill": C.btnAccent,
         "--pill-base-text": C.inkSoft,
         "--pill-active-text": C.btnAccentTextActive,
@@ -215,7 +215,7 @@ function Chip({ label, active, onClick }) {
         fontFamily: SANS, fontSize: 14, fontWeight: 600,
         padding: "9px 17px", borderRadius: 0,
         border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
-        background: C.paper,
+        background: C.paperSoft,
         cursor: "pointer",
         "--pill-fill": C.btnAccent,
         "--pill-base-text": C.inkSoft,
@@ -328,7 +328,7 @@ function RiskRPanel({ form, updateForm }) {
             onClick={() => adjust(delta)}
             style={{
               width: 30, height: 26, padding: 0, borderRadius: 0,
-              border: `1px solid ${C.line}`, background: C.paper,
+              border: `1px solid ${C.line}`, background: C.paperSoft,
               color: C.inkSoft, fontWeight: 600, fontSize: 10, cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontFamily: SANS, lineHeight: 1,
@@ -1662,7 +1662,7 @@ function YearStepper({ year, years, onChange }) {
 
   const btnStyle = (enabled) => ({
     flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-    background: C.paper, border: "none", padding: 0,
+    background: C.paperSoft, border: "none", padding: 0,
     color: enabled ? C.ink : C.faint, cursor: enabled ? "pointer" : "default",
   });
 
@@ -1817,7 +1817,7 @@ function Dashboard({ trades }) {
   const selectStyle = (active) => ({
     fontFamily: SANS, fontSize: 14, fontWeight: 600, padding: "9px 12px", borderRadius: 0,
     border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
-    background: C.paper, color: C.ink, cursor: "pointer",
+    background: C.paperSoft, color: C.ink, cursor: "pointer",
   });
 
   // Only one chart's tooltip should be visible at a time. Recharts keeps its
