@@ -7,28 +7,27 @@ import {
 import { auth } from "./firebase";
 import BrandMark from "./BrandMark.jsx";
 
-// Font stack unified with App.jsx (Inter — the closest freely-licensed
-// match to Claude's UI sans) and the same serif for the wordmark.
-const CHAT_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+// Font stack unified with App.jsx: GitHub's system font stack (Primer).
+const CHAT_FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif";
 const SERIF = CHAT_FONT;
 const SANS = CHAT_FONT;
 
-// Tokens copied 1:1 from App.jsx's LIGHT theme so the login page is
-// pixel-identical to the rest of the app — no drift, no separate palette.
+// Tokens: palet Primer (GitHub) versi light — login page dikunci light
+// regardless tema aktif, jadi selalu pakai warna GitHub light + aksen biru.
 const C = {
-  bg: "#e8e8e8", paper: "#FFFFFF", paperSoft: "#F0EEE6",
-  pageBg: "#e8e8e8",
-  ink: "#000000", inkSoft: "#000000", muted: "#000000", faint: "#000000",
-  line: "#000000", lineSoft: "#000000",
-  inputBg: "#F0EEE6",
-  clay: "#011627", clayDeep: "#011627",
-  btnAccent: "#011627", btnAccentDeep: "#011627",
-  rustRed: "#B85C50", rustWash: "#F1E2DE",
-  sage: "#788C5D", sageWash: "#E8ECE1",
-  shadowCard: "0 1px 2px rgba(20,20,19,0.04)",
-  shadowRaised: "0 1px 2px rgba(20,20,19,0.04), 0 1px 1px rgba(20,20,19,0.03)",
-  shadowPopover: "0 4px 8px -2px rgba(20,20,19,0.06), 0 12px 20px -6px rgba(20,20,19,0.10)",
-  shadowModal: "0 8px 12px -4px rgba(20,20,19,0.10), 0 24px 40px -8px rgba(20,20,19,0.18)",
+  bg: "#ffffff", paper: "#ffffff", paperSoft: "#f6f8fa",
+  pageBg: "#ffffff",
+  ink: "#1f2328", inkSoft: "#656d76", muted: "#656d76", faint: "#8c959f",
+  line: "#d0d7de", lineSoft: "#d8dee4",
+  inputBg: "#ffffff",
+  clay: "#0969da", clayDeep: "#0552a5",
+  btnAccent: "#0969da", btnAccentDeep: "#0552a5",
+  rustRed: "#d1242f", rustWash: "#ffebe9",
+  sage: "#1a7f37", sageWash: "#dafbe1",
+  shadowCard: "none",
+  shadowRaised: "0 1px 0 rgba(31,35,40,0.04)",
+  shadowPopover: "0 8px 24px rgba(140,149,159,0.2)",
+  shadowModal: "0 8px 24px rgba(140,149,159,0.3)",
 };
 
 function friendlyError(code) {
@@ -105,7 +104,7 @@ export default function AuthScreen() {
         * { box-sizing: border-box; }
         input::placeholder { color: ${C.faint}; }
         .auth-input { transition: border-color .12s ease, box-shadow .12s ease; box-shadow: none; }
-        .auth-input:focus { outline: none; border-color: ${C.clay} !important; box-shadow: 0 0 0 3px rgba(1,22,39,0.15) !important; }
+        .auth-input:focus { outline: none; border-color: ${C.clay} !important; box-shadow: 0 0 0 3px rgba(9,105,218,0.15) !important; }
         .auth-submit { transition: background .12s ease, transform .1s ease, box-shadow .12s ease; }
         .auth-submit:hover:not(:disabled) { background: ${C.btnAccentDeep}; box-shadow: ${C.shadowRaised}; }
         .auth-submit:active:not(:disabled) { transform: scale(0.98); }
@@ -115,7 +114,7 @@ export default function AuthScreen() {
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", maxWidth: 380 }}>
       <div style={{
         width: "100%", maxWidth: 380, background: C.paper,
-        border: `1px solid ${C.line}`, borderRadius: 10, padding: 32,
+        border: `1px solid ${C.line}`, borderRadius: 6, padding: 32,
         boxShadow: C.shadowRaised,
       }}>
         <div style={{ marginBottom: 4, display: "flex", alignItems: "center", gap: 6, fontSize: "clamp(16px, 5.4vw, 22px)" }}>
