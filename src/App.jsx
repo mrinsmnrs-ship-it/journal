@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useMemo, useRef, createContext, useContext } from "react";
+import React, { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "motion/react";
 import {
@@ -1032,7 +1032,6 @@ function DateField({ value, onChange, align = "left" }) {
   const C = useTheme();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
-  const [mobilePos, setMobilePos] = useState(null); // {top} saat mode mobile, null = pakai layout desktop biasa
   const initial = value ? new Date(value + "T00:00:00") : new Date();
   const [viewYear, setViewYear] = useState(initial.getFullYear());
   const [viewMonth, setViewMonth] = useState(initial.getMonth());
@@ -1063,51 +1062,23 @@ function DateField({ value, onChange, align = "left" }) {
     if (viewMonth === 11) { setViewMonth(0); setViewYear(viewYear + 1); } else setViewMonth(viewMonth + 1);
   }
 
-  // Di layar sempit (mobile), popup kalender dibuat "position: fixed" lalu
-  // di-center berdasar LEBAR LAYAR (bukan lebar kolom field, yang bisa
-  // sempit kayak di form Custom Range). Posisi atasnya dihitung dari
-  // bounding rect field-nya sendiri, dan dihitung ulang tiap scroll/resize
-  // selama kalender terbuka, supaya tetap nempel tepat di bawah field-nya.
-  useLayoutEffect(() => {
-    if (!open) { setMobilePos(null); return; }
-
-    function recompute() {
-      const isMobile = window.innerWidth <= 820;
-      if (!isMobile || !wrapperRef.current) { setMobilePos(null); return; }
-      const rect = wrapperRef.current.getBoundingClientRect();
-      setMobilePos({ top: rect.bottom + 6 });
-    }
-
-    recompute();
-    window.addEventListener("scroll", recompute, true);
-    window.addEventListener("resize", recompute);
-    return () => {
-      window.removeEventListener("scroll", recompute, true);
-      window.removeEventListener("resize", recompute);
-    };
-  }, [open]);
-
+  // Kalender selalu tampil sebagai popup "mobile style": fixed di tengah
+  // layar (bukan nempel di bawah field), biar simpel dan konsisten di
+  // semua ukuran layar. Selalu di-portal ke <body> supaya tidak kepotong
+  // overflow/parent manapun.
   const popupContent = (
     <AnimatePresence>
       {open && (
         <>
           <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
           <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-            style={mobilePos ? {
-              position: "fixed", top: mobilePos.top,
-              left: "50%", right: "auto", transform: "translateX(-50%)",
-              zIndex: 30, width: "min(80vw, 260px)", maxWidth: 260,
-              background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
-              boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
-            } : {
-              position: "absolute", top: "calc(100% + 6px)",
-              left: align === "left" ? 0 : "auto",
-              right: align === "right" ? 0 : "auto",
-              zIndex: 30, width: "min(300px, calc(100vw - 32px))",
+            initial={{ opacity: 0, scale: 0.94, filter: "blur(14px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 0.94, filter: "blur(14px)" }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+              zIndex: 30, width: "min(85vw, 280px)", maxWidth: 280,
               background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
               boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
             }}>
@@ -1184,7 +1155,7 @@ function DateField({ value, onChange, align = "left" }) {
       >
         {value ? fmtDateDisplay(value) : "Select date"}
       </button>
-      {mobilePos ? createPortal(popupContent, document.body) : popupContent}
+      {createPortal(popupContent, document.body)}
     </div>
   );
 }
