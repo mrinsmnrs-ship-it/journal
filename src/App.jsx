@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "motion/react";
 import {
   Trash2, Plus, PencilLine, BookOpen, LayoutDashboard,
   Sun, Moon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, LogOut, MessageCircle,
@@ -977,29 +977,14 @@ function RJournal({ user }) {
         </div>
 
         {/* Bottom nav (mobile) */}
-        <div className="bottom-nav" style={{ alignItems: "center" }}>
-          {NAV.map((n) => (
-            <button
-              key={n.key}
-              ref={(el) => { navRefs.current[n.key] = el; }}
-              onClick={() => setTab(n.key)}
-             style={{
-                background: tab === n.key ? C.navActiveBg : "transparent", border: "none", cursor: "pointer",
-                padding: "6px 10px 4px", borderRadius: 6,
-                color: tab === n.key ? C.ink : C.faint,
-                transition: "color .15s ease, background .15s ease",
-              }}
-            >
-              <span style={{ fontFamily: SANS, fontSize: 13, fontWeight: tab === n.key ? 600 : 600, letterSpacing: "-0.01em" }}>{n.label}</span>
-            </button>
-          ))}
-          <div style={{
-            position: "absolute", top: 0, height: 3, borderRadius: 2,
-            background: C.btnAccent,
-            left: navIndicator.left, width: navIndicator.width,
-            transition: "left .28s cubic-bezier(.4,0,.2,1), width .28s cubic-bezier(.4,0,.2,1)",
-          }} />
-        </div>
+        <MobileDockNav
+          items={NAV}
+          activeKey={tab}
+          onSelect={setTab}
+          registerItemRef={(key, el) => { navRefs.current[key] = el; }}
+          indicator={navIndicator}
+          accentColor={C.btnAccent}
+        />
       </div>
     </ThemeContext.Provider>
   );
@@ -1705,6 +1690,82 @@ function YearStepper({ year, years, onChange }) {
           <ChevronDown size={14} strokeWidth={2.5} />
         </button>
       </div>
+    </div>
+  );
+}
+
+// ---- Bottom nav (mobile) with a Dock-style magnify effect, but text labels ----
+// Adapted from the reactbits.dev "Dock" pattern: items scale up the closer
+// the pointer/finger gets to their center. On touch devices there's no
+// hover, so we track the live touch position while the finger is dragging
+// across the bar (onTouchMove) and relax back to normal size on release.
+function MobileDockItem({ label, active, onClick, mouseX, spring, distance, magnification, registerRef }) {
+  const C = useTheme();
+  const localRef = useRef(null);
+  const setRef = (el) => {
+    localRef.current = el;
+    if (registerRef) registerRef(el);
+  };
+  const mouseDistance = useTransform(mouseX, (val) => {
+    const rect = localRef.current?.getBoundingClientRect() ?? { x: 0, width: 60 };
+    return val - rect.x - rect.width / 2;
+  });
+  const targetScale = useTransform(mouseDistance, [-distance, 0, distance], [1, magnification, 1]);
+  const scale = useSpring(targetScale, spring);
+
+  return (
+    <motion.button
+      ref={setRef}
+      onClick={onClick}
+      style={{
+        scale,
+        transformOrigin: "bottom center",
+        background: active ? C.navActiveBg : "transparent",
+        border: "none", cursor: "pointer",
+        padding: "6px 10px 4px", borderRadius: 6,
+        color: active ? C.ink : C.faint,
+      }}
+    >
+      <span style={{ fontFamily: SANS, fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
+        {label}
+      </span>
+    </motion.button>
+  );
+}
+
+function MobileDockNav({ items, activeKey, onSelect, registerItemRef, indicator, accentColor }) {
+  const mouseX = useMotionValue(Infinity);
+  const spring = { mass: 0.15, stiffness: 160, damping: 14 };
+
+  return (
+    <div
+      className="bottom-nav"
+      style={{ alignItems: "center" }}
+      onMouseMove={(e) => mouseX.set(e.clientX)}
+      onMouseLeave={() => mouseX.set(Infinity)}
+      onTouchMove={(e) => { if (e.touches && e.touches[0]) mouseX.set(e.touches[0].clientX); }}
+      onTouchEnd={() => mouseX.set(Infinity)}
+      onTouchCancel={() => mouseX.set(Infinity)}
+    >
+      {items.map((n) => (
+        <MobileDockItem
+          key={n.key}
+          label={n.label}
+          active={activeKey === n.key}
+          onClick={() => onSelect(n.key)}
+          mouseX={mouseX}
+          spring={spring}
+          distance={85}
+          magnification={1.32}
+          registerRef={(el) => registerItemRef(n.key, el)}
+        />
+      ))}
+      <div style={{
+        position: "absolute", top: 0, height: 3, borderRadius: 2,
+        background: accentColor,
+        left: indicator.left, width: indicator.width,
+        transition: "left .28s cubic-bezier(.4,0,.2,1), width .28s cubic-bezier(.4,0,.2,1)",
+      }} />
     </div>
   );
 }
