@@ -1039,6 +1039,17 @@ function DateField({ value, onChange, align = "left" }) {
   const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
   const pad = (n) => String(n).padStart(2, "0");
+
+  // Popup ini di-portal ke document.body, jadi selama dia terbuka, layar di
+  // belakangnya dikunci (nggak bisa discroll) — sama seperti popup delete
+  // trade. Cara keluarnya cuma dua: pilih tanggal (selectDay) atau klik di
+  // luar kartu kalender (onClick di overlay).
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prevOverflow; };
+  }, [open]);
   const daysCount = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
   const cells = [
@@ -1077,6 +1088,7 @@ function DateField({ value, onChange, align = "left" }) {
             position: "fixed", inset: 0, zIndex: 29,
             display: "flex", alignItems: "center", justifyContent: "center",
             padding: 16, boxSizing: "border-box",
+            background: "rgba(0,0,0,0.35)",
           }}
         >
           <motion.div
@@ -1101,7 +1113,7 @@ function DateField({ value, onChange, align = "left" }) {
           </div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 2 }}>
                         {WEEKDAYS.map((w, i) => (
-              <div key={i} style={{ textAlign: "center", fontSize: 12, color: C.muted, fontWeight: 600, padding: "4px 0" }}>{w}</div>
+              <div key={i} style={{ textAlign: "center", fontSize: 12, color: C.muted, fontWeight: 600, padding: "4px 0", fontFamily: SANS }}>{w}</div>
             ))}
           </div>
           <div style={{ position: "relative", overflow: "hidden" }}>
@@ -1372,6 +1384,16 @@ function JournalList({ trades, onDelete, onGoLog }) {
   const [confirmId, setConfirmId] = useState(null);
   const confirmTrade = trades.find((t) => t.id === confirmId) || null;
 
+  // Kunci scroll di belakang popup delete selama dia terbuka — sama seperti
+  // popup kalender. Keluarnya cuma lewat "No" / "Yes, Delete" atau klik di
+  // luar kartu (overlay).
+  useEffect(() => {
+    if (!confirmTrade) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prevOverflow; };
+  }, [confirmTrade]);
+
   if (trades.length === 0) {
     return (
       <div style={{ marginTop: 30, textAlign: "center", color: C.muted }}>
@@ -1417,40 +1439,54 @@ function JournalList({ trades, onDelete, onGoLog }) {
           </div>
         );
       })}
-      {confirmTrade && (
-        <>
-          <div onClick={() => setConfirmId(null)} style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", zIndex: 39,
-          }} />
-          <div style={{
-            position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
-            zIndex: 40, width: "min(360px, calc(100vw - 48px))",
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 24,
-            boxShadow: C.shadowModal,
-          }}>
-            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, marginBottom: 9, letterSpacing: "-0.01em", color: C.ink }}>Delete this trade?</div>
-            <div style={{ fontSize: 15, color: C.inkSoft, lineHeight: 1.5, marginBottom: 22 }}>
-              {confirmTrade.symbol} &middot; {confirmTrade.date} &middot; {fmtR(confirmTrade.rActual)} will be permanently removed.
-            </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button
-                onClick={() => setConfirmId(null)}
-                style={{
-                  flex: 1, padding: "12px 0", borderRadius: 0, border: `1px solid ${C.line}`,
-                  background: C.paperSoft, color: C.ink, fontWeight: 700, fontSize: 15.5, cursor: "pointer",
-                }}
-              >No</button>
-              <button
-                onClick={() => { onDelete(confirmTrade.id); setConfirmId(null); }}
-                style={{
-                  flex: 1, padding: "12px 0", borderRadius: 0, border: "none",
-                  background: C.dangerBg, color: "#FFFFFF", fontWeight: 700, fontSize: 15.5, cursor: "pointer",
-                }}
-              >Yes, Delete</button>
-            </div>
+      <AnimatePresence>
+        {confirmTrade && (
+          <div
+            key="delete-confirm-overlay"
+            onClick={() => setConfirmId(null)}
+            style={{
+              position: "fixed", inset: 0, zIndex: 39,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              padding: 16, boxSizing: "border-box",
+              background: "rgba(0,0,0,0.35)",
+            }}
+          >
+            <motion.div
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, scale: 0.94, filter: "blur(14px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              exit={{ opacity: 0, scale: 0.94, filter: "blur(14px)" }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                width: "min(360px, calc(100vw - 48px))",
+                background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 24,
+                boxShadow: C.shadowModal,
+              }}
+            >
+              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, marginBottom: 9, letterSpacing: "-0.01em", color: C.ink }}>Delete this trade?</div>
+              <div style={{ fontSize: 15, color: C.inkSoft, lineHeight: 1.5, marginBottom: 22 }}>
+                {confirmTrade.symbol} &middot; {confirmTrade.date} &middot; {fmtR(confirmTrade.rActual)} will be permanently removed.
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button
+                  onClick={() => setConfirmId(null)}
+                  style={{
+                    flex: 1, padding: "12px 0", borderRadius: 0, border: `1px solid ${C.line}`,
+                    background: C.paperSoft, color: C.ink, fontWeight: 700, fontSize: 15.5, cursor: "pointer",
+                  }}
+                >No</button>
+                <button
+                  onClick={() => { onDelete(confirmTrade.id); setConfirmId(null); }}
+                  style={{
+                    flex: 1, padding: "12px 0", borderRadius: 0, border: "none",
+                    background: C.dangerBg, color: "#FFFFFF", fontWeight: 700, fontSize: 15.5, cursor: "pointer",
+                  }}
+                >Yes, Delete</button>
+              </div>
+            </motion.div>
           </div>
-        </>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }
