@@ -11,9 +11,9 @@ import { ArrowUp, Square } from "lucide-react";
 import { askGemini } from "./gemini";
 import { loadUserData, saveUserData } from "./store";
 
-// Font disatukan dengan App.jsx & AuthScreen.jsx — Inter di semua tempat,
-// termasuk bubble chat, supaya tidak ada halaman yang terasa "beda app".
-const CHAT_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+// Font disatukan dengan App.jsx & AuthScreen.jsx — sistem font GitHub di
+// semua tempat, termasuk bubble chat, supaya tidak ada halaman yang terasa "beda app".
+const CHAT_FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif";
 const SANS = CHAT_FONT;
 
 const PERSONA_NAME = "Rei";
@@ -189,7 +189,6 @@ export default function JournalChat({ user, trades, theme }) {
       }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         @keyframes typingBounce {
           0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
           30% { transform: translateY(-4px); opacity: 1; }
