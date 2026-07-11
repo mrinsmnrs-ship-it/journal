@@ -1,0 +1,73 @@
+/* Adapted from PillNav's hover-circle reveal effect.
+   Here the circle rises on *selection* (tap) rather than mouse hover,
+   since this is a touch-first form control. */
+
+.pill-toggle {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pill-toggle-fill {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 260px;
+  height: 260px;
+  margin-left: -130px;
+  border-radius: 50%;
+  background: var(--pill-fill);
+  transform: translateY(45%) scale(0);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pill-toggle[data-active="true"] .pill-toggle-fill {
+  transform: translateY(45%) scale(1);
+}
+
+.pill-toggle-label-stack {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1.2;
+}
+
+.pill-toggle-label-base,
+.pill-toggle-label-active {
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+}
+
+.pill-toggle-label-base {
+  color: var(--pill-base-text);
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.pill-toggle-label-active {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  color: var(--pill-active-text);
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.pill-toggle[data-active="true"] .pill-toggle-label-base {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.pill-toggle[data-active="true"] .pill-toggle-label-active {
+  transform: translateY(0);
+  opacity: 1;
+}
