@@ -154,6 +154,20 @@ function computeDailyR(trades) {
   });
   return map;
 }
+function computeSymbolStats(trades) {
+  const map = new Map();
+  trades.forEach((t) => {
+    const sym = t.symbol || "\u2014";
+    const cur = map.get(sym) || { symbol: sym, totalR: 0, count: 0, wins: 0 };
+    cur.totalR += t.rActual;
+    cur.count += 1;
+    if (t.rActual > 0) cur.wins += 1;
+    map.set(sym, cur);
+  });
+  return Array.from(map.values())
+    .map((s) => ({ ...s, totalR: Math.round(s.totalR * 100) / 100, winRate: s.count ? (s.wins / s.count) * 100 : 0 }))
+    .sort((a, b) => b.totalR - a.totalR);
+}
 
 const PERIODS = [
   { key: "all", label: "All Time" },
@@ -1593,6 +1607,41 @@ function CalendarHeatmap({ trades, year }) {
   );
 }
 
+function SymbolPerformanceChart({ trades }) {
+  const C = useTheme();
+  const data = useMemo(() => computeSymbolStats(trades), [trades]);
+  const barHeight = 34;
+  const chartHeight = Math.max(120, data.length * barHeight + 20);
+  return (
+    <div style={{ width: "100%", height: chartHeight }}>
+      <ResponsiveContainer>
+        <BarChart data={data} layout="vertical" margin={{ top: 4, right: 40, bottom: 0, left: 4 }}>
+          <CartesianGrid stroke={C.lineSoft} strokeDasharray="3 3" horizontal={false} />
+          <XAxis type="number" tick={{ fontFamily: MONO, fontSize: 11, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
+          <YAxis
+            type="category" dataKey="symbol" width={70}
+            tick={{ fontFamily: SANS, fontSize: 12.5, fontWeight: 700, fill: C.ink }}
+            axisLine={false} tickLine={false}
+          />
+          <Tooltip
+            contentStyle={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, fontFamily: SANS, fontSize: 12 }}
+            formatter={(value, name, props) => [
+              `${fmtR(props.payload.totalR)} \u00b7 ${props.payload.winRate.toFixed(0)}% win rate \u00b7 ${props.payload.count} trade${props.payload.count === 1 ? "" : "s"}`,
+              "Total R",
+            ]}
+          />
+          <ReferenceLine x={0} stroke={C.line} />
+          <Bar dataKey="totalR" radius={[3, 3, 3, 3]} barSize={18}>
+            {data.map((d, i) => (
+              <Cell key={i} fill={d.totalR >= 0 ? C.sage : C.rustRed} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 function Dashboard({ trades }) {
   const C = useTheme();
   const [period, setPeriod] = useState("all");
@@ -1689,6 +1738,14 @@ function Dashboard({ trades }) {
               <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Green = win, red = loss</div>
             </div>
             <TradeRBarChart trades={filteredTrades} />
+          </div>
+
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ padding: "0 4px" }}>
+              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Performance by Symbol</div>
+              <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Total R per simbol, diurutkan dari yang paling profitable</div>
+            </div>
+            <SymbolPerformanceChart trades={filteredTrades} />
           </div>
 
           <div style={{ marginBottom: 18, marginTop: -6 }}>
