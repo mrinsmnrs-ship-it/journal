@@ -6,7 +6,8 @@ import {
 } from "lucide-react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
-  ResponsiveContainer,
+  ResponsiveContainer, AreaChart, Area, BarChart, Bar, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
 } from "recharts";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
@@ -131,6 +132,28 @@ function startOfWeek(d) {
 }
 function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
 function startOfYear(d) { return new Date(d.getFullYear(), 0, 1); }
+function tradeYears(trades) {
+  const years = new Set(trades.map((t) => parseISO(t.date).getFullYear()));
+  return Array.from(years).sort((a, b) => b - a);
+}
+function computeEquityCurve(trades) {
+  const sorted = [...trades].sort((a, b) => parseISO(a.date) - parseISO(b.date));
+  let cum = 0;
+  return sorted.map((t, i) => {
+    cum += t.rActual;
+    return { index: i + 1, date: t.date, symbol: t.symbol, cum: Math.round(cum * 100) / 100 };
+  });
+}
+function computeDailyR(trades) {
+  const map = new Map();
+  trades.forEach((t) => {
+    const cur = map.get(t.date) || { total: 0, count: 0 };
+    cur.total += t.rActual;
+    cur.count += 1;
+    map.set(t.date, cur);
+  });
+  return map;
+}
 
 const PERIODS = [
   { key: "all", label: "All Time" },
@@ -1406,31 +1429,238 @@ function StatCard({ label, value, color }) {
     </div>
   );
 }
+function EquityCurve({ trades }) {
+  const C = useTheme();
+  const data = useMemo(() => computeEquityCurve(trades), [trades]);
+  const final = data.length ? data[data.length - 1].cum : 0;
+  const color = final >= 0 ? C.sage : C.rustRed;
+  return (
+    <div style={{ width: "100%", height: 260 }}>
+      <ResponsiveContainer>
+        <AreaChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: -12 }}>
+          <defs>
+            <linearGradient id="equityFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={color} stopOpacity={0.28} />
+              <stop offset="95%" stopColor={color} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid stroke={C.lineSoft} strokeDasharray="3 3" vertical={false} />
+          <XAxis dataKey="index" tick={{ fontFamily: SANS, fontSize: 11, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
+          <YAxis tick={{ fontFamily: MONO, fontSize: 11, fill: C.muted }} axisLine={false} tickLine={false} width={40} />
+          <Tooltip
+            contentStyle={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, fontFamily: SANS, fontSize: 12 }}
+            labelFormatter={(v, payload) => (payload && payload[0] ? `${payload[0].payload.symbol} \u00b7 ${fmtDateDisplay(payload[0].payload.date)}` : v)}
+            formatter={(value) => [fmtR(value), "Cumulative R"]}
+          />
+          <ReferenceLine y={0} stroke={C.line} />
+          <Area type="monotone" dataKey="cum" stroke={color} strokeWidth={2} fill="url(#equityFill)" dot={false} activeDot={{ r: 4 }} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function TradeRBarChart({ trades }) {
+  const C = useTheme();
+  const data = useMemo(() => {
+    const sorted = [...trades].sort((a, b) => parseISO(a.date) - parseISO(b.date));
+    return sorted.map((t, i) => ({ index: i + 1, date: t.date, symbol: t.symbol, r: t.rActual }));
+  }, [trades]);
+  return (
+    <div style={{ width: "100%", height: 220 }}>
+      <ResponsiveContainer>
+        <BarChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: -12 }}>
+          <CartesianGrid stroke={C.lineSoft} strokeDasharray="3 3" vertical={false} />
+          <XAxis dataKey="index" tick={{ fontFamily: SANS, fontSize: 11, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
+          <YAxis tick={{ fontFamily: MONO, fontSize: 11, fill: C.muted }} axisLine={false} tickLine={false} width={40} />
+          <Tooltip
+            contentStyle={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, fontFamily: SANS, fontSize: 12 }}
+            labelFormatter={(v, payload) => (payload && payload[0] ? `${payload[0].payload.symbol} \u00b7 ${fmtDateDisplay(payload[0].payload.date)}` : v)}
+            formatter={(value) => [fmtR(value), "R"]}
+          />
+          <ReferenceLine y={0} stroke={C.line} />
+          <Bar dataKey="r" radius={[3, 3, 3, 3]}>
+            {data.map((d, i) => (
+              <Cell key={i} fill={d.r >= 0 ? C.sage : C.rustRed} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function CalendarHeatmap({ trades, year }) {
+  const C = useTheme();
+  const dailyMap = useMemo(
+    () => computeDailyR(trades.filter((t) => parseISO(t.date).getFullYear() === year)),
+    [trades, year]
+  );
+
+  const weeks = useMemo(() => {
+    const start = new Date(year, 0, 1);
+    const gridStart = new Date(start);
+    gridStart.setDate(start.getDate() - start.getDay());
+    const end = new Date(year, 11, 31);
+    const gridEnd = new Date(end);
+    gridEnd.setDate(end.getDate() + (6 - end.getDay()));
+
+    const cols = [];
+    let cur = new Date(gridStart);
+    while (cur <= gridEnd) {
+      const col = [];
+      for (let i = 0; i < 7; i++) {
+        const iso = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`;
+        col.push({ date: new Date(cur), iso, inYear: cur.getFullYear() === year });
+        cur.setDate(cur.getDate() + 1);
+      }
+      cols.push(col);
+    }
+    return cols;
+  }, [year]);
+
+  const maxAbs = useMemo(() => {
+    let m = 0;
+    dailyMap.forEach((v) => { m = Math.max(m, Math.abs(v.total)); });
+    return m || 1;
+  }, [dailyMap]);
+
+  const monthLabels = useMemo(() => {
+    const labels = [];
+    let lastMonth = -1;
+    weeks.forEach((col, i) => {
+      const first = col.find((d) => d.inYear);
+      if (first && first.date.getDate() <= 7 && first.date.getMonth() !== lastMonth) {
+        labels.push({ index: i, label: first.date.toLocaleString("en-US", { month: "short" }) });
+        lastMonth = first.date.getMonth();
+      }
+    });
+    return labels;
+  }, [weeks]);
+
+  const cell = 11, gap = 3;
+
+  return (
+    <div style={{ overflowX: "auto", paddingBottom: 4 }}>
+      <div style={{ position: "relative", height: 14, marginBottom: 4, marginLeft: 22 }}>
+        {monthLabels.map((m) => (
+          <div key={m.index} style={{ position: "absolute", left: m.index * (cell + gap), fontFamily: SANS, fontSize: 10, color: C.muted }}>{m.label}</div>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap }}>
+        <div style={{ display: "flex", flexDirection: "column", gap, marginRight: 4 }}>
+          {["", "Mon", "", "Wed", "", "Fri", ""].map((d, i) => (
+            <div key={i} style={{ width: 18, height: cell, fontFamily: SANS, fontSize: 9, color: C.muted, lineHeight: `${cell}px` }}>{d}</div>
+          ))}
+        </div>
+        {weeks.map((col, ci) => (
+          <div key={ci} style={{ display: "flex", flexDirection: "column", gap }}>
+            {col.map((d, di) => {
+              const data = dailyMap.get(d.iso);
+              let bg = C.lineSoft;
+              let opacity = d.inYear ? 0.45 : 0;
+              if (d.inYear && data) {
+                const intensity = clamp(Math.abs(data.total) / maxAbs, 0.3, 1);
+                bg = data.total > 0 ? C.sage : data.total < 0 ? C.rustRed : C.lineSoft;
+                opacity = data.total === 0 ? 0.5 : intensity;
+              }
+              const title = data
+                ? `${fmtDateDisplay(d.iso)} \u00b7 ${fmtR(data.total)} \u00b7 ${data.count} trade${data.count === 1 ? "" : "s"}`
+                : fmtDateDisplay(d.iso);
+              return (
+                <div
+                  key={di}
+                  title={title}
+                  style={{ width: cell, height: cell, borderRadius: 2, background: bg, opacity, border: `1px solid ${C.line}` }}
+                />
+              );
+            })}
+          </div>
+        ))}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 10, fontFamily: SANS, fontSize: 10.5, color: C.muted }}>
+        <span>Loss</span>
+        {[1, 0.7, 0.4].map((o) => (
+          <div key={`l${o}`} style={{ width: cell, height: cell, borderRadius: 2, background: C.rustRed, opacity: o, border: `1px solid ${C.line}` }} />
+        ))}
+        <div style={{ width: cell, height: cell, borderRadius: 2, background: C.lineSoft, opacity: 0.45, border: `1px solid ${C.line}` }} />
+        {[0.4, 0.7, 1].map((o) => (
+          <div key={`w${o}`} style={{ width: cell, height: cell, borderRadius: 2, background: C.sage, opacity: o, border: `1px solid ${C.line}` }} />
+        ))}
+        <span>Win</span>
+      </div>
+    </div>
+  );
+}
+
 function Dashboard({ trades }) {
   const C = useTheme();
   const [period, setPeriod] = useState("all");
+  const [selectedYear, setSelectedYear] = useState(null);
+  const [customRange, setCustomRange] = useState({ from: "", to: "" });
+  const availableYears = useMemo(() => tradeYears(trades), [trades]);
+  const [heatmapYear, setHeatmapYear] = useState(() => availableYears[0] || new Date().getFullYear());
+
+  useEffect(() => {
+    if (availableYears.length && !availableYears.includes(heatmapYear)) {
+      setHeatmapYear(availableYears[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableYears]);
+
   const filteredTrades = useMemo(() => {
     if (period === "all") return trades;
-    const now = new Date();
-    let start;
-    if (period === "week") start = startOfWeek(now);
-    else if (period === "month") start = startOfMonth(now);
-    else start = startOfYear(now);
-    return trades.filter((t) => parseISO(t.date) >= start);
-  }, [trades, period]);
+    if (period === "week") return trades.filter((t) => parseISO(t.date) >= startOfWeek(new Date()));
+    if (period === "month") return trades.filter((t) => parseISO(t.date) >= startOfMonth(new Date()));
+    if (period === "year") return trades.filter((t) => parseISO(t.date) >= startOfYear(new Date()));
+    if (period === "specificYear" && selectedYear) {
+      return trades.filter((t) => parseISO(t.date).getFullYear() === selectedYear);
+    }
+    if (period === "custom" && customRange.from && customRange.to) {
+      const from = parseISO(customRange.from);
+      const to = parseISO(customRange.to);
+      to.setHours(23, 59, 59, 999);
+      return trades.filter((t) => { const d = parseISO(t.date); return d >= from && d <= to; });
+    }
+    return trades;
+  }, [trades, period, selectedYear, customRange]);
   const stats = useMemo(() => computeStats(filteredTrades), [filteredTrades]);
 
   if (trades.length === 0) {
     return <div style={{ marginTop: 30, color: C.muted, fontSize: 16 }}>Log a trade to see your performance dashboard.</div>;
   }
 
+  const selectStyle = (active) => ({
+    fontFamily: SANS, fontSize: 14, fontWeight: 600, padding: "9px 12px", borderRadius: 6,
+    border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
+    background: C.paper, color: C.ink, cursor: "pointer",
+  });
+
   return (
     <div style={{ width: "100%", maxWidth: "100%" }}>
-      <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginBottom: 24 }}>
+      <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginBottom: 10, alignItems: "center" }}>
         {PERIODS.map((p) => (
           <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
         ))}
+        {availableYears.length > 0 && (
+          <select
+            value={period === "specificYear" && selectedYear ? String(selectedYear) : ""}
+            onChange={(e) => { setSelectedYear(Number(e.target.value)); setPeriod("specificYear"); }}
+            style={selectStyle(period === "specificYear")}
+          >
+            <option value="" disabled>Year&hellip;</option>
+            {availableYears.map((y) => <option key={y} value={y}>{y}</option>)}
+          </select>
+        )}
+        <Chip label="Custom Range" active={period === "custom"} onClick={() => setPeriod("custom")} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
       </div>
+      {period === "custom" && (
+        <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 18, flexWrap: "wrap" }}>
+          <DateField value={customRange.from} onChange={(d) => setCustomRange((r) => ({ ...r, from: d }))} />
+          <span style={{ color: C.muted, fontSize: 13, fontFamily: SANS }}>to</span>
+          <DateField value={customRange.to} onChange={(d) => setCustomRange((r) => ({ ...r, to: d }))} />
+        </div>
+      )}
       {filteredTrades.length === 0 ? (
         <div style={{ color: C.muted, fontSize: 16, marginBottom: 28 }}>No trades logged in this period.</div>
       ) : (
@@ -1444,6 +1674,23 @@ function Dashboard({ trades }) {
             <StatCard label="Avg Win" value={`+${stats.avgWin.toFixed(2)}`} color={C.sage} />
             <StatCard label="Avg Loss" value={stats.avgLoss.toFixed(2)} color={C.rustRed} />
           </div>
+
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ padding: "0 4px" }}>
+              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Equity Curve</div>
+              <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Cumulative R, trade by trade</div>
+            </div>
+            <EquityCurve trades={filteredTrades} />
+          </div>
+
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ padding: "0 4px" }}>
+              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>R per Trade</div>
+              <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Green = win, red = loss</div>
+            </div>
+            <TradeRBarChart trades={filteredTrades} />
+          </div>
+
           <div style={{ marginBottom: 18, marginTop: -6 }}>
   <div style={{ padding: "0 4px" }}>
     <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
@@ -1475,8 +1722,25 @@ function Dashboard({ trades }) {
     );
   })}
           </div>
+
+          {availableYears.length > 0 && (
+            <div style={{ marginTop: 22 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", padding: "0 4px", marginBottom: 10, flexWrap: "wrap", gap: 10 }}>
+                <div>
+                  <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trade Calendar</div>
+                  <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Daily P&amp;L for {heatmapYear}</div>
+                </div>
+                <select value={heatmapYear} onChange={(e) => setHeatmapYear(Number(e.target.value))} style={selectStyle(true)}>
+                  {availableYears.map((y) => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </div>
+              <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 6, padding: "14px 18px", boxShadow: C.shadowCard }}>
+                <CalendarHeatmap trades={trades} year={heatmapYear} />
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
   );
-                }
+}
