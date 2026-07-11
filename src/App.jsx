@@ -895,28 +895,14 @@ function RJournal({ user }) {
                 <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
               </span>
             </div>
-            <div style={{ position: "relative" }}>
-              {NAV_DESKTOP.map((n) => (
-                <button
-                  key={n.key}
-                  ref={(el) => { desktopNavRefs.current[n.key] = el; }}
-                  className="nav-item-desktop"
-                  onClick={() => setTab(n.key)}
-                  style={{
-                    color: tab === n.key ? C.ink : C.faint,
-                    background: tab === n.key ? C.navActiveBg : "transparent",
-                  }}
-                >
-                  {n.label}
-                </button>
-              ))}
-              <div style={{
-                position: "absolute", top: desktopNavIndicator.top, right: 0,
-                width: 3, height: desktopNavIndicator.height, borderRadius: 0,
-                background: C.btnAccent,
-                transition: "top .28s cubic-bezier(.4,0,.2,1), height .28s cubic-bezier(.4,0,.2,1)",
-              }} />
-            </div>
+            <DesktopDockNav
+              items={NAV_DESKTOP}
+              activeKey={tab}
+              onSelect={setTab}
+              registerItemRef={(key, el) => { desktopNavRefs.current[key] = el; }}
+              indicator={desktopNavIndicator}
+              accentColor={C.btnAccent}
+            />
             <div style={{ flex: 1 }} />
             <div style={{ padding: "0 2px", marginBottom: 12, display: "flex", gap: 8 }}>
               <ThemeToggle mode={themeMode} onToggle={toggleTheme} />
@@ -1040,7 +1026,7 @@ const calendarSlideVariants = {
   exit: (dir) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0 }),
 };
 
-function DateField({ value, onChange }) {
+function DateField({ value, onChange, align = "left" }) {
   const C = useTheme();
   const [open, setOpen] = useState(false);
   const initial = value ? new Date(value + "T00:00:00") : new Date();
@@ -1098,7 +1084,10 @@ function DateField({ value, onChange }) {
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
               style={{
-                position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: 300,
+                position: "absolute", top: "calc(100% + 6px)",
+                left: align === "left" ? 0 : "auto",
+                right: align === "right" ? 0 : "auto",
+                zIndex: 30, width: "min(300px, calc(100vw - 32px))",
                 background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
                 boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
               }}>
@@ -1746,6 +1735,70 @@ function YearStepper({ year, years, onChange }) {
 // the pointer/finger gets to their center. On touch devices there's no
 // hover, so we track the live touch position while the finger is dragging
 // across the bar (onTouchMove) and relax back to normal size on release.
+function DesktopDockItem({ label, active, onClick, mouseY, spring, distance, magnification, registerRef }) {
+  const C = useTheme();
+  const localRef = useRef(null);
+  const setRef = (el) => {
+    localRef.current = el;
+    if (registerRef) registerRef(el);
+  };
+  const mouseDistance = useTransform(mouseY, (val) => {
+    const rect = localRef.current?.getBoundingClientRect() ?? { y: 0, height: 40 };
+    return val - rect.y - rect.height / 2;
+  });
+  const targetScale = useTransform(mouseDistance, [-distance, 0, distance], [1, magnification, 1]);
+  const scale = useSpring(targetScale, spring);
+
+  return (
+    <motion.button
+      ref={setRef}
+      onClick={onClick}
+      className="nav-item-desktop"
+      style={{
+        scale,
+        transformOrigin: "center left",
+        color: active ? C.ink : C.faint,
+        background: active ? C.navActiveBg : "transparent",
+      }}
+    >
+      {label}
+    </motion.button>
+  );
+}
+
+function DesktopDockNav({ items, activeKey, onSelect, registerItemRef, indicator, accentColor }) {
+  const mouseY = useMotionValue(Infinity);
+  const spring = { mass: 0.15, stiffness: 160, damping: 14 };
+
+  return (
+    <div
+      style={{ position: "relative" }}
+      onMouseMove={(e) => mouseY.set(e.clientY)}
+      onMouseLeave={() => mouseY.set(Infinity)}
+    >
+      {items.map((n) => (
+        <DesktopDockItem
+          key={n.key}
+          label={n.label}
+          active={activeKey === n.key}
+          onClick={() => onSelect(n.key)}
+          mouseY={mouseY}
+          spring={spring}
+          distance={60}
+          magnification={1.08}
+          registerRef={(el) => registerItemRef(n.key, el)}
+        />
+      ))}
+      <div style={{
+        position: "absolute", top: indicator.top, right: 0,
+        width: 3, height: indicator.height, borderRadius: 0,
+        background: accentColor,
+        transition: "top .28s cubic-bezier(.4,0,.2,1), height .28s cubic-bezier(.4,0,.2,1)",
+      }} />
+    </div>
+  );
+}
+
 function MobileDockItem({ label, active, onClick, mouseX, spring, distance, magnification, registerRef }) {
   const C = useTheme();
   const localRef = useRef(null);
@@ -1896,7 +1949,7 @@ function Dashboard({ trades }) {
         <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 18, flexWrap: "wrap" }}>
           <DateField value={customRange.from} onChange={(d) => setCustomRange((r) => ({ ...r, from: d }))} />
           <span style={{ color: C.muted, fontSize: 13, fontFamily: SANS }}>to</span>
-          <DateField value={customRange.to} onChange={(d) => setCustomRange((r) => ({ ...r, to: d }))} />
+          <DateField value={customRange.to} onChange={(d) => setCustomRange((r) => ({ ...r, to: d }))} align="right" />
         </div>
       )}
       {filteredTrades.length === 0 ? (
