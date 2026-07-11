@@ -169,17 +169,26 @@ function Chip({ label, active, onClick }) {
   const C = useTheme();
   return (
     <button
+      type="button"
       onClick={onClick}
+      data-active={active}
+      className="pill-toggle"
       style={{
         fontFamily: SANS, fontSize: 14, fontWeight: 600,
         padding: "9px 17px", borderRadius: 6,
         border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
-        background: active ? C.btnAccent : C.paper,
-        color: active ? C.btnAccentTextActive : C.inkSoft,
-        cursor: "pointer", transition: "none",
+        background: C.paper,
+        cursor: "pointer",
+        "--pill-fill": C.btnAccent,
+        "--pill-base-text": C.inkSoft,
+        "--pill-active-text": C.btnAccentTextActive,
       }}
     >
-      {label}
+      <span className="pill-toggle-fill" />
+      <span className="pill-toggle-label-stack">
+        <span className="pill-toggle-label-base">{label}</span>
+        <span className="pill-toggle-label-active">{label}</span>
+      </span>
     </button>
   );
 }
@@ -1063,12 +1072,28 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
       <Field label="Notes">
         <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
       </Field>
-      <button onClick={handleSave} disabled={!canSave} style={{
-  width: "100%", padding: "16px 0", borderRadius: 6, border: "none",
-  background: canSave ? C.btnAccent : C.lineSoft, color: canSave ? C.btnAccentTextActive : C.faint,
-  fontWeight: 700, fontSize: 17, cursor: canSave ? "pointer" : "not-allowed",
-  boxShadow: canSave ? C.shadowCard : "none",
-}}>Save Trade</button>
+      <button
+        type="button"
+        onClick={handleSave}
+        disabled={!canSave}
+        data-active={canSave}
+        className="pill-toggle"
+        style={{
+          width: "100%", padding: "16px 0", borderRadius: 6, border: "none",
+          background: C.lineSoft,
+          fontWeight: 700, fontSize: 17, cursor: canSave ? "pointer" : "not-allowed",
+          boxShadow: canSave ? C.shadowCard : "none",
+          "--pill-fill": C.btnAccent,
+          "--pill-base-text": C.faint,
+          "--pill-active-text": C.btnAccentTextActive,
+        }}
+      >
+        <span className="pill-toggle-fill" />
+        <span className="pill-toggle-label-stack">
+          <span className="pill-toggle-label-base">Save Trade</span>
+          <span className="pill-toggle-label-active">Save Trade</span>
+        </span>
+      </button>
           </div>
   );
 }
