@@ -23,56 +23,61 @@ import "./PillToggle.css";
 // modals, the send button). They're soft, low-opacity, and layered
 // (a tight "contact" shadow + a looser "ambient" shadow), never a single
 // hard blur.
+// ---- Design tokens : gaya GitHub (Primer design system) ----
+// GitHub bersandar pada border tipis, bukan shadow, untuk kartu/panel biasa.
+// Shadow cuma muncul di elemen yang "melayang" di atas halaman (dropdown, modal).
 const SHADOW_LIGHT = {
   shadowCard: "none",
-  shadowRaised: "none",
-  shadowPopover: "none",
-  shadowModal: "none",
+  shadowRaised: "0 1px 0 rgba(31,35,40,0.04)",
+  shadowPopover: "0 8px 24px rgba(140,149,159,0.2)",
+  shadowModal: "0 8px 24px rgba(140,149,159,0.3)",
 };
 const SHADOW_DARK = {
   shadowCard: "none",
   shadowRaised: "none",
-  shadowPopover: "none",
-  shadowModal: "none",
+  shadowPopover: "0 8px 24px rgba(1,4,9,0.85)",
+  shadowModal: "0 8px 24px rgba(1,4,9,0.9)",
 };
 
 const LIGHT = {
-  bg: "#e8e8e8", paper: "#e8e8e8", paperSoft: "#e8e8e8",
-  paperSoftLight: "#e8e8e8", paperSoftStat: "#e8e8e8",
-  ink: "#000000", inkSoft: "#000000", muted: "#000000", faint: "#000000",
-  line: "#000000", lineSoft: "#000000",
-  clay: "#011627", clayDeep: "#011627", clayWash: "#e8e8e8", clayOnWhite: "#011627",
-  sage: "#788C5D", sageWash: "#e8e8e8", sageOnWhite: "#5F7048",
-  rustRed: "#B85C50", rustWash: "#e8e8e8", rustOnWhite: "#B85C50", dangerBg: "#DC2626",
-  amber: "#011627", amberWash: "#e8e8e8", amberOnWhite: "#011627",
-  inputBg: "#e8e8e8", inputText: "#000000", inputPlaceholder: "#000000", inputBorder: "#000000",
-  btnAccent: "#011627", btnAccentBorder: "#011627", btnAccentWash: "#e8e8e8",
-  btnAccentText: "#011627", btnAccentTextActive: "#FFFFFF",
-  navActiveBg: "rgba(1, 22, 39, 0.12)",
+  bg: "#ffffff", paper: "#ffffff", paperSoft: "#f6f8fa",
+  paperSoftLight: "#f6f8fa", paperSoftStat: "#f6f8fa",
+  ink: "#1f2328", inkSoft: "#656d76", muted: "#656d76", faint: "#8c959f",
+  line: "#d0d7de", lineSoft: "#d8dee4",
+  clay: "#0969da", clayDeep: "#0552a5", clayWash: "#ddf4ff", clayOnWhite: "#0969da",
+  sage: "#1a7f37", sageWash: "#dafbe1", sageOnWhite: "#1a7f37",
+  rustRed: "#d1242f", rustWash: "#ffebe9", rustOnWhite: "#d1242f", dangerBg: "#d1242f",
+  amber: "#9a6700", amberWash: "#fff8c5", amberOnWhite: "#9a6700",
+  inputBg: "#ffffff", inputText: "#1f2328", inputPlaceholder: "#6e7781", inputBorder: "#d0d7de",
+  btnAccent: "#0969da", btnAccentBorder: "#0969da", btnAccentWash: "#ddf4ff",
+  btnAccentText: "#0969da", btnAccentTextActive: "#ffffff",
+  navActiveBg: "rgba(9, 105, 218, 0.1)",
   ...SHADOW_LIGHT,
 };
 const DARK = {
-  bg: "#011627", paper: "#011627", paperSoft: "#011627",
-  paperSoftLight: "#011627", paperSoftStat: "#011627",
-  ink: "#FFFFFF", inkSoft: "#FFFFFF", muted: "#FFFFFF", faint: "#FFFFFF",
-  line: "#FFFFFF", lineSoft: "#FFFFFF",
-  clay: "#e8e8e8", clayDeep: "#e8e8e8", clayWash: "#011627", clayOnWhite: "#e8e8e8",
-  sage: "#788C5D", sageWash: "#011627", sageOnWhite: "#9CB27E",
-  rustRed: "#D28A7E", rustWash: "#011627", rustOnWhite: "#D28A7E", dangerBg: "#E23F3F",
-  amber: "#e8e8e8", amberWash: "#011627", amberOnWhite: "#e8e8e8",
-  inputBg: "#011627", inputText: "#FFFFFF", inputPlaceholder: "#FFFFFF", inputBorder: "#FFFFFF",
-  btnAccent: "#e8e8e8", btnAccentBorder: "#e8e8e8", btnAccentWash: "#011627",
-  btnAccentText: "#e8e8e8", btnAccentTextActive: "#011627",
-  navActiveBg: "rgba(232, 232, 232, 0.18)",
+  bg: "#0d1117", paper: "#0d1117", paperSoft: "#161b22",
+  paperSoftLight: "#161b22", paperSoftStat: "#161b22",
+  ink: "#e6edf3", inkSoft: "#848d97", muted: "#848d97", faint: "#6e7681",
+  line: "#30363d", lineSoft: "#21262d",
+  clay: "#2f81f7", clayDeep: "#1f6feb", clayWash: "rgba(56,139,253,0.15)", clayOnWhite: "#2f81f7",
+  sage: "#3fb950", sageWash: "rgba(46,160,67,0.15)", sageOnWhite: "#3fb950",
+  rustRed: "#f85149", rustWash: "rgba(248,81,73,0.15)", rustOnWhite: "#f85149", dangerBg: "#f85149",
+  amber: "#d29922", amberWash: "rgba(187,128,9,0.15)", amberOnWhite: "#d29922",
+  inputBg: "#0d1117", inputText: "#e6edf3", inputPlaceholder: "#6e7681", inputBorder: "#30363d",
+  btnAccent: "#1f6feb", btnAccentBorder: "#1f6feb", btnAccentWash: "rgba(56,139,253,0.15)",
+  btnAccentText: "#2f81f7", btnAccentTextActive: "#ffffff",
+  navActiveBg: "rgba(47, 129, 247, 0.15)",
   ...SHADOW_DARK,
 };
 
-const CHAT_FONT = "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
-const LOGO_FONT = "'Inter', sans-serif"; // reserved for the "Aftermath" wordmark only
-const LABEL_FONT = "'Geist Pixel', 'Manrope', sans-serif"; // dipakai khusus untuk label field di form Log Trade
+const GITHUB_SANS = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif";
+const GITHUB_MONO = "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace";
+const CHAT_FONT = GITHUB_SANS;
+const LOGO_FONT = "'Inter', sans-serif"; // reserved for the "Aftermath" wordmark only — logo tetap beda dari UI
+const LABEL_FONT = GITHUB_SANS; // label field ikut sistem font GitHub juga
 const SERIF = CHAT_FONT; // font disatukan dengan halaman lain
 const SANS = CHAT_FONT;  // font disatukan dengan halaman lain
-const MONO = "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const MONO = GITHUB_MONO; // dipakai untuk angka/data ala GitHub (diff, code)
 const NAV = [
   { key: "log", label: "Log Trade", icon: PencilLine },
   { key: "journal", label: "Journal", icon: BookOpen },
@@ -707,10 +712,8 @@ function RJournal({ user }) {
     <ThemeContext.Provider value={C}>
       <div className={`app-root${isChatTab ? " chat-mode" : ""}`} style={{ ...getPageBackground(themeMode, C), minHeight: "100vh", color: C.ink, fontFamily: SANS }}>
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
           @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&display=swap');
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
-          @import url('https://fonts.googleapis.com/css2?family=Geist+Pixel&display=swap');
           * { box-sizing: border-box; }
           html, body { margin:0; height: 100%; }
           button { -webkit-tap-highlight-color: transparent; transition: transform .1s ease; }
@@ -752,7 +755,7 @@ function RJournal({ user }) {
 
           .nav-item-desktop {
             display:flex; align-items:center; padding: 11px 12px; border-radius: 6px;
-            font-family: 'Manrope', sans-serif; font-size:16px; font-weight:600; letter-spacing: -0.015em;
+            font-family: ${SANS}; font-size:16px; font-weight:600; letter-spacing: -0.015em;
             cursor:pointer; border:none; background:transparent;
             width: calc(100% - 16px); text-align:left; margin-bottom:2px; transition: color .12s ease, background .12s ease;
           }
@@ -921,7 +924,7 @@ function RJournal({ user }) {
                 transition: "color .15s ease, background .15s ease",
               }}
             >
-              <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: 13, fontWeight: tab === n.key ? 600 : 600, letterSpacing: "-0.01em" }}>{n.label}</span>
+              <span style={{ fontFamily: SANS, fontSize: 13, fontWeight: tab === n.key ? 600 : 600, letterSpacing: "-0.01em" }}>{n.label}</span>
             </button>
           ))}
           <div style={{
@@ -981,7 +984,7 @@ function DateField({ value, onChange }) {
           <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
           <div style={{
             position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: 300,
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 8, padding: 16,
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: 16,
             boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
@@ -1029,7 +1032,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
   const C = useTheme();
   const inputStyle = useInputStyle();
   return (
-    <div style={{ background: C.paperSoftLight, borderRadius: 10, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
+    <div style={{ background: C.paperSoftLight, borderRadius: 6, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
       <Field label="Date">
         <DateField value={form.date} onChange={(d) => updateForm("date", d)} />
       </Field>
@@ -1096,7 +1099,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
         return (
           <div key={t.id} style={{
             background: C.paperSoftLight, border: `1px solid ${C.line}`,
-            borderRadius: 8, padding: "20px 22px", boxShadow: C.shadowCard,
+            borderRadius: 6, padding: "20px 22px", boxShadow: C.shadowCard,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
   <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
@@ -1129,7 +1132,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
           <div style={{
             position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
             zIndex: 40, width: "min(360px, calc(100vw - 48px))",
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 10, padding: 24,
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: 24,
             boxShadow: C.shadowModal,
           }}>
             <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, marginBottom: 9, letterSpacing: "-0.01em", color: C.ink }}>Delete this trade?</div>
@@ -1240,7 +1243,7 @@ function Dashboard({ trades }) {
             </div>
           </div>
           <SectionLabel text="By Rules Compliance" />
-          <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 8, padding: "4px 18px", boxShadow: C.shadowCard }}>
+          <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 6, padding: "4px 18px", boxShadow: C.shadowCard }}>
   {["Yes", "Partial", "No"].map((r, i) => {
     const d = stats.byRules[r];
     const avg = d.count ? d.total / d.count : 0;
