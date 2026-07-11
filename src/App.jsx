@@ -34,13 +34,13 @@ const SHADOW_LIGHT = {
   shadowCard: "none",
   shadowRaised: "0 1px 0 rgba(31,35,40,0.04)",
   shadowPopover: "0 8px 24px rgba(140,149,159,0.2)",
-  shadowModal: "0 8px 24px rgba(140,149,159,0.3)",
+  shadowModal: "0 8px 24px rgba(140,149,159,0.18)",
 };
 const SHADOW_DARK = {
   shadowCard: "none",
   shadowRaised: "none",
   shadowPopover: "0 8px 24px rgba(1,4,9,0.85)",
-  shadowModal: "0 8px 24px rgba(1,4,9,0.9)",
+  shadowModal: "0 8px 24px rgba(1,4,9,0.55)",
 };
 
 const LIGHT = {
@@ -1104,7 +1104,7 @@ function DateField({ value, onChange, align = "left" }) {
             style={{
               width: "min(85vw, 280px)", maxWidth: 280, color: C.ink,
               background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
-              boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
+              boxShadow: C.shadowModal,
             }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <button type="button" onClick={prevMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
