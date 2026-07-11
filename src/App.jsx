@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "motion/react";
 import {
   Trash2, Plus, PencilLine, BookOpen, LayoutDashboard,
-  Sun, Moon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, LogOut, MessageCircle,
+  Sun, Moon, ChevronLeft, ChevronRight, LogOut, MessageCircle,
 } from "lucide-react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
-  ResponsiveContainer, AreaChart, Area, BarChart, Bar, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
+  ResponsiveContainer,
 } from "recharts";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
@@ -16,8 +14,7 @@ import AuthScreen from "./AuthScreen.jsx";
 import JournalChat from "./JournalChat.jsx";
 import BrandMark from "./BrandMark.jsx";
 import EmotionSlider from "./EmotionSlider.jsx";
-import Counter from "./Counter.jsx";
-import "./PillToggle.css";
+import "./DateField.css";
 
 // ---- Design tokens : Claude-matched palette (blue / sage / amber) ----
 // Shadow tokens: Claude.ai leans on hairline borders more than shadows —
@@ -25,61 +22,54 @@ import "./PillToggle.css";
 // modals, the send button). They're soft, low-opacity, and layered
 // (a tight "contact" shadow + a looser "ambient" shadow), never a single
 // hard blur.
-// ---- Design tokens : gaya GitHub (Primer design system) ----
-// GitHub bersandar pada border tipis, bukan shadow, untuk kartu/panel biasa.
-// Shadow cuma muncul di elemen yang "melayang" di atas halaman (dropdown, modal).
 const SHADOW_LIGHT = {
   shadowCard: "none",
-  shadowRaised: "0 1px 0 rgba(31,35,40,0.04)",
-  shadowPopover: "0 8px 24px rgba(140,149,159,0.2)",
-  shadowModal: "0 8px 24px rgba(140,149,159,0.3)",
+  shadowRaised: "none",
+  shadowPopover: "none",
+  shadowModal: "none",
 };
 const SHADOW_DARK = {
   shadowCard: "none",
   shadowRaised: "none",
-  shadowPopover: "0 8px 24px rgba(1,4,9,0.85)",
-  shadowModal: "0 8px 24px rgba(1,4,9,0.9)",
+  shadowPopover: "none",
+  shadowModal: "none",
 };
 
 const LIGHT = {
-  bg: "#ffffff", paper: "#ffffff", paperSoft: "#f6f8fa",
-  paperSoftLight: "#f6f8fa", paperSoftStat: "#f6f8fa",
-  ink: "#1f2328", inkSoft: "#656d76", muted: "#656d76", faint: "#8c959f",
-  line: "#d0d7de", lineSoft: "#d8dee4",
-  clay: "#044df5", clayDeep: "#0339b8", clayWash: "#e1eafe", clayOnWhite: "#044df5",
-  sage: "#1a7f37", sageWash: "#dafbe1", sageOnWhite: "#1a7f37",
-  rustRed: "#d1242f", rustWash: "#ffebe9", rustOnWhite: "#d1242f", dangerBg: "#d1242f",
-  amber: "#9a6700", amberWash: "#fff8c5", amberOnWhite: "#9a6700",
-  inputBg: "#ffffff", inputText: "#1f2328", inputPlaceholder: "#6e7781", inputBorder: "#d0d7de",
-  btnAccent: "#044df5", btnAccentBorder: "#044df5", btnAccentWash: "#e1eafe",
-  btnAccentText: "#044df5", btnAccentTextActive: "#ffffff",
-  navActiveBg: "rgba(4, 77, 245, 0.1)",
+  bg: "#FAF9F5", paper: "#FAF9F5", paperSoft: "#FAF9F5",
+  paperSoftLight: "#FAF9F5", paperSoftStat: "#FAF9F5",
+  ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
+  line: "#C2C0B8", lineSoft: "#D3D1C8",
+  clay: "#4A7DBD", clayDeep: "#3D6C9C", clayWash: "#FAF9F5", clayOnWhite: "#3D6C9C",
+  sage: "#788C5D", sageWash: "#FAF9F5", sageOnWhite: "#5F7048",
+  rustRed: "#B85C50", rustWash: "#FAF9F5", rustOnWhite: "#B85C50", dangerBg: "#DC2626",
+  amber: "#6A9BCC", amberWash: "#FAF9F5", amberOnWhite: "#3D6C9C",
+  inputBg: "#FAF9F5", inputText: "#141413", inputPlaceholder: "#AFAEA9", inputBorder: "#C2C0B8",
+  btnAccent: "#4A7DBD", btnAccentBorder: "#4A7DBD", btnAccentWash: "#FAF9F5",
+  btnAccentText: "#3D6C9C", btnAccentTextActive: "#FFFFFF",
+  navActiveBg: "rgba(74, 125, 189, 0.12)",
   ...SHADOW_LIGHT,
 };
 const DARK = {
-  bg: "#0d1117", paper: "#0d1117", paperSoft: "#161b22",
-  paperSoftLight: "#161b22", paperSoftStat: "#161b22",
-  ink: "#e6edf3", inkSoft: "#848d97", muted: "#848d97", faint: "#6e7681",
-  line: "#30363d", lineSoft: "#21262d",
-  clay: "#044df5", clayDeep: "#0339b8", clayWash: "rgba(4,77,245,0.15)", clayOnWhite: "#044df5",
-  sage: "#3fb950", sageWash: "rgba(46,160,67,0.15)", sageOnWhite: "#3fb950",
-  rustRed: "#f85149", rustWash: "rgba(248,81,73,0.15)", rustOnWhite: "#f85149", dangerBg: "#f85149",
-  amber: "#d29922", amberWash: "rgba(187,128,9,0.15)", amberOnWhite: "#d29922",
-  inputBg: "#0d1117", inputText: "#e6edf3", inputPlaceholder: "#6e7681", inputBorder: "#30363d",
-  btnAccent: "#044df5", btnAccentBorder: "#044df5", btnAccentWash: "rgba(4,77,245,0.15)",
-  btnAccentText: "#044df5", btnAccentTextActive: "#ffffff",
-  navActiveBg: "rgba(4, 77, 245, 0.15)",
+  bg: "#262624", paper: "#262624", paperSoft: "#262624",
+  paperSoftLight: "#262624", paperSoftStat: "#262624",
+  ink: "#FAF9F5", inkSoft: "#D8D6CF", muted: "#9C9A93", faint: "#6E6C64",
+  line: "#6E6C63", lineSoft: "#57564E",
+  clay: "#6A9BCC", clayDeep: "#8FB8DE", clayWash: "#262624", clayOnWhite: "#8FB8DE",
+  sage: "#788C5D", sageWash: "#262624", sageOnWhite: "#9CB27E",
+  rustRed: "#D28A7E", rustWash: "#262624", rustOnWhite: "#D28A7E", dangerBg: "#E23F3F",
+  amber: "#6A9BCC", amberWash: "#262624", amberOnWhite: "#8FB8DE",
+  inputBg: "#262624", inputText: "#FAF9F5", inputPlaceholder: "#6E6C64", inputBorder: "#6E6C63",
+  btnAccent: "#6A9BCC", btnAccentBorder: "#6A9BCC", btnAccentWash: "#262624",
+  btnAccentText: "#8FB8DE", btnAccentTextActive: "#FFFFFF",
+  navActiveBg: "rgba(106, 155, 204, 0.18)",
   ...SHADOW_DARK,
 };
 
-const GITHUB_SANS = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif";
-const GITHUB_MONO = "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace";
-const CHAT_FONT = GITHUB_SANS;
-const LOGO_FONT = "'Inter', sans-serif"; // reserved for the "Aftermath" wordmark only — logo tetap beda dari UI
-const LABEL_FONT = GITHUB_SANS; // label field ikut sistem font GitHub juga
+const CHAT_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 const SERIF = CHAT_FONT; // font disatukan dengan halaman lain
 const SANS = CHAT_FONT;  // font disatukan dengan halaman lain
-const MONO = GITHUB_MONO; // dipakai untuk angka/data ala GitHub (diff, code)
+const MONO = "'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace";
 const NAV = [
   { key: "log", label: "Log Trade", icon: PencilLine },
   { key: "journal", label: "Journal", icon: BookOpen },
@@ -132,42 +122,6 @@ function startOfWeek(d) {
 }
 function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
 function startOfYear(d) { return new Date(d.getFullYear(), 0, 1); }
-function tradeYears(trades) {
-  const years = new Set(trades.map((t) => parseISO(t.date).getFullYear()));
-  return Array.from(years).sort((a, b) => b - a);
-}
-function computeEquityCurve(trades) {
-  const sorted = [...trades].sort((a, b) => parseISO(a.date) - parseISO(b.date));
-  let cum = 0;
-  return sorted.map((t, i) => {
-    cum += t.rActual;
-    return { index: i + 1, date: t.date, symbol: t.symbol, cum: Math.round(cum * 100) / 100 };
-  });
-}
-function computeDailyR(trades) {
-  const map = new Map();
-  trades.forEach((t) => {
-    const cur = map.get(t.date) || { total: 0, count: 0 };
-    cur.total += t.rActual;
-    cur.count += 1;
-    map.set(t.date, cur);
-  });
-  return map;
-}
-function computeSymbolStats(trades) {
-  const map = new Map();
-  trades.forEach((t) => {
-    const sym = t.symbol || "\u2014";
-    const cur = map.get(sym) || { symbol: sym, totalR: 0, count: 0, wins: 0 };
-    cur.totalR += t.rActual;
-    cur.count += 1;
-    if (t.rActual > 0) cur.wins += 1;
-    map.set(sym, cur);
-  });
-  return Array.from(map.values())
-    .map((s) => ({ ...s, totalR: Math.round(s.totalR * 100) / 100, winRate: s.count ? (s.wins / s.count) * 100 : 0 }))
-    .sort((a, b) => b.totalR - a.totalR);
-}
 
 const PERIODS = [
   { key: "all", label: "All Time" },
@@ -177,56 +131,21 @@ const PERIODS = [
 ];
 
 // ---- Small atoms ----
-function PillToggle({ label, active, onClick }) {
-  const C = useTheme();
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      data-active={active}
-      className="pill-toggle"
-      style={{
-        flex: 1, height: 40, padding: 0, borderRadius: 0,
-        border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
-        background: C.paperSoft, fontFamily: SANS, fontWeight: 700, fontSize: 16,
-        "--pill-fill": C.btnAccent,
-        "--pill-base-text": C.inkSoft,
-        "--pill-active-text": C.btnAccentTextActive,
-      }}
-    >
-      <span className="pill-toggle-fill" />
-      <span className="pill-toggle-label-stack">
-        <span className="pill-toggle-label-base">{label}</span>
-        <span className="pill-toggle-label-active">{label}</span>
-      </span>
-    </button>
-  );
-}
-
 function Chip({ label, active, onClick }) {
   const C = useTheme();
   return (
     <button
-      type="button"
       onClick={onClick}
-      data-active={active}
-      className="pill-toggle"
       style={{
         fontFamily: SANS, fontSize: 14, fontWeight: 600,
-        padding: "9px 17px", borderRadius: 0,
+        padding: "9px 17px", borderRadius: 6,
         border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
-        background: C.paperSoft,
-        cursor: "pointer",
-        "--pill-fill": C.btnAccent,
-        "--pill-base-text": C.inkSoft,
-        "--pill-active-text": C.btnAccentTextActive,
+        background: active ? C.btnAccent : C.paper,
+        color: active ? C.btnAccentTextActive : C.inkSoft,
+        cursor: "pointer", transition: "none",
       }}
     >
-      <span className="pill-toggle-fill" />
-      <span className="pill-toggle-label-stack">
-        <span className="pill-toggle-label-base">{label}</span>
-        <span className="pill-toggle-label-active">{label}</span>
-      </span>
+      {label}
     </button>
   );
 }
@@ -235,8 +154,8 @@ function Field({ label, children }) {
   return (
     <div style={{ marginBottom: 22 }}>
       <div style={{
-        fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
-        color: C.muted, marginBottom: 9, textTransform: "capitalize",
+        fontFamily: SANS, fontSize: 13, fontWeight: 600, letterSpacing: "0.04em",
+        color: C.muted, marginBottom: 9, textTransform: "uppercase",
       }}>{label}</div>
       {children}
     </div>
@@ -246,102 +165,11 @@ function useInputStyle() {
   const C = useTheme();
   return {
     width: "100%", boxSizing: "border-box", background: C.inputBg,
-    border: `1px solid ${C.inputBorder}`, borderRadius: 0, padding: "14px 16px",
+    border: `1px solid ${C.inputBorder}`, borderRadius: 6, padding: "14px 16px",
     color: C.inputText, fontFamily: SANS, fontSize: 16, outline: "none",
     boxShadow: "none",
   };
 }
-// Shared Risk % / R Planned / R Actual panel.
-// Tap a box to select it, then use the single set of -0.1 / - / + / +0.1
-// buttons to adjust whichever field is currently selected — no need for
-// three separate +/- controls.
-const R_FIELDS = [
-  { key: "riskPct", label: "Risk" },
-  { key: "rPlanned", label: "R Planned" },
-  { key: "rActual", label: "R Actual" },
-];
-
-function RiskRPanel({ form, updateForm }) {
-  const C = useTheme();
-  const [activeField, setActiveField] = useState("rActual");
-
-  const adjust = (delta) => {
-    const current = Number(form[activeField]) || 0;
-    const next = Math.round((current + delta) * 100) / 100;
-    updateForm(activeField, String(next));
-  };
-
-  return (
-    <div style={{ marginBottom: 22 }}>
-      <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
-        {R_FIELDS.map(({ key, label }) => {
-          const active = activeField === key;
-          const raw = form[key];
-          const numeric = raw === "" || raw === undefined || raw === null || isNaN(Number(raw)) ? 0 : Number(raw);
-          const isNegative = numeric < 0;
-          return (
-            <div key={key} style={{ flex: 1 }}>
-              <div style={{
-                fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
-                color: C.muted, marginBottom: 9, textTransform: "capitalize",
-              }}>{label}</div>
-              <button
-                type="button"
-                onClick={() => setActiveField(key)}
-                style={{
-                  width: "100%", boxSizing: "border-box", background: C.inputBg,
-                  border: `1px solid ${active ? C.btnAccentBorder : C.inputBorder}`,
-                  borderRadius: 0, height: 40, padding: "0 6px", cursor: "pointer",
-                  display: "flex", justifyContent: "center", alignItems: "center", gap: 1,
-                }}
-              >
-                {isNegative && (
-                  <span style={{ fontSize: 14, fontWeight: 600, color: C.inputText, lineHeight: 1 }}>&minus;</span>
-                )}
-                <Counter
-                  value={Math.abs(numeric)}
-                  places={[10, 1, ".", 0.1]}
-                  fontSize={14}
-                  padding={1}
-                  gap={1}
-                  horizontalPadding={0}
-                  textColor={C.inputText}
-                  fontWeight={600}
-                  topGradientStyle={{ display: "none" }}
-                  bottomGradientStyle={{ display: "none" }}
-                />
-              </button>
-            </div>
-          );
-        })}
-      </div>
-      <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
-        {[
-          { label: "-0.1", delta: -0.1 },
-          { label: "-", delta: -1 },
-          { label: "+", delta: 1 },
-          { label: "+0.1", delta: 0.1 },
-        ].map(({ label, delta }) => (
-          <button
-            key={label}
-            type="button"
-            onClick={() => adjust(delta)}
-            style={{
-              width: 30, height: 26, padding: 0, borderRadius: 0,
-              border: `1px solid ${C.line}`, background: C.paperSoft,
-              color: C.inkSoft, fontWeight: 600, fontSize: 10, cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: SANS, lineHeight: 1,
-            }}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function Tag({ text }) {
   // Monokrom: satu warna netral saja, tidak lagi per-kategori (blue/sage/rust/amber)
   // Warna & style disamakan persis dengan pill persona "Nox Valerica" di chat.
@@ -350,7 +178,7 @@ function Tag({ text }) {
     <span style={{
       fontFamily: SANS, fontSize: 12, fontWeight: 400, color: C.muted,
       background: C.paperSoft, border: `1px solid ${C.line}`,
-      borderRadius: 0, padding: "6px 13px",
+      borderRadius: 6, padding: "6px 13px",
     }}>
       {text}
     </span>
@@ -360,8 +188,8 @@ function SectionLabel({ text }) {
   const C = useTheme();
   return (
     <div style={{
-      fontFamily: SANS, fontSize: 10, fontWeight: 700, letterSpacing: "0.06em",
-      color: C.muted, marginBottom: 15, textTransform: "capitalize",
+      fontFamily: SANS, fontSize: 13, fontWeight: 700, letterSpacing: "0.06em",
+      color: C.muted, marginBottom: 15, textTransform: "uppercase",
     }}>{text}</div>
   );
 }
@@ -381,7 +209,7 @@ function ThemeToggle({ mode, onToggle, compact }) {
       title={`Switch to ${nextLabel} theme`}
       style={{
         display: "flex", alignItems: "center", gap: 9,
-        background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 0,
+        background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 6,
         padding: compact ? "9px" : "10px 16px", cursor: "pointer", color: C.inkSoft,
         fontFamily: SANS, fontSize: 14, fontWeight: 600,
       }}
@@ -589,7 +417,7 @@ export default function App() {
   }, []);
   if (user === undefined) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: SANS, color: "#000000" }}>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: SANS, color: "#767470" }}>
         Loading…
       </div>
     );
@@ -612,12 +440,9 @@ function RJournal({ user }) {
   const [trades, setTrades] = useState([]);
   const [themeMode, setThemeMode] = useState("light");
   const [loaded, setLoaded] = useState(false);
-  const [symbolOptions, setSymbolOptions] = useState([]);
-  const [entryModelOptions, setEntryModelOptions] = useState([]);
   const [form, setForm] = useState({
     date: todayISO(), symbol: "", direction: "", reason: "",
     riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "",
-    entryModel: "", entryModelTracked: false,
   });
 
   useEffect(() => {
@@ -625,8 +450,6 @@ function RJournal({ user }) {
       const data = await loadUserData(user.uid);
       setTrades(data.trades);
       setThemeMode(THEME_ORDER.includes(data.theme) ? data.theme : "light");
-      setSymbolOptions(data.symbolOptions);
-      setEntryModelOptions(data.entryModelOptions);
       setLoaded(true);
     })();
   }, [user.uid]);
@@ -693,18 +516,6 @@ function RJournal({ user }) {
   function toggleEmotion(e) {
   setForm((f) => ({ ...f, emotion: f.emotion === e ? "" : e }));
   }
-  async function addSymbolOption(opt) {
-    if (!opt || symbolOptions.includes(opt)) return;
-    const next = [...symbolOptions, opt];
-    setSymbolOptions(next);
-    await saveUserData(user.uid, { symbolOptions: next });
-  }
-  async function addEntryModelOption(opt) {
-    if (!opt || entryModelOptions.includes(opt)) return;
-    const next = [...entryModelOptions, opt];
-    setEntryModelOptions(next);
-    await saveUserData(user.uid, { entryModelOptions: next });
-  }
   const canSave = form.symbol.trim() && form.direction && form.rActual !== "";
   async function handleSave() {
     if (!canSave) return;
@@ -715,13 +526,11 @@ function RJournal({ user }) {
       rPlanned: form.rPlanned === "" ? null : Number(form.rPlanned),
       rActual: Number(form.rActual), rules: form.rules || null,
       emotion: form.emotion, notes: form.notes.trim(), createdAt: Date.now(),
-      entryModel: form.entryModel.trim() || null,
-      entryModelTracked: !!form.entryModelTracked && !!form.entryModel.trim(),
     };
     const next = [trade, ...trades];
     setTrades(next);
     await saveUserData(user.uid, { trades: next });
-    setForm({ date: todayISO(), symbol: "", direction: "", reason: "", riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "", entryModel: "", entryModelTracked: false });
+    setForm({ date: todayISO(), symbol: "", direction: "", reason: "", riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "" });
     setTab("journal");
   }
   async function handleDelete(id) {
@@ -778,8 +587,9 @@ function RJournal({ user }) {
     <ThemeContext.Provider value={C}>
       <div className={`app-root${isChatTab ? " chat-mode" : ""}`} style={{ ...getPageBackground(themeMode, C), minHeight: "100vh", color: C.ink, fontFamily: SANS }}>
         <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
           @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&display=swap');
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
           * { box-sizing: border-box; }
           html, body { margin:0; height: 100%; }
           button { -webkit-tap-highlight-color: transparent; transition: transform .1s ease; }
@@ -789,7 +599,7 @@ function RJournal({ user }) {
           input, textarea { font-family: ${SANS}; }
           input:focus, textarea:focus { border-color: ${C.clay} !important; }
           ::-webkit-scrollbar { width: 6px; }
-          ::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 0; }
+          ::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 4px; }
           .recharts-wrapper, .recharts-wrapper svg, .recharts-surface { overflow: visible !important; }
 
           .app-shell { display: flex; height: 100vh; }
@@ -817,12 +627,11 @@ function RJournal({ user }) {
 
           .bottom-nav { display: none; }
           .mobile-topbar { display: none; }
-          .perf-marquee { display: none; }
           .app-footer-mobile { display: none; }
 
           .nav-item-desktop {
-            display:flex; align-items:center; padding: 11px 12px; border-radius: 0;
-            font-family: ${SANS}; font-size:16px; font-weight:600; letter-spacing: -0.015em;
+            display:flex; align-items:center; padding: 11px 12px; border-radius: 6px;
+            font-family: 'Inter', sans-serif; font-size:16px; font-weight:600; letter-spacing: -0.015em;
             cursor:pointer; border:none; background:transparent;
             width: calc(100% - 16px); text-align:left; margin-bottom:2px; transition: color .12s ease, background .12s ease;
           }
@@ -855,20 +664,6 @@ function RJournal({ user }) {
               justify-content: space-between; align-items: center;
               background: ${C.bg}; padding: 14px 16px; border-bottom: 1px solid ${C.line};
             }
-            .perf-marquee {
-              display: block; position: static; flex-shrink: 0;
-              overflow: hidden; white-space: nowrap;
-              background: ${C.bg}; border-bottom: 1px solid ${C.line};
-              padding: 6px 0;
-            }
-            .perf-marquee-track {
-              display: inline-flex; width: max-content;
-              animation: perf-marquee-scroll 32s linear infinite;
-            }
-            @keyframes perf-marquee-scroll {
-              from { transform: translateX(0); }
-              to { transform: translateX(-50%); }
-            }
             .main-area {
               flex: 1; min-height: 0; height: auto; overflow-y: auto;
               padding: 16px; max-width: 100%; margin-left: 0; margin-right: 0;
@@ -895,14 +690,28 @@ function RJournal({ user }) {
                 <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
               </span>
             </div>
-            <DesktopDockNav
-              items={NAV_DESKTOP}
-              activeKey={tab}
-              onSelect={setTab}
-              registerItemRef={(key, el) => { desktopNavRefs.current[key] = el; }}
-              indicator={desktopNavIndicator}
-              accentColor={C.btnAccent}
-            />
+            <div style={{ position: "relative" }}>
+              {NAV_DESKTOP.map((n) => (
+                <button
+                  key={n.key}
+                  ref={(el) => { desktopNavRefs.current[n.key] = el; }}
+                  className="nav-item-desktop"
+                  onClick={() => setTab(n.key)}
+                  style={{
+                    color: tab === n.key ? C.ink : C.faint,
+                    background: tab === n.key ? C.navActiveBg : "transparent",
+                  }}
+                >
+                  {n.label}
+                </button>
+              ))}
+              <div style={{
+                position: "absolute", top: desktopNavIndicator.top, right: 0,
+                width: 3, height: desktopNavIndicator.height, borderRadius: 2,
+                background: C.btnAccent,
+                transition: "top .28s cubic-bezier(.4,0,.2,1), height .28s cubic-bezier(.4,0,.2,1)",
+              }} />
+            </div>
             <div style={{ flex: 1 }} />
             <div style={{ padding: "0 2px", marginBottom: 12, display: "flex", gap: 8 }}>
               <ThemeToggle mode={themeMode} onToggle={toggleTheme} />
@@ -911,7 +720,7 @@ function RJournal({ user }) {
                 title="Log out"
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 0,
+                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 6,
                   padding: "10px 13px", cursor: "pointer", color: C.inkSoft,
                 }}
               >
@@ -940,38 +749,13 @@ function RJournal({ user }) {
                 title="Log out"
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 0,
+                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 6,
                   padding: 8, cursor: "pointer", color: C.inkSoft,
                 }}
               >
                 <LogOut size={15} />
               </button>
                           </div>
-          </div>
-
-          {/* Performance marquee — scrolling stats summary, mobile only */}
-          <div className="perf-marquee">
-            <div className="perf-marquee-track" style={{ fontFamily: SANS, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.02em", color: C.inkSoft, lineHeight: 1 }}>
-              {[0, 1].map((rep) => (
-                <span key={rep} style={{ display: "inline-flex", alignItems: "center" }}>
-                  <span style={{ padding: "0 14px" }}>Total Trades {stats.total}</span>
-                  <span style={{ color: C.line }}>&middot;</span>
-                  <span style={{ padding: "0 14px" }}>Win Rate {Math.round(stats.winRate)}%</span>
-                  <span style={{ color: C.line }}>&middot;</span>
-                  <span style={{ padding: "0 14px" }}>Total R {fmtR(stats.totalR)}</span>
-                  <span style={{ color: C.line }}>&middot;</span>
-                  <span style={{ padding: "0 14px" }}>Expectancy {fmtR(stats.expectancy)}</span>
-                  <span style={{ color: C.line }}>&middot;</span>
-                  <span style={{ padding: "0 14px" }}>Avg Win {fmtR(stats.avgWin)}</span>
-                  <span style={{ color: C.line }}>&middot;</span>
-                  <span style={{ padding: "0 14px" }}>Avg Loss {fmtR(stats.avgLoss)}</span>
-                  <span style={{ color: C.line }}>&middot;</span>
-                  <span style={{ padding: "0 14px" }}>Discipline {Math.round(stats.disciplineScore)}%</span>
-                  <span style={{ color: C.line }}>&middot;</span>
-                  <span style={{ padding: "0 14px" }}>Risk Consistency {Math.round(stats.riskConsistency)}%</span>
-                </span>
-              ))}
-            </div>
           </div>
 
           {/* Main content */}
@@ -983,13 +767,13 @@ function RJournal({ user }) {
                 <JournalChat user={user} trades={trades} theme={C} />
               </div>
             ) : tab === "log" ? (
-              <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} />
+              <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} />
             ) : tab === "journal" ? (
               <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} />
             ) : tab === "dashboard" ? (
               <Dashboard trades={trades} />
             ) : (
-              <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} />
+              <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} />
             )}
             
           </div>
@@ -1003,59 +787,56 @@ function RJournal({ user }) {
         </div>
 
         {/* Bottom nav (mobile) */}
-        <MobileDockNav
-          items={NAV}
-          activeKey={tab}
-          onSelect={setTab}
-          registerItemRef={(key, el) => { navRefs.current[key] = el; }}
-          indicator={navIndicator}
-          accentColor={C.btnAccent}
-        />
+        <div className="bottom-nav" style={{ alignItems: "center" }}>
+          {NAV.map((n) => (
+            <button
+              key={n.key}
+              ref={(el) => { navRefs.current[n.key] = el; }}
+              onClick={() => setTab(n.key)}
+             style={{
+                background: tab === n.key ? C.navActiveBg : "transparent", border: "none", cursor: "pointer",
+                padding: "6px 10px 4px", borderRadius: 6,
+                color: tab === n.key ? C.ink : C.faint,
+                transition: "color .15s ease, background .15s ease",
+              }}
+            >
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: tab === n.key ? 600 : 600, letterSpacing: "-0.01em" }}>{n.label}</span>
+            </button>
+          ))}
+          <div style={{
+            position: "absolute", top: 0, height: 3, borderRadius: 2,
+            background: C.btnAccent,
+            left: navIndicator.left, width: navIndicator.width,
+            transition: "left .28s cubic-bezier(.4,0,.2,1), width .28s cubic-bezier(.4,0,.2,1)",
+          }} />
+        </div>
       </div>
     </ThemeContext.Provider>
   );
 }
 
 // ---- Log Trade ----
-const CALENDAR_ROWS = 6;
-const CALENDAR_CELLS = CALENDAR_ROWS * 7;
-
-const calendarSlideVariants = {
-  enter: (dir) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
-  center: { x: 0, opacity: 1 },
-  exit: (dir) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0 }),
-};
-
-function DateField({ value, onChange, align = "left" }) {
+function DateField({ value, onChange }) {
   const C = useTheme();
   const [open, setOpen] = useState(false);
   const initial = value ? new Date(value + "T00:00:00") : new Date();
   const [viewYear, setViewYear] = useState(initial.getFullYear());
   const [viewMonth, setViewMonth] = useState(initial.getMonth());
-  const [slideDir, setSlideDir] = useState(1);
   const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
   const pad = (n) => String(n).padStart(2, "0");
   const daysCount = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
-  const cells = [
-    ...Array(firstDay).fill(null),
-    ...Array.from({ length: daysCount }, (_, i) => i + 1),
-  ];
-  // Pad to a fixed number of cells so the grid is always the same height,
-  // no matter how many days/rows a given month actually needs.
-  while (cells.length < CALENDAR_CELLS) cells.push(null);
+  const cells = [...Array(firstDay).fill(null), ...Array.from({ length: daysCount }, (_, i) => i + 1)];
 
   function selectDay(d) {
     onChange(`${viewYear}-${pad(viewMonth + 1)}-${pad(d)}`);
     setOpen(false);
   }
   function prevMonth() {
-    setSlideDir(-1);
     if (viewMonth === 0) { setViewMonth(11); setViewYear(viewYear - 1); } else setViewMonth(viewMonth - 1);
   }
   function nextMonth() {
-    setSlideDir(1);
     if (viewMonth === 11) { setViewMonth(0); setViewYear(viewYear + 1); } else setViewMonth(viewMonth + 1);
   }
 
@@ -1067,30 +848,20 @@ function DateField({ value, onChange, align = "left" }) {
         onClick={() => setOpen((o) => !o)}
         style={{
           width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
-          borderRadius: 0, height: 40, padding: "0 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
-          textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center",
+          borderRadius: 6, padding: "14px 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
+          textAlign: "left", cursor: "pointer",
           boxShadow: "none",
         }}
       >
         {value ? fmtDateDisplay(value) : "Select date"}
       </button>
-      <AnimatePresence>
-        {open && (
-          <>
-            <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-              style={{
-                position: "absolute", top: "calc(100% + 6px)",
-                left: align === "left" ? 0 : "auto",
-                right: align === "right" ? 0 : "auto",
-                zIndex: 30, width: "min(300px, calc(100vw - 32px))",
-                background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
-                boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
-              }}>
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
+          <div className="date-picker-popup" style={{
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 8, padding: 16,
+            boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
+          }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
               <button type="button" onClick={prevMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
                 <ChevronLeft size={18} />
@@ -1105,246 +876,98 @@ function DateField({ value, onChange, align = "left" }) {
                 <div key={i} style={{ textAlign: "center", fontSize: 12, color: C.muted, fontWeight: 600, padding: "4px 0" }}>{w}</div>
               ))}
             </div>
-            <div style={{ position: "relative", overflow: "hidden" }}>
-              <AnimatePresence initial={false} custom={slideDir} mode="popLayout">
-                <motion.div
-                  key={`${viewYear}-${viewMonth}`}
-                  custom={slideDir}
-                  variants={calendarSlideVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  style={{
-                    width: "100%",
-                    display: "grid", gridTemplateColumns: "repeat(7, 1fr)",
-                    gridAutoRows: "1fr", gridTemplateRows: `repeat(${CALENDAR_ROWS}, 1fr)`,
-                    gap: 2,
-                  }}
-                >
-                  {cells.map((d, i) => {
-                    if (!d) return <div key={i} style={{ aspectRatio: "1" }} />;
-                    const iso = `${viewYear}-${pad(viewMonth + 1)}-${pad(d)}`;
-                    const isSelected = iso === value;
-                    return (
-                      <button
-                        type="button"
-                        key={i}
-                        onClick={() => selectDay(d)}
-                        style={{
-                          aspectRatio: "1", border: "none", borderRadius: 0, cursor: "pointer",
-                          background: isSelected ? C.btnAccent : "transparent",
-                          color: isSelected ? C.btnAccentTextActive : C.ink,
-                          fontSize: 14, fontFamily: SANS,
-                        }}
-                      >{d}</button>
-                    );
-                  })}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// ---- Notion-style creatable select: pick an existing tag or type to
-// create a new one, so you don't have to retype the same symbol/model
-// every time. Pills all share one default color (no per-tag rainbow). ----
-function TagSelect({ value, onChange, options, onAddOption, placeholder, uppercase, disabled }) {
-  const C = useTheme();
-  const inputStyle = useInputStyle();
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-
-  const norm = (s) => (uppercase ? s.toUpperCase() : s);
-  const trimmedQuery = query.trim();
-  const filtered = options.filter((o) => o.toLowerCase().includes(trimmedQuery.toLowerCase()));
-  const exactMatch = options.some((o) => o.toLowerCase() === trimmedQuery.toLowerCase());
-
-  function openMenu() {
-    if (disabled) return;
-    setQuery(value || "");
-    setOpen(true);
-  }
-  function select(opt) {
-    onChange(opt);
-    setOpen(false);
-  }
-  function createAndSelect() {
-    const v = norm(trimmedQuery);
-    if (!v) return;
-    if (!options.some((o) => o.toLowerCase() === v.toLowerCase())) onAddOption(v);
-    onChange(v);
-    setOpen(false);
-  }
-  function handleKeyDown(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (exactMatch) select(options.find((o) => o.toLowerCase() === trimmedQuery.toLowerCase()));
-      else createAndSelect();
-    } else if (e.key === "Escape") {
-      setOpen(false);
-    }
-  }
-
-  return (
-    <div style={{ position: "relative" }}>
-      <input
-        type="text"
-        disabled={disabled}
-        placeholder={placeholder}
-        value={open ? query : value}
-        onFocus={openMenu}
-        onChange={(e) => setQuery(norm(e.target.value))}
-        onKeyDown={handleKeyDown}
-        style={{
-          ...inputStyle, height: 40, padding: "0 16px",
-          textTransform: uppercase ? "uppercase" : "none",
-          opacity: disabled ? 0.5 : 1, cursor: disabled ? "not-allowed" : "text",
-        }}
-      />
-      <AnimatePresence>
-        {open && (
-          <>
-            <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-              style={{
-                position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: "100%", minWidth: 220,
-                background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 8,
-                boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
-                maxHeight: 240, overflowY: "auto",
-              }}>
-            {filtered.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: trimmedQuery && !exactMatch ? 8 : 0 }}>
-                {filtered.map((opt) => (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
+              {cells.map((d, i) => {
+                if (!d) return <div key={i} />;
+                const iso = `${viewYear}-${pad(viewMonth + 1)}-${pad(d)}`;
+                const isSelected = iso === value;
+                return (
                   <button
                     type="button"
-                    key={opt}
-                    onMouseDown={(e) => { e.preventDefault(); select(opt); }}
+                    key={i}
+                    onClick={() => selectDay(d)}
                     style={{
-                      border: `1px solid ${C.line}`, borderRadius: 0, padding: "5px 12px",
-                      background: opt === value ? C.btnAccentWash : C.paperSoft,
-                      color: opt === value ? C.btnAccentText : C.ink,
-                      fontSize: 13, fontWeight: 600, fontFamily: SANS, cursor: "pointer",
+                      aspectRatio: "1", border: "none", borderRadius: 6, cursor: "pointer",
+                      background: isSelected ? C.btnAccent : "transparent",
+                      color: isSelected ? C.btnAccentTextActive : C.ink,
+                      fontSize: 14, fontFamily: SANS,
                     }}
-                  >{opt}</button>
-                ))}
-              </div>
-            )}
-            {trimmedQuery && !exactMatch && (
-              <button
-                type="button"
-                onMouseDown={(e) => { e.preventDefault(); createAndSelect(); }}
-                style={{
-                  width: "100%", textAlign: "left", border: "none", background: "transparent",
-                  color: C.muted, fontSize: 13, fontFamily: SANS, cursor: "pointer", padding: "6px 4px",
-                }}
-              >
-                + Create "{norm(trimmedQuery)}"
-              </button>
-            )}
-            {filtered.length === 0 && !trimmedQuery && (
-              <div style={{ color: C.faint, fontSize: 13, fontFamily: SANS, padding: "6px 4px" }}>
-                Start typing to create an option.
-              </div>
-            )}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                  >{d}</button>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, symbolOptions, entryModelOptions, onAddSymbolOption, onAddEntryModelOption }) {
+function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) {
   const C = useTheme();
   const inputStyle = useInputStyle();
   return (
-    <div style={{ background: C.paperSoftLight, borderRadius: 0, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
+    <div style={{ background: C.paperSoftLight, borderRadius: 10, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
       <Field label="Date">
         <DateField value={form.date} onChange={(d) => updateForm("date", d)} />
       </Field>
       <Field label="Symbol">
-        <TagSelect
-          value={form.symbol}
-          onChange={(v) => updateForm("symbol", v)}
-          options={symbolOptions}
-          onAddOption={onAddSymbolOption}
-          placeholder="EURUSD, XAUUSD, ..."
-          uppercase
-        />
+        <input type="text" placeholder="EURUSD, XAUUSD, ..." value={form.symbol} onChange={(e) => updateForm("symbol", e.target.value.toUpperCase())} style={{ ...inputStyle, textTransform: "uppercase" }} />
       </Field>
       <Field label="Direction">
         <div style={{ display: "flex", gap: 12 }}>
-          {["Long", "Short"].map((d) => (
-            <PillToggle key={d} label={d} active={form.direction === d} onClick={() => updateForm("direction", d)} />
-          ))}
+          {["Long", "Short"].map((d) => {
+            const active = form.direction === d;
+            return (
+              <button key={d} onClick={() => updateForm("direction", d)} style={{
+                flex: 1, padding: "14px 0", borderRadius: 6,
+                border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
+                background: active ? C.btnAccent : C.paper,
+                color: active ? C.btnAccentTextActive : C.inkSoft, fontWeight: 700, fontSize: 16, cursor: "pointer",
+              }}>{d}</button>
+            );
+          })}
         </div>
       </Field>
       <Field label="Reason / Setup">
-        <input type="text" placeholder="Breakout retest, reversal, ..." value={form.reason} onChange={(e) => updateForm("reason", e.target.value)} style={{ ...inputStyle, height: 40, padding: "0 16px" }} />
+        <input type="text" placeholder="Breakout retest, reversal, ..." value={form.reason} onChange={(e) => updateForm("reason", e.target.value)} style={inputStyle} />
       </Field>
-      <div style={{ marginBottom: 22 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 9 }}>
-          <div style={{
-            fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
-            color: C.muted, textTransform: "capitalize",
-          }}>Entry Model</div>
-          <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-            <span style={{ fontSize: 11, color: C.muted, fontFamily: SANS }}>Count in stats</span>
-            <input
-              type="checkbox"
-              checked={form.entryModelTracked}
-              onChange={(e) => updateForm("entryModelTracked", e.target.checked)}
-              style={{ width: 16, height: 16, cursor: "pointer", accentColor: C.btnAccent }}
-            />
-          </label>
+      <div style={{ display: "flex", gap: 16 }}>
+        <div style={{ flex: 1 }}>
+          <Field label="Risk %">
+            <input type="number" inputMode="decimal" placeholder="1" value={form.riskPct} onChange={(e) => updateForm("riskPct", e.target.value)} style={inputStyle} />
+          </Field>
         </div>
-        <TagSelect
-          value={form.entryModel}
-          onChange={(v) => updateForm("entryModel", v)}
-          options={entryModelOptions}
-          onAddOption={onAddEntryModelOption}
-          placeholder="Not everyone uses one — optional"
-        />
+        <div style={{ flex: 1 }}>
+          <Field label="R Planned">
+            <input type="number" inputMode="decimal" placeholder="2" value={form.rPlanned} onChange={(e) => updateForm("rPlanned", e.target.value)} style={inputStyle} />
+          </Field>
+        </div>
       </div>
-      <RiskRPanel form={form} updateForm={updateForm} />
+      <Field label="R Actual">
+        <input type="number" inputMode="decimal" placeholder="2.3 or -1" value={form.rActual} onChange={(e) => updateForm("rActual", e.target.value)} style={inputStyle} />
+      </Field>
       <Field label="Rules Compliance">
-        <div style={{ display: "flex", gap: 12 }}>
-          {["Yes", "No"].map((r) => (
-            <PillToggle key={r} label={r} active={form.rules === r} onClick={() => updateForm("rules", r)} />
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          {["Yes", "Partial", "No"].map((r) => (
+            <Chip key={r} label={r} active={form.rules === r} onClick={() => updateForm("rules", r)}
+              activeColor={r === "Yes" ? C.sageOnWhite : r === "No" ? C.rustOnWhite : C.amberOnWhite}
+              activeBg={r === "Yes" ? C.sageWash : r === "No" ? C.rustWash : C.amberWash} />
           ))}
         </div>
       </Field>
       <Field label="Emotions">
-        <EmotionSlider value={form.emotion} onChange={(e) => updateForm("emotion", e)} theme={C} />
+        <EmotionSlider value={form.emotion} onChange={(e) => updateForm("emotion", e)} />
       </Field>
       <Field label="Notes">
         <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
       </Field>
-      <button
-        type="button"
-        onClick={handleSave}
-        disabled={!canSave}
-        style={{
-          width: "100%", padding: "16px 0", borderRadius: 0, border: "none",
-          background: canSave ? C.btnAccent : C.lineSoft,
-          color: canSave ? C.btnAccentTextActive : C.faint,
-          fontWeight: 700, fontSize: 17, cursor: canSave ? "pointer" : "not-allowed",
-          boxShadow: canSave ? C.shadowCard : "none",
-          transition: "background-color 0.15s ease, color 0.15s ease",
-        }}
-      >
-        Save Trade
-      </button>
+      <button onClick={handleSave} disabled={!canSave} style={{
+  width: "100%", padding: "16px 0", borderRadius: 6, border: "none",
+  background: canSave ? C.btnAccent : C.lineSoft, color: canSave ? C.btnAccentTextActive : C.faint,
+  fontWeight: 700, fontSize: 17, cursor: canSave ? "pointer" : "not-allowed",
+  boxShadow: canSave ? C.shadowCard : "none",
+}}>Save Trade</button>
           </div>
   );
 }
@@ -1361,7 +984,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
         <div style={{ fontSize: 16, marginBottom: 16 }}>No trades logged yet.</div>
         <button onClick={onGoLog} style={{
           display: "inline-flex", alignItems: "center", gap: 8, background: C.clayWash,
-          border: `1px solid ${C.clay}`, color: C.clayOnWhite, borderRadius: 0, padding: "12px 20px",
+          border: `1px solid ${C.clay}`, color: C.clayOnWhite, borderRadius: 6, padding: "12px 20px",
           fontWeight: 700, fontSize: 15, cursor: "pointer",
         }}><Plus size={18} /> Log your first trade</button>
       </div>
@@ -1375,12 +998,12 @@ function JournalList({ trades, onDelete, onGoLog }) {
         return (
           <div key={t.id} style={{
             background: C.paperSoftLight, border: `1px solid ${C.line}`,
-            borderRadius: 0, padding: "20px 22px", boxShadow: C.shadowCard,
+            borderRadius: 8, padding: "20px 22px", boxShadow: C.shadowCard,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
   <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
     <div style={{ fontWeight: 700, fontSize: 19 }}>{t.symbol}</div>
-    <div style={{ fontFamily: SANS, fontSize: 10, color: C.faint }}>{t.date}</div>
+    <div style={{ fontFamily: SANS, fontSize: 14, color: C.faint }}>{t.date}</div>
   </div>
   <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 17, color: win ? C.ink : C.faint }}>
     {fmtR(t.rActual)}
@@ -1394,9 +1017,9 @@ function JournalList({ trades, onDelete, onGoLog }) {
 </div>
             {t.notes && <div style={{ fontSize: 14, color: C.muted, marginTop: 11, fontStyle: "italic" }}>{t.notes}</div>}
             <button onClick={() => setConfirmId(t.id)} style={{
-              marginTop: 15, background: "transparent", border: "none", color: C.faint, fontSize: 10,
+              marginTop: 15, background: "transparent", border: "none", color: C.faint, fontSize: 14,
   display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: 0,
-            }}><Trash2 size={11} /> Delete</button>
+            }}><Trash2 size={14} /> Delete</button>
           </div>
         );
       })}
@@ -1408,7 +1031,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
           <div style={{
             position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
             zIndex: 40, width: "min(360px, calc(100vw - 48px))",
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 24,
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 10, padding: 24,
             boxShadow: C.shadowModal,
           }}>
             <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, marginBottom: 9, letterSpacing: "-0.01em", color: C.ink }}>Delete this trade?</div>
@@ -1419,14 +1042,14 @@ function JournalList({ trades, onDelete, onGoLog }) {
               <button
                 onClick={() => setConfirmId(null)}
                 style={{
-                  flex: 1, padding: "12px 0", borderRadius: 0, border: `1px solid ${C.line}`,
+                  flex: 1, padding: "12px 0", borderRadius: 6, border: `1px solid ${C.line}`,
                   background: C.paperSoft, color: C.ink, fontWeight: 700, fontSize: 15.5, cursor: "pointer",
                 }}
               >No</button>
               <button
                 onClick={() => { onDelete(confirmTrade.id); setConfirmId(null); }}
                 style={{
-                  flex: 1, padding: "12px 0", borderRadius: 0, border: "none",
+                  flex: 1, padding: "12px 0", borderRadius: 6, border: "none",
                   background: C.dangerBg, color: "#FFFFFF", fontWeight: 700, fontSize: 15.5, cursor: "pointer",
                 }}
               >Yes, Delete</button>
@@ -1458,500 +1081,37 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
 function StatCard({ label, value, color }) {
   const C = useTheme();
   return (
-    <div style={{ background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 0, padding: "13px 15px", boxShadow: C.shadowCard }}>
+    <div style={{ background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 6, padding: "13px 15px", boxShadow: C.shadowCard }}>
       <div style={{ fontFamily: SANS, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.04em", color: C.muted, textTransform: "uppercase", marginBottom: 5 }}>{label}</div>
       <div style={{ fontFamily: SANS, fontSize: 19, fontWeight: 700, color: C.ink }}>{value}</div>
     </div>
   );
 }
-function EquityCurve({ trades }) {
-  const C = useTheme();
-  const data = useMemo(() => computeEquityCurve(trades), [trades]);
-  const final = data.length ? data[data.length - 1].cum : 0;
-  const color = final >= 0 ? C.sage : C.rustRed;
-  return (
-    <div style={{ width: "100%", height: 260 }}>
-      <ResponsiveContainer>
-        <AreaChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: -12 }}>
-          <defs>
-            <linearGradient id="equityFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={color} stopOpacity={0.28} />
-              <stop offset="95%" stopColor={color} stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid stroke={C.lineSoft} strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="index" tick={{ fontFamily: SANS, fontSize: 11, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
-          <YAxis tick={{ fontFamily: MONO, fontSize: 11, fill: C.muted }} axisLine={false} tickLine={false} width={40} />
-          <Tooltip
-            contentStyle={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, fontFamily: SANS, fontSize: 12 }}
-            labelFormatter={(v, payload) => (payload && payload[0] ? `${payload[0].payload.symbol} \u00b7 ${fmtDateDisplay(payload[0].payload.date)}` : v)}
-            formatter={(value) => [fmtR(value), "Cumulative R"]}
-            cursor={{ stroke: C.faint, strokeWidth: 1 }}
-          />
-          <ReferenceLine y={0} stroke={C.line} />
-          <Area type="monotone" dataKey="cum" stroke={color} strokeWidth={2} fill="url(#equityFill)" dot={false} activeDot={{ r: 4 }} />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
-function TradeRTooltip({ active, payload }) {
-  const C = useTheme();
-  if (!active || !payload || !payload.length) return null;
-  const d = payload[0].payload;
-  const color = d.r >= 0 ? C.sage : C.rustRed;
-  return (
-    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: "9px 12px", fontFamily: SANS, fontSize: 12, boxShadow: C.shadowPopover }}>
-      <div style={{ color: C.muted, marginBottom: 3 }}>{d.symbol} &middot; {fmtDateDisplay(d.date)}</div>
-      <div style={{ color, fontWeight: 700, fontSize: 13 }}>{fmtR(d.r)}</div>
-    </div>
-  );
-}
-function TradeRBarChart({ trades }) {
-  const C = useTheme();
-  const data = useMemo(() => {
-    const sorted = [...trades].sort((a, b) => parseISO(a.date) - parseISO(b.date));
-    return sorted.map((t, i) => ({ index: i + 1, date: t.date, symbol: t.symbol, r: t.rActual }));
-  }, [trades]);
-  return (
-    <div style={{ width: "100%", height: 220 }}>
-      <ResponsiveContainer>
-        <BarChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: -12 }}>
-          <CartesianGrid stroke={C.lineSoft} strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="index" tick={{ fontFamily: SANS, fontSize: 11, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
-          <YAxis tick={{ fontFamily: MONO, fontSize: 11, fill: C.muted }} axisLine={false} tickLine={false} width={40} />
-          <Tooltip content={<TradeRTooltip />} cursor={{ fill: C.line, opacity: 0.18 }} />
-          <ReferenceLine y={0} stroke={C.line} />
-          <Bar dataKey="r" radius={[3, 3, 3, 3]}>
-            {data.map((d, i) => (
-              <Cell key={i} fill={d.r >= 0 ? C.sage : C.rustRed} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
-function CalendarHeatmap({ trades, year }) {
-  const C = useTheme();
-  const dailyMap = useMemo(
-    () => computeDailyR(trades.filter((t) => parseISO(t.date).getFullYear() === year)),
-    [trades, year]
-  );
-
-  const weeks = useMemo(() => {
-    const start = new Date(year, 0, 1);
-    const gridStart = new Date(start);
-    gridStart.setDate(start.getDate() - start.getDay());
-    const end = new Date(year, 11, 31);
-    const gridEnd = new Date(end);
-    gridEnd.setDate(end.getDate() + (6 - end.getDay()));
-
-    const cols = [];
-    let cur = new Date(gridStart);
-    while (cur <= gridEnd) {
-      const col = [];
-      for (let i = 0; i < 7; i++) {
-        const iso = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`;
-        col.push({ date: new Date(cur), iso, inYear: cur.getFullYear() === year });
-        cur.setDate(cur.getDate() + 1);
-      }
-      cols.push(col);
-    }
-    return cols;
-  }, [year]);
-
-  const maxAbs = useMemo(() => {
-    let m = 0;
-    dailyMap.forEach((v) => { m = Math.max(m, Math.abs(v.total)); });
-    return m || 1;
-  }, [dailyMap]);
-
-  const monthLabels = useMemo(() => {
-    const labels = [];
-    let lastMonth = -1;
-    weeks.forEach((col, i) => {
-      const first = col.find((d) => d.inYear);
-      if (first && first.date.getDate() <= 7 && first.date.getMonth() !== lastMonth) {
-        labels.push({ index: i, label: first.date.toLocaleString("en-US", { month: "short" }) });
-        lastMonth = first.date.getMonth();
-      }
-    });
-    return labels;
-  }, [weeks]);
-
-  const cell = 11, gap = 3;
-
-  return (
-    <div style={{ overflowX: "auto", paddingBottom: 4 }}>
-      <div style={{ position: "relative", height: 14, marginBottom: 4, marginLeft: 22 }}>
-        {monthLabels.map((m) => (
-          <div key={m.index} style={{ position: "absolute", left: m.index * (cell + gap), fontFamily: SANS, fontSize: 10, color: C.muted }}>{m.label}</div>
-        ))}
-      </div>
-      <div style={{ display: "flex", gap }}>
-        <div style={{ display: "flex", flexDirection: "column", gap, marginRight: 4 }}>
-          {["", "Mon", "", "Wed", "", "Fri", ""].map((d, i) => (
-            <div key={i} style={{ width: 18, height: cell, fontFamily: SANS, fontSize: 9, color: C.muted, lineHeight: `${cell}px` }}>{d}</div>
-          ))}
-        </div>
-        {weeks.map((col, ci) => (
-          <div key={ci} style={{ display: "flex", flexDirection: "column", gap }}>
-            {col.map((d, di) => {
-              const data = dailyMap.get(d.iso);
-              let bg = C.lineSoft;
-              let opacity = d.inYear ? 0.45 : 0;
-              if (d.inYear && data) {
-                const intensity = clamp(Math.abs(data.total) / maxAbs, 0.3, 1);
-                bg = data.total > 0 ? C.sage : data.total < 0 ? C.rustRed : C.lineSoft;
-                opacity = data.total === 0 ? 0.5 : intensity;
-              }
-              const title = data
-                ? `${fmtDateDisplay(d.iso)} \u00b7 ${fmtR(data.total)} \u00b7 ${data.count} trade${data.count === 1 ? "" : "s"}`
-                : fmtDateDisplay(d.iso);
-              return (
-                <div
-                  key={di}
-                  title={title}
-                  style={{ width: cell, height: cell, borderRadius: 0, background: bg, opacity, border: `1px solid ${C.line}` }}
-                />
-              );
-            })}
-          </div>
-        ))}
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 10, fontFamily: SANS, fontSize: 10.5, color: C.muted }}>
-        <span>Loss</span>
-        {[1, 0.7, 0.4].map((o) => (
-          <div key={`l${o}`} style={{ width: cell, height: cell, borderRadius: 0, background: C.rustRed, opacity: o, border: `1px solid ${C.line}` }} />
-        ))}
-        <div style={{ width: cell, height: cell, borderRadius: 0, background: C.lineSoft, opacity: 0.45, border: `1px solid ${C.line}` }} />
-        {[0.4, 0.7, 1].map((o) => (
-          <div key={`w${o}`} style={{ width: cell, height: cell, borderRadius: 0, background: C.sage, opacity: o, border: `1px solid ${C.line}` }} />
-        ))}
-        <span>Win</span>
-      </div>
-    </div>
-  );
-}
-
-function SymbolTooltip({ active, payload }) {
-  const C = useTheme();
-  if (!active || !payload || !payload.length) return null;
-  const d = payload[0].payload;
-  const color = d.totalR >= 0 ? C.sage : C.rustRed;
-  return (
-    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: "9px 12px", fontFamily: SANS, fontSize: 12, boxShadow: C.shadowPopover }}>
-      <div style={{ color: C.ink, fontWeight: 700, marginBottom: 3 }}>{d.symbol}</div>
-      <div style={{ color, fontWeight: 700, fontSize: 13 }}>{fmtR(d.totalR)}</div>
-      <div style={{ color: C.muted, marginTop: 3 }}>{d.winRate.toFixed(0)}% win rate &middot; {d.count} trade{d.count === 1 ? "" : "s"}</div>
-    </div>
-  );
-}
-function SymbolPerformanceChart({ trades }) {
-  const C = useTheme();
-  const data = useMemo(() => computeSymbolStats(trades), [trades]);
-  const barHeight = 34;
-  const chartHeight = Math.max(120, data.length * barHeight + 20);
-  return (
-    <div style={{ width: "100%", height: chartHeight }}>
-      <ResponsiveContainer>
-        <BarChart data={data} layout="vertical" margin={{ top: 4, right: 40, bottom: 0, left: 4 }}>
-          <CartesianGrid stroke={C.lineSoft} strokeDasharray="3 3" horizontal={false} />
-          <XAxis type="number" tick={{ fontFamily: MONO, fontSize: 11, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
-          <YAxis
-            type="category" dataKey="symbol" width={70}
-            tick={{ fontFamily: SANS, fontSize: 12.5, fontWeight: 700, fill: C.ink }}
-            axisLine={false} tickLine={false}
-          />
-          <Tooltip content={<SymbolTooltip />} cursor={{ fill: C.line, opacity: 0.18 }} />
-          <ReferenceLine x={0} stroke={C.line} />
-          <Bar dataKey="totalR" radius={[3, 3, 3, 3]} barSize={18}>
-            {data.map((d, i) => (
-              <Cell key={i} fill={d.totalR >= 0 ? C.sage : C.rustRed} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
-function YearStepper({ year, years, onChange }) {
-  const C = useTheme();
-  const idx = years.indexOf(year);
-  const canUp = idx > 0; // years sorted descending, so index-1 = newer year
-  const canDown = idx !== -1 && idx < years.length - 1;
-  const stepHeight = 42;
-
-  const goUp = () => { if (canUp) onChange(years[idx - 1]); };
-  const goDown = () => { if (canDown) onChange(years[idx + 1]); };
-
-  const btnStyle = (enabled) => ({
-    flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-    background: C.paperSoft, border: "none", padding: 0,
-    color: enabled ? C.ink : C.faint, cursor: enabled ? "pointer" : "default",
-  });
-
-  return (
-    <div style={{ display: "flex", alignItems: "stretch", gap: 8 }}>
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "center",
-        height: stepHeight, minWidth: 90, padding: "0 14px",
-        background: C.inputBg, border: `1px solid ${C.btnAccentBorder}`, borderRadius: 0,
-      }}>
-        <Counter
-          value={year}
-          places={[1000, 100, 10, 1]}
-          fontSize={16}
-          padding={2}
-          gap={1}
-          horizontalPadding={0}
-          textColor={C.inputText}
-          fontWeight={700}
-          topGradientStyle={{ display: "none" }}
-          bottomGradientStyle={{ display: "none" }}
-        />
-      </div>
-      <div style={{
-        display: "flex", flexDirection: "column", height: stepHeight, width: 32,
-        borderRadius: 0, overflow: "hidden", border: `1px solid ${C.line}`,
-      }}>
-        <button type="button" onClick={goUp} disabled={!canUp} style={{ ...btnStyle(canUp), borderBottom: `1px solid ${C.line}` }}>
-          <ChevronUp size={14} strokeWidth={2.5} />
-        </button>
-        <button type="button" onClick={goDown} disabled={!canDown} style={btnStyle(canDown)}>
-          <ChevronDown size={14} strokeWidth={2.5} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ---- Bottom nav (mobile) with a Dock-style magnify effect, but text labels ----
-// Adapted from the reactbits.dev "Dock" pattern: items scale up the closer
-// the pointer/finger gets to their center. On touch devices there's no
-// hover, so we track the live touch position while the finger is dragging
-// across the bar (onTouchMove) and relax back to normal size on release.
-function DesktopDockItem({ label, active, onClick, mouseY, spring, distance, magnification, registerRef }) {
-  const C = useTheme();
-  const localRef = useRef(null);
-  const setRef = (el) => {
-    localRef.current = el;
-    if (registerRef) registerRef(el);
-  };
-  const mouseDistance = useTransform(mouseY, (val) => {
-    const rect = localRef.current?.getBoundingClientRect() ?? { y: 0, height: 40 };
-    return val - rect.y - rect.height / 2;
-  });
-  const targetScale = useTransform(mouseDistance, [-distance, 0, distance], [1, magnification, 1]);
-  const scale = useSpring(targetScale, spring);
-
-  return (
-    <motion.button
-      ref={setRef}
-      onClick={onClick}
-      className="nav-item-desktop"
-      style={{
-        scale,
-        transformOrigin: "center left",
-        color: active ? C.ink : C.faint,
-        background: active ? C.navActiveBg : "transparent",
-      }}
-    >
-      {label}
-    </motion.button>
-  );
-}
-
-function DesktopDockNav({ items, activeKey, onSelect, registerItemRef, indicator, accentColor }) {
-  const mouseY = useMotionValue(Infinity);
-  const spring = { mass: 0.15, stiffness: 160, damping: 14 };
-
-  return (
-    <div
-      style={{ position: "relative" }}
-      onMouseMove={(e) => mouseY.set(e.clientY)}
-      onMouseLeave={() => mouseY.set(Infinity)}
-    >
-      {items.map((n) => (
-        <DesktopDockItem
-          key={n.key}
-          label={n.label}
-          active={activeKey === n.key}
-          onClick={() => onSelect(n.key)}
-          mouseY={mouseY}
-          spring={spring}
-          distance={60}
-          magnification={1.08}
-          registerRef={(el) => registerItemRef(n.key, el)}
-        />
-      ))}
-      <div style={{
-        position: "absolute", top: indicator.top, right: 0,
-        width: 3, height: indicator.height, borderRadius: 0,
-        background: accentColor,
-        transition: "top .28s cubic-bezier(.4,0,.2,1), height .28s cubic-bezier(.4,0,.2,1)",
-      }} />
-    </div>
-  );
-}
-
-function MobileDockItem({ label, active, onClick, mouseX, spring, distance, magnification, registerRef }) {
-  const C = useTheme();
-  const localRef = useRef(null);
-  const setRef = (el) => {
-    localRef.current = el;
-    if (registerRef) registerRef(el);
-  };
-  const mouseDistance = useTransform(mouseX, (val) => {
-    const rect = localRef.current?.getBoundingClientRect() ?? { x: 0, width: 60 };
-    return val - rect.x - rect.width / 2;
-  });
-  const targetScale = useTransform(mouseDistance, [-distance, 0, distance], [1, magnification, 1]);
-  const scale = useSpring(targetScale, spring);
-
-  return (
-    <motion.button
-      ref={setRef}
-      onClick={onClick}
-      style={{
-        scale,
-        transformOrigin: "bottom center",
-        background: active ? C.navActiveBg : "transparent",
-        border: "none", cursor: "pointer",
-        padding: "6px 10px 4px", borderRadius: 0,
-        color: active ? C.ink : C.faint,
-      }}
-    >
-      <span style={{ fontFamily: SANS, fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
-        {label}
-      </span>
-    </motion.button>
-  );
-}
-
-function MobileDockNav({ items, activeKey, onSelect, registerItemRef, indicator, accentColor }) {
-  const mouseX = useMotionValue(Infinity);
-  const spring = { mass: 0.15, stiffness: 160, damping: 14 };
-
-  return (
-    <div
-      className="bottom-nav"
-      style={{ alignItems: "center" }}
-      onMouseMove={(e) => mouseX.set(e.clientX)}
-      onMouseLeave={() => mouseX.set(Infinity)}
-      onTouchMove={(e) => { if (e.touches && e.touches[0]) mouseX.set(e.touches[0].clientX); }}
-      onTouchEnd={() => mouseX.set(Infinity)}
-      onTouchCancel={() => mouseX.set(Infinity)}
-    >
-      {items.map((n) => (
-        <MobileDockItem
-          key={n.key}
-          label={n.label}
-          active={activeKey === n.key}
-          onClick={() => onSelect(n.key)}
-          mouseX={mouseX}
-          spring={spring}
-          distance={85}
-          magnification={1.32}
-          registerRef={(el) => registerItemRef(n.key, el)}
-        />
-      ))}
-      <div style={{
-        position: "absolute", top: 0, height: 3, borderRadius: 0,
-        background: accentColor,
-        left: indicator.left, width: indicator.width,
-        transition: "left .28s cubic-bezier(.4,0,.2,1), width .28s cubic-bezier(.4,0,.2,1)",
-      }} />
-    </div>
-  );
-}
-
 function Dashboard({ trades }) {
   const C = useTheme();
   const [period, setPeriod] = useState("all");
-  const [selectedYear, setSelectedYear] = useState(null);
-  const [customRange, setCustomRange] = useState({ from: "", to: "" });
-  const availableYears = useMemo(() => tradeYears(trades), [trades]);
-  const [heatmapYear, setHeatmapYear] = useState(() => availableYears[0] || new Date().getFullYear());
-
-  useEffect(() => {
-    if (availableYears.length && !availableYears.includes(heatmapYear)) {
-      setHeatmapYear(availableYears[0]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [availableYears]);
-
   const filteredTrades = useMemo(() => {
     if (period === "all") return trades;
-    if (period === "week") return trades.filter((t) => parseISO(t.date) >= startOfWeek(new Date()));
-    if (period === "month") return trades.filter((t) => parseISO(t.date) >= startOfMonth(new Date()));
-    if (period === "year") return trades.filter((t) => parseISO(t.date) >= startOfYear(new Date()));
-    if (period === "specificYear" && selectedYear) {
-      return trades.filter((t) => parseISO(t.date).getFullYear() === selectedYear);
-    }
-    if (period === "custom" && customRange.from && customRange.to) {
-      const from = parseISO(customRange.from);
-      const to = parseISO(customRange.to);
-      to.setHours(23, 59, 59, 999);
-      return trades.filter((t) => { const d = parseISO(t.date); return d >= from && d <= to; });
-    }
-    return trades;
-  }, [trades, period, selectedYear, customRange]);
+    const now = new Date();
+    let start;
+    if (period === "week") start = startOfWeek(now);
+    else if (period === "month") start = startOfMonth(now);
+    else start = startOfYear(now);
+    return trades.filter((t) => parseISO(t.date) >= start);
+  }, [trades, period]);
   const stats = useMemo(() => computeStats(filteredTrades), [filteredTrades]);
 
   if (trades.length === 0) {
     return <div style={{ marginTop: 30, color: C.muted, fontSize: 16 }}>Log a trade to see your performance dashboard.</div>;
   }
 
-  const selectStyle = (active) => ({
-    fontFamily: SANS, fontSize: 14, fontWeight: 600, padding: "9px 12px", borderRadius: 0,
-    border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
-    background: C.paperSoft, color: C.ink, cursor: "pointer",
-  });
-
-  // Only one chart's tooltip should be visible at a time. Recharts keeps its
-  // hover/tap state internally per-chart, so tapping chart B doesn't close
-  // chart A's tooltip on its own. We force-remount every OTHER chart whenever
-  // a new one is tapped, which resets its internal tooltip state to closed.
-  const [activeChart, setActiveChart] = useState(null);
-  const [chartGen, setChartGen] = useState(0);
-  const activateChart = (id) => {
-    setActiveChart((prev) => {
-      if (prev !== id) setChartGen((g) => g + 1);
-      return id;
-    });
-  };
-  const chartKey = (id) => (activeChart === id ? `${id}-active` : `${id}-idle-${chartGen}`);
-
   return (
     <div style={{ width: "100%", maxWidth: "100%" }}>
-      <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginBottom: 10, alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginBottom: 24 }}>
         {PERIODS.map((p) => (
           <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
         ))}
-        {availableYears.length > 0 && (
-          <select
-            value={period === "specificYear" && selectedYear ? String(selectedYear) : ""}
-            onChange={(e) => { setSelectedYear(Number(e.target.value)); setPeriod("specificYear"); }}
-            style={selectStyle(period === "specificYear")}
-          >
-            <option value="" disabled>Year&hellip;</option>
-            {availableYears.map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
-        )}
-        <Chip label="Custom Range" active={period === "custom"} onClick={() => setPeriod("custom")} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
       </div>
-      {period === "custom" && (
-        <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 18, flexWrap: "wrap" }}>
-          <DateField value={customRange.from} onChange={(d) => setCustomRange((r) => ({ ...r, from: d }))} />
-          <span style={{ color: C.muted, fontSize: 13, fontFamily: SANS }}>to</span>
-          <DateField value={customRange.to} onChange={(d) => setCustomRange((r) => ({ ...r, to: d }))} align="right" />
-        </div>
-      )}
       {filteredTrades.length === 0 ? (
         <div style={{ color: C.muted, fontSize: 16, marginBottom: 28 }}>No trades logged in this period.</div>
       ) : (
@@ -1965,39 +1125,8 @@ function Dashboard({ trades }) {
             <StatCard label="Avg Win" value={`+${stats.avgWin.toFixed(2)}`} color={C.sage} />
             <StatCard label="Avg Loss" value={stats.avgLoss.toFixed(2)} color={C.rustRed} />
           </div>
-
-          <div style={{ marginBottom: 22 }}>
-            <div style={{ padding: "0 4px", marginBottom: 16 }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Equity Curve</div>
-              <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Cumulative R, trade by trade</div>
-            </div>
-            <div onPointerDown={() => activateChart("equity")}>
-              <EquityCurve key={chartKey("equity")} trades={filteredTrades} />
-            </div>
-          </div>
-
-          <div style={{ marginBottom: 22 }}>
-            <div style={{ padding: "0 4px", marginBottom: 16 }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>R per Trade</div>
-              <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Green = win, red = loss</div>
-            </div>
-            <div onPointerDown={() => activateChart("rbar")}>
-              <TradeRBarChart key={chartKey("rbar")} trades={filteredTrades} />
-            </div>
-          </div>
-
-          <div style={{ marginBottom: 22 }}>
-            <div style={{ padding: "0 4px", marginBottom: 16 }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Performance by Symbol</div>
-              <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Total R per simbol, diurutkan dari yang paling profitable</div>
-            </div>
-            <div onPointerDown={() => activateChart("symbol")}>
-              <SymbolPerformanceChart key={chartKey("symbol")} trades={filteredTrades} />
-            </div>
-          </div>
-
           <div style={{ marginBottom: 18, marginTop: -6 }}>
-  <div style={{ padding: "0 4px", marginBottom: 16 }}>
+  <div style={{ padding: "0 4px" }}>
     <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
     <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Score 0–100 per dimension</div>
   </div>
@@ -2013,7 +1142,7 @@ function Dashboard({ trades }) {
             </div>
           </div>
           <SectionLabel text="By Rules Compliance" />
-          <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 0, padding: "4px 18px", boxShadow: C.shadowCard }}>
+          <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 8, padding: "4px 18px", boxShadow: C.shadowCard }}>
   {["Yes", "Partial", "No"].map((r, i) => {
     const d = stats.byRules[r];
     const avg = d.count ? d.total / d.count : 0;
@@ -2027,23 +1156,8 @@ function Dashboard({ trades }) {
     );
   })}
           </div>
-
-          {availableYears.length > 0 && (
-            <div style={{ marginTop: 22 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", padding: "0 4px", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
-                <div>
-                  <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trade Calendar</div>
-                  <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Daily P&amp;L for {heatmapYear}</div>
-                </div>
-                <YearStepper year={heatmapYear} years={availableYears} onChange={setHeatmapYear} />
-              </div>
-              <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 0, padding: "14px 18px", boxShadow: C.shadowCard }}>
-                <CalendarHeatmap trades={trades} year={heatmapYear} />
-              </div>
-            </div>
-          )}
         </>
       )}
     </div>
   );
-}
+                }
