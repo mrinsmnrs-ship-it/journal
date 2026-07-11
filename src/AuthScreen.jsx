@@ -16,15 +16,15 @@ const SANS = CHAT_FONT;
 // Tokens: palet Primer (GitHub) versi light — login page dikunci light
 // regardless tema aktif, jadi selalu pakai warna GitHub light + aksen biru.
 const C = {
-  bg: "#ffffff", paper: "#ffffff", paperSoft: "#f6f8fa",
+  bg: "#ffffff", paper: "#ffffff", paperSoft: "#f5f5f5",
   pageBg: "#ffffff",
-  ink: "#1f2328", inkSoft: "#656d76", muted: "#656d76", faint: "#8c959f",
-  line: "#d0d7de", lineSoft: "#d8dee4",
+  ink: "#0a0a0a", inkSoft: "#737373", muted: "#737373", faint: "#a3a3a3",
+  line: "#e5e5e5", lineSoft: "#ececec",
   inputBg: "#ffffff",
-  clay: "#0969da", clayDeep: "#0552a5",
-  btnAccent: "#0969da", btnAccentDeep: "#0552a5",
-  rustRed: "#d1242f", rustWash: "#ffebe9",
-  sage: "#1a7f37", sageWash: "#dafbe1",
+  clay: "#2563eb", clayDeep: "#1d4ed8",
+  btnAccent: "#2563eb", btnAccentDeep: "#1d4ed8",
+  rustRed: "#dc2626", rustWash: "#fee2e2",
+  sage: "#0d9488", sageWash: "#ccfbf1",
   shadowCard: "none",
   shadowRaised: "0 1px 0 rgba(31,35,40,0.04)",
   shadowPopover: "0 8px 24px rgba(140,149,159,0.2)",
