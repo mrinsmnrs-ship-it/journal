@@ -1042,7 +1042,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
         </div>
       </Field>
       <Field label="Reason / Setup">
-        <input type="text" placeholder="Breakout retest, reversal, ..." value={form.reason} onChange={(e) => updateForm("reason", e.target.value)} style={inputStyle} />
+        <input type="text" placeholder="Breakout retest, reversal, ..." value={form.reason} onChange={(e) => updateForm("reason", e.target.value)} style={{ ...inputStyle, height: 40, padding: "0 16px" }} />
       </Field>
       <RiskRPanel form={form} updateForm={updateForm} />
       <Field label="Rules Compliance">
