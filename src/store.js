@@ -13,9 +13,11 @@ export async function loadUserData(uid) {
       trades: data.trades || [],
       theme: data.theme || "light",
       chatMessages: data.chatMessages || [],
+      symbolOptions: data.symbolOptions || [],
+      entryModelOptions: data.entryModelOptions || [],
     };
   }
-  return { trades: [], theme: "light", chatMessages: [] };
+  return { trades: [], theme: "light", chatMessages: [], symbolOptions: [], entryModelOptions: [] };
 }
 
 export async function saveUserData(uid, partial) {
