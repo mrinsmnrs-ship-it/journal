@@ -20,7 +20,7 @@
   width: 260px;
   height: 260px;
   margin-left: -130px;
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--pill-fill);
   transform: translateY(45%) scale(0);
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
