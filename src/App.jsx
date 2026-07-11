@@ -15,6 +15,7 @@ import JournalChat from "./JournalChat.jsx";
 import BrandMark from "./BrandMark.jsx";
 import EmotionSlider from "./EmotionSlider.jsx";
 import Counter from "./Counter.jsx";
+import "./PillToggle.css";
 
 // ---- Design tokens : Claude-matched palette (blue / sage / amber) ----
 // Shadow tokens: Claude.ai leans on hairline borders more than shadows —
@@ -131,6 +132,32 @@ const PERIODS = [
 ];
 
 // ---- Small atoms ----
+function PillToggle({ label, active, onClick }) {
+  const C = useTheme();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      data-active={active}
+      className="pill-toggle"
+      style={{
+        flex: 1, height: 46, padding: 0, borderRadius: 6,
+        border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
+        background: C.paper, fontFamily: SANS, fontWeight: 700, fontSize: 16,
+        "--pill-fill": C.btnAccent,
+        "--pill-base-text": C.inkSoft,
+        "--pill-active-text": C.btnAccentTextActive,
+      }}
+    >
+      <span className="pill-toggle-fill" />
+      <span className="pill-toggle-label-stack">
+        <span className="pill-toggle-label-base">{label}</span>
+        <span className="pill-toggle-label-active">{label}</span>
+      </span>
+    </button>
+  );
+}
+
 function Chip({ label, active, onClick }) {
   const C = useTheme();
   return (
@@ -1008,17 +1035,9 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
       </Field>
       <Field label="Direction">
         <div style={{ display: "flex", gap: 12 }}>
-          {["Long", "Short"].map((d) => {
-            const active = form.direction === d;
-            return (
-              <button key={d} onClick={() => updateForm("direction", d)} style={{
-                flex: 1, padding: "14px 0", borderRadius: 6,
-                border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
-                background: active ? C.btnAccent : C.paper,
-                color: active ? C.btnAccentTextActive : C.inkSoft, fontWeight: 700, fontSize: 16, cursor: "pointer",
-              }}>{d}</button>
-            );
-          })}
+          {["Long", "Short"].map((d) => (
+            <PillToggle key={d} label={d} active={form.direction === d} onClick={() => updateForm("direction", d)} />
+          ))}
         </div>
       </Field>
       <Field label="Reason / Setup">
@@ -1026,11 +1045,9 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
       </Field>
       <RiskRPanel form={form} updateForm={updateForm} />
       <Field label="Rules Compliance">
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          {["Yes", "Partial", "No"].map((r) => (
-            <Chip key={r} label={r} active={form.rules === r} onClick={() => updateForm("rules", r)}
-              activeColor={r === "Yes" ? C.sageOnWhite : r === "No" ? C.rustOnWhite : C.amberOnWhite}
-              activeBg={r === "Yes" ? C.sageWash : r === "No" ? C.rustWash : C.amberWash} />
+        <div style={{ display: "flex", gap: 12 }}>
+          {["Yes", "No"].map((r) => (
+            <PillToggle key={r} label={r} active={form.rules === r} onClick={() => updateForm("rules", r)} />
           ))}
         </div>
       </Field>
