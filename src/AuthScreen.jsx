@@ -6,6 +6,7 @@ import {
 } from "firebase/auth";
 import { auth } from "./firebase";
 import BrandMark from "./BrandMark.jsx";
+import "./PillToggle.css";
 
 // Font stack unified with App.jsx: GitHub's system font stack (Primer).
 const CHAT_FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif";
@@ -50,6 +51,7 @@ export default function AuthScreen() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [busy, setBusy] = useState(false);
+  const [pressed, setPressed] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -105,9 +107,8 @@ export default function AuthScreen() {
         input::placeholder { color: ${C.faint}; }
         .auth-input { transition: border-color .12s ease, box-shadow .12s ease; box-shadow: none; }
         .auth-input:focus { outline: none; border-color: ${C.clay} !important; box-shadow: 0 0 0 3px rgba(9,105,218,0.15) !important; }
-        .auth-submit { transition: background .12s ease, transform .1s ease, box-shadow .12s ease; }
-        .auth-submit:hover:not(:disabled) { background: ${C.btnAccentDeep}; box-shadow: ${C.shadowRaised}; }
-        .auth-submit:active:not(:disabled) { transform: scale(0.98); }
+        .auth-submit { transition: box-shadow .12s ease; }
+        .auth-submit:hover:not(:disabled) { box-shadow: ${C.shadowRaised}; }
         .auth-tab { transition: color .12s ease; }
       `}</style>
 
@@ -137,16 +138,22 @@ export default function AuthScreen() {
               key={m}
               type="button"
               onClick={() => switchMode(m)}
-              className="auth-tab"
+              data-active={mode === m}
+              className="pill-toggle auth-tab"
               style={{
                 flex: 1, border: "none", borderRadius: 6, padding: "9px 0",
                 fontFamily: SANS, fontSize: 13.5, fontWeight: 700, cursor: "pointer",
-                background: mode === m ? C.paper : "transparent",
-                color: mode === m ? C.ink : C.muted,
-                boxShadow: mode === m ? C.shadowCard : "none",
+                background: "transparent",
+                "--pill-fill": C.paper,
+                "--pill-base-text": C.muted,
+                "--pill-active-text": C.ink,
               }}
             >
-              {m === "login" ? "Log In" : "Sign Up"}
+              <span className="pill-toggle-fill" style={{ boxShadow: C.shadowRaised }} />
+              <span className="pill-toggle-label-stack">
+                <span className="pill-toggle-label-base">{m === "login" ? "Log In" : "Sign Up"}</span>
+                <span className="pill-toggle-label-active">{m === "login" ? "Log In" : "Sign Up"}</span>
+              </span>
             </button>
           ))}
         </div>
@@ -236,15 +243,28 @@ export default function AuthScreen() {
           <button
             type="submit"
             disabled={busy}
-            className="auth-submit"
+            data-active={pressed && !busy}
+            onMouseDown={() => setPressed(true)}
+            onMouseUp={() => setPressed(false)}
+            onMouseLeave={() => setPressed(false)}
+            onTouchStart={() => setPressed(true)}
+            onTouchEnd={() => setPressed(false)}
+            className="pill-toggle auth-submit"
             style={{
               width: "100%", padding: "13px 0", borderRadius: 6, border: "none",
-              background: C.btnAccent, color: "#FFFFFF", fontWeight: 700, fontSize: 15,
+              background: C.btnAccent, fontWeight: 700, fontSize: 15,
               cursor: busy ? "not-allowed" : "pointer", opacity: busy ? 0.6 : 1,
               boxShadow: C.shadowCard,
+              "--pill-fill": C.btnAccentDeep,
+              "--pill-base-text": "#FFFFFF",
+              "--pill-active-text": "#FFFFFF",
             }}
           >
-            {busy ? "Please wait..." : mode === "login" ? "Log In" : "Sign Up"}
+            <span className="pill-toggle-fill" />
+            <span className="pill-toggle-label-stack">
+              <span className="pill-toggle-label-base">{busy ? "Please wait..." : mode === "login" ? "Log In" : "Sign Up"}</span>
+              <span className="pill-toggle-label-active">{busy ? "Please wait..." : mode === "login" ? "Log In" : "Sign Up"}</span>
+            </span>
           </button>
         </form>
       </div>
