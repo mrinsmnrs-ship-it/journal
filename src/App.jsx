@@ -186,7 +186,7 @@ function PillToggle({ label, active, onClick }) {
       data-active={active}
       className="pill-toggle"
       style={{
-        flex: 1, height: 40, padding: 0, borderRadius: 6,
+        flex: 1, height: 40, padding: 0, borderRadius: 0,
         border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
         background: C.paper, fontFamily: SANS, fontWeight: 700, fontSize: 16,
         "--pill-fill": C.btnAccent,
@@ -213,7 +213,7 @@ function Chip({ label, active, onClick }) {
       className="pill-toggle"
       style={{
         fontFamily: SANS, fontSize: 14, fontWeight: 600,
-        padding: "9px 17px", borderRadius: 6,
+        padding: "9px 17px", borderRadius: 0,
         border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
         background: C.paper,
         cursor: "pointer",
@@ -246,7 +246,7 @@ function useInputStyle() {
   const C = useTheme();
   return {
     width: "100%", boxSizing: "border-box", background: C.inputBg,
-    border: `1px solid ${C.inputBorder}`, borderRadius: 6, padding: "14px 16px",
+    border: `1px solid ${C.inputBorder}`, borderRadius: 0, padding: "14px 16px",
     color: C.inputText, fontFamily: SANS, fontSize: 16, outline: "none",
     boxShadow: "none",
   };
@@ -291,7 +291,7 @@ function RiskRPanel({ form, updateForm }) {
                 style={{
                   width: "100%", boxSizing: "border-box", background: C.inputBg,
                   border: `1px solid ${active ? C.btnAccentBorder : C.inputBorder}`,
-                  borderRadius: 6, height: 40, padding: "0 6px", cursor: "pointer",
+                  borderRadius: 0, height: 40, padding: "0 6px", cursor: "pointer",
                   display: "flex", justifyContent: "center", alignItems: "center", gap: 1,
                 }}
               >
@@ -327,7 +327,7 @@ function RiskRPanel({ form, updateForm }) {
             type="button"
             onClick={() => adjust(delta)}
             style={{
-              width: 30, height: 26, padding: 0, borderRadius: 4,
+              width: 30, height: 26, padding: 0, borderRadius: 0,
               border: `1px solid ${C.line}`, background: C.paper,
               color: C.inkSoft, fontWeight: 600, fontSize: 10, cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -350,7 +350,7 @@ function Tag({ text }) {
     <span style={{
       fontFamily: SANS, fontSize: 12, fontWeight: 400, color: C.muted,
       background: C.paperSoft, border: `1px solid ${C.line}`,
-      borderRadius: 6, padding: "6px 13px",
+      borderRadius: 0, padding: "6px 13px",
     }}>
       {text}
     </span>
@@ -381,7 +381,7 @@ function ThemeToggle({ mode, onToggle, compact }) {
       title={`Switch to ${nextLabel} theme`}
       style={{
         display: "flex", alignItems: "center", gap: 9,
-        background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 6,
+        background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 0,
         padding: compact ? "9px" : "10px 16px", cursor: "pointer", color: C.inkSoft,
         fontFamily: SANS, fontSize: 14, fontWeight: 600,
       }}
@@ -789,7 +789,7 @@ function RJournal({ user }) {
           input, textarea { font-family: ${SANS}; }
           input:focus, textarea:focus { border-color: ${C.clay} !important; }
           ::-webkit-scrollbar { width: 6px; }
-          ::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 4px; }
+          ::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 0; }
           .recharts-wrapper, .recharts-wrapper svg, .recharts-surface { overflow: visible !important; }
 
           .app-shell { display: flex; height: 100vh; }
@@ -820,7 +820,7 @@ function RJournal({ user }) {
           .app-footer-mobile { display: none; }
 
           .nav-item-desktop {
-            display:flex; align-items:center; padding: 11px 12px; border-radius: 6px;
+            display:flex; align-items:center; padding: 11px 12px; border-radius: 0;
             font-family: ${SANS}; font-size:16px; font-weight:600; letter-spacing: -0.015em;
             cursor:pointer; border:none; background:transparent;
             width: calc(100% - 16px); text-align:left; margin-bottom:2px; transition: color .12s ease, background .12s ease;
@@ -897,7 +897,7 @@ function RJournal({ user }) {
               ))}
               <div style={{
                 position: "absolute", top: desktopNavIndicator.top, right: 0,
-                width: 3, height: desktopNavIndicator.height, borderRadius: 2,
+                width: 3, height: desktopNavIndicator.height, borderRadius: 0,
                 background: C.btnAccent,
                 transition: "top .28s cubic-bezier(.4,0,.2,1), height .28s cubic-bezier(.4,0,.2,1)",
               }} />
@@ -910,7 +910,7 @@ function RJournal({ user }) {
                 title="Log out"
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 6,
+                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 0,
                   padding: "10px 13px", cursor: "pointer", color: C.inkSoft,
                 }}
               >
@@ -939,7 +939,7 @@ function RJournal({ user }) {
                 title="Log out"
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 6,
+                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 0,
                   padding: 8, cursor: "pointer", color: C.inkSoft,
                 }}
               >
@@ -1041,7 +1041,7 @@ function DateField({ value, onChange }) {
         onClick={() => setOpen((o) => !o)}
         style={{
           width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
-          borderRadius: 6, height: 40, padding: "0 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
+          borderRadius: 0, height: 40, padding: "0 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
           textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center",
           boxShadow: "none",
         }}
@@ -1053,7 +1053,7 @@ function DateField({ value, onChange }) {
           <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
           <div style={{
             position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: 300,
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: 16,
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
             boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
@@ -1097,7 +1097,7 @@ function DateField({ value, onChange }) {
                         key={i}
                         onClick={() => selectDay(d)}
                         style={{
-                          aspectRatio: "1", border: "none", borderRadius: 6, cursor: "pointer",
+                          aspectRatio: "1", border: "none", borderRadius: 0, cursor: "pointer",
                           background: isSelected ? C.btnAccent : "transparent",
                           color: isSelected ? C.btnAccentTextActive : C.ink,
                           fontSize: 14, fontFamily: SANS,
@@ -1176,7 +1176,7 @@ function TagSelect({ value, onChange, options, onAddOption, placeholder, upperca
           <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
           <div style={{
             position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: "100%", minWidth: 220,
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: 8,
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 8,
             boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
             maxHeight: 240, overflowY: "auto",
           }}>
@@ -1188,7 +1188,7 @@ function TagSelect({ value, onChange, options, onAddOption, placeholder, upperca
                     key={opt}
                     onMouseDown={(e) => { e.preventDefault(); select(opt); }}
                     style={{
-                      border: `1px solid ${C.line}`, borderRadius: 999, padding: "5px 12px",
+                      border: `1px solid ${C.line}`, borderRadius: 0, padding: "5px 12px",
                       background: opt === value ? C.btnAccentWash : C.paperSoft,
                       color: opt === value ? C.btnAccentText : C.ink,
                       fontSize: 13, fontWeight: 600, fontFamily: SANS, cursor: "pointer",
@@ -1225,7 +1225,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
   const C = useTheme();
   const inputStyle = useInputStyle();
   return (
-    <div style={{ background: C.paperSoftLight, borderRadius: 6, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
+    <div style={{ background: C.paperSoftLight, borderRadius: 0, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
       <Field label="Date">
         <DateField value={form.date} onChange={(d) => updateForm("date", d)} />
       </Field>
@@ -1294,7 +1294,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
         data-active={canSave}
         className="pill-toggle"
         style={{
-          width: "100%", padding: "16px 0", borderRadius: 6, border: "none",
+          width: "100%", padding: "16px 0", borderRadius: 0, border: "none",
           background: C.lineSoft,
           fontWeight: 700, fontSize: 17, cursor: canSave ? "pointer" : "not-allowed",
           boxShadow: canSave ? C.shadowCard : "none",
@@ -1325,7 +1325,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
         <div style={{ fontSize: 16, marginBottom: 16 }}>No trades logged yet.</div>
         <button onClick={onGoLog} style={{
           display: "inline-flex", alignItems: "center", gap: 8, background: C.clayWash,
-          border: `1px solid ${C.clay}`, color: C.clayOnWhite, borderRadius: 6, padding: "12px 20px",
+          border: `1px solid ${C.clay}`, color: C.clayOnWhite, borderRadius: 0, padding: "12px 20px",
           fontWeight: 700, fontSize: 15, cursor: "pointer",
         }}><Plus size={18} /> Log your first trade</button>
       </div>
@@ -1339,7 +1339,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
         return (
           <div key={t.id} style={{
             background: C.paperSoftLight, border: `1px solid ${C.line}`,
-            borderRadius: 6, padding: "20px 22px", boxShadow: C.shadowCard,
+            borderRadius: 0, padding: "20px 22px", boxShadow: C.shadowCard,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
   <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
@@ -1372,7 +1372,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
           <div style={{
             position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
             zIndex: 40, width: "min(360px, calc(100vw - 48px))",
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: 24,
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 24,
             boxShadow: C.shadowModal,
           }}>
             <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 19, marginBottom: 9, letterSpacing: "-0.01em", color: C.ink }}>Delete this trade?</div>
@@ -1383,14 +1383,14 @@ function JournalList({ trades, onDelete, onGoLog }) {
               <button
                 onClick={() => setConfirmId(null)}
                 style={{
-                  flex: 1, padding: "12px 0", borderRadius: 6, border: `1px solid ${C.line}`,
+                  flex: 1, padding: "12px 0", borderRadius: 0, border: `1px solid ${C.line}`,
                   background: C.paperSoft, color: C.ink, fontWeight: 700, fontSize: 15.5, cursor: "pointer",
                 }}
               >No</button>
               <button
                 onClick={() => { onDelete(confirmTrade.id); setConfirmId(null); }}
                 style={{
-                  flex: 1, padding: "12px 0", borderRadius: 6, border: "none",
+                  flex: 1, padding: "12px 0", borderRadius: 0, border: "none",
                   background: C.dangerBg, color: "#FFFFFF", fontWeight: 700, fontSize: 15.5, cursor: "pointer",
                 }}
               >Yes, Delete</button>
@@ -1422,7 +1422,7 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
 function StatCard({ label, value, color }) {
   const C = useTheme();
   return (
-    <div style={{ background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 6, padding: "13px 15px", boxShadow: C.shadowCard }}>
+    <div style={{ background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 0, padding: "13px 15px", boxShadow: C.shadowCard }}>
       <div style={{ fontFamily: SANS, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.04em", color: C.muted, textTransform: "uppercase", marginBottom: 5 }}>{label}</div>
       <div style={{ fontFamily: SANS, fontSize: 19, fontWeight: 700, color: C.ink }}>{value}</div>
     </div>
@@ -1447,7 +1447,7 @@ function EquityCurve({ trades }) {
           <XAxis dataKey="index" tick={{ fontFamily: SANS, fontSize: 11, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
           <YAxis tick={{ fontFamily: MONO, fontSize: 11, fill: C.muted }} axisLine={false} tickLine={false} width={40} />
           <Tooltip
-            contentStyle={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, fontFamily: SANS, fontSize: 12 }}
+            contentStyle={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, fontFamily: SANS, fontSize: 12 }}
             labelFormatter={(v, payload) => (payload && payload[0] ? `${payload[0].payload.symbol} \u00b7 ${fmtDateDisplay(payload[0].payload.date)}` : v)}
             formatter={(value) => [fmtR(value), "Cumulative R"]}
             cursor={{ stroke: C.faint, strokeWidth: 1 }}
@@ -1466,7 +1466,7 @@ function TradeRTooltip({ active, payload }) {
   const d = payload[0].payload;
   const color = d.r >= 0 ? C.sage : C.rustRed;
   return (
-    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: "9px 12px", fontFamily: SANS, fontSize: 12, boxShadow: C.shadowPopover }}>
+    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: "9px 12px", fontFamily: SANS, fontSize: 12, boxShadow: C.shadowPopover }}>
       <div style={{ color: C.muted, marginBottom: 3 }}>{d.symbol} &middot; {fmtDateDisplay(d.date)}</div>
       <div style={{ color, fontWeight: 700, fontSize: 13 }}>{fmtR(d.r)}</div>
     </div>
@@ -1579,7 +1579,7 @@ function CalendarHeatmap({ trades, year }) {
                 <div
                   key={di}
                   title={title}
-                  style={{ width: cell, height: cell, borderRadius: 2, background: bg, opacity, border: `1px solid ${C.line}` }}
+                  style={{ width: cell, height: cell, borderRadius: 0, background: bg, opacity, border: `1px solid ${C.line}` }}
                 />
               );
             })}
@@ -1589,11 +1589,11 @@ function CalendarHeatmap({ trades, year }) {
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 10, fontFamily: SANS, fontSize: 10.5, color: C.muted }}>
         <span>Loss</span>
         {[1, 0.7, 0.4].map((o) => (
-          <div key={`l${o}`} style={{ width: cell, height: cell, borderRadius: 2, background: C.rustRed, opacity: o, border: `1px solid ${C.line}` }} />
+          <div key={`l${o}`} style={{ width: cell, height: cell, borderRadius: 0, background: C.rustRed, opacity: o, border: `1px solid ${C.line}` }} />
         ))}
-        <div style={{ width: cell, height: cell, borderRadius: 2, background: C.lineSoft, opacity: 0.45, border: `1px solid ${C.line}` }} />
+        <div style={{ width: cell, height: cell, borderRadius: 0, background: C.lineSoft, opacity: 0.45, border: `1px solid ${C.line}` }} />
         {[0.4, 0.7, 1].map((o) => (
-          <div key={`w${o}`} style={{ width: cell, height: cell, borderRadius: 2, background: C.sage, opacity: o, border: `1px solid ${C.line}` }} />
+          <div key={`w${o}`} style={{ width: cell, height: cell, borderRadius: 0, background: C.sage, opacity: o, border: `1px solid ${C.line}` }} />
         ))}
         <span>Win</span>
       </div>
@@ -1607,7 +1607,7 @@ function SymbolTooltip({ active, payload }) {
   const d = payload[0].payload;
   const color = d.totalR >= 0 ? C.sage : C.rustRed;
   return (
-    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: "9px 12px", fontFamily: SANS, fontSize: 12, boxShadow: C.shadowPopover }}>
+    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: "9px 12px", fontFamily: SANS, fontSize: 12, boxShadow: C.shadowPopover }}>
       <div style={{ color: C.ink, fontWeight: 700, marginBottom: 3 }}>{d.symbol}</div>
       <div style={{ color, fontWeight: 700, fontSize: 13 }}>{fmtR(d.totalR)}</div>
       <div style={{ color: C.muted, marginTop: 3 }}>{d.winRate.toFixed(0)}% win rate &middot; {d.count} trade{d.count === 1 ? "" : "s"}</div>
@@ -1664,7 +1664,7 @@ function YearStepper({ year, years, onChange }) {
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "center",
         height: stepHeight, minWidth: 90, padding: "0 14px",
-        background: C.inputBg, border: `1px solid ${C.btnAccentBorder}`, borderRadius: 6,
+        background: C.inputBg, border: `1px solid ${C.btnAccentBorder}`, borderRadius: 0,
       }}>
         <Counter
           value={year}
@@ -1681,7 +1681,7 @@ function YearStepper({ year, years, onChange }) {
       </div>
       <div style={{
         display: "flex", flexDirection: "column", height: stepHeight, width: 32,
-        borderRadius: 6, overflow: "hidden", border: `1px solid ${C.line}`,
+        borderRadius: 0, overflow: "hidden", border: `1px solid ${C.line}`,
       }}>
         <button type="button" onClick={goUp} disabled={!canUp} style={{ ...btnStyle(canUp), borderBottom: `1px solid ${C.line}` }}>
           <ChevronUp size={14} strokeWidth={2.5} />
@@ -1722,7 +1722,7 @@ function MobileDockItem({ label, active, onClick, mouseX, spring, distance, magn
         transformOrigin: "bottom center",
         background: active ? C.navActiveBg : "transparent",
         border: "none", cursor: "pointer",
-        padding: "6px 10px 4px", borderRadius: 6,
+        padding: "6px 10px 4px", borderRadius: 0,
         color: active ? C.ink : C.faint,
       }}
     >
@@ -1761,7 +1761,7 @@ function MobileDockNav({ items, activeKey, onSelect, registerItemRef, indicator,
         />
       ))}
       <div style={{
-        position: "absolute", top: 0, height: 3, borderRadius: 2,
+        position: "absolute", top: 0, height: 3, borderRadius: 0,
         background: accentColor,
         left: indicator.left, width: indicator.width,
         transition: "left .28s cubic-bezier(.4,0,.2,1), width .28s cubic-bezier(.4,0,.2,1)",
@@ -1808,7 +1808,7 @@ function Dashboard({ trades }) {
   }
 
   const selectStyle = (active) => ({
-    fontFamily: SANS, fontSize: 14, fontWeight: 600, padding: "9px 12px", borderRadius: 6,
+    fontFamily: SANS, fontSize: 14, fontWeight: 600, padding: "9px 12px", borderRadius: 0,
     border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
     background: C.paper, color: C.ink, cursor: "pointer",
   });
@@ -1913,7 +1913,7 @@ function Dashboard({ trades }) {
             </div>
           </div>
           <SectionLabel text="By Rules Compliance" />
-          <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 6, padding: "4px 18px", boxShadow: C.shadowCard }}>
+          <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 0, padding: "4px 18px", boxShadow: C.shadowCard }}>
   {["Yes", "Partial", "No"].map((r, i) => {
     const d = stats.byRules[r];
     const avg = d.count ? d.total / d.count : 0;
@@ -1937,7 +1937,7 @@ function Dashboard({ trades }) {
                 </div>
                 <YearStepper year={heatmapYear} years={availableYears} onChange={setHeatmapYear} />
               </div>
-              <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 6, padding: "14px 18px", boxShadow: C.shadowCard }}>
+              <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 0, padding: "14px 18px", boxShadow: C.shadowCard }}>
                 <CalendarHeatmap trades={trades} year={heatmapYear} />
               </div>
             </div>
