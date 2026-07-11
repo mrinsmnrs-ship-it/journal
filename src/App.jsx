@@ -575,9 +575,12 @@ function RJournal({ user }) {
   const [trades, setTrades] = useState([]);
   const [themeMode, setThemeMode] = useState("light");
   const [loaded, setLoaded] = useState(false);
+  const [symbolOptions, setSymbolOptions] = useState([]);
+  const [entryModelOptions, setEntryModelOptions] = useState([]);
   const [form, setForm] = useState({
     date: todayISO(), symbol: "", direction: "", reason: "",
     riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "",
+    entryModel: "", entryModelTracked: false,
   });
 
   useEffect(() => {
@@ -585,6 +588,8 @@ function RJournal({ user }) {
       const data = await loadUserData(user.uid);
       setTrades(data.trades);
       setThemeMode(THEME_ORDER.includes(data.theme) ? data.theme : "light");
+      setSymbolOptions(data.symbolOptions);
+      setEntryModelOptions(data.entryModelOptions);
       setLoaded(true);
     })();
   }, [user.uid]);
@@ -651,6 +656,18 @@ function RJournal({ user }) {
   function toggleEmotion(e) {
   setForm((f) => ({ ...f, emotion: f.emotion === e ? "" : e }));
   }
+  async function addSymbolOption(opt) {
+    if (!opt || symbolOptions.includes(opt)) return;
+    const next = [...symbolOptions, opt];
+    setSymbolOptions(next);
+    await saveUserData(user.uid, { symbolOptions: next });
+  }
+  async function addEntryModelOption(opt) {
+    if (!opt || entryModelOptions.includes(opt)) return;
+    const next = [...entryModelOptions, opt];
+    setEntryModelOptions(next);
+    await saveUserData(user.uid, { entryModelOptions: next });
+  }
   const canSave = form.symbol.trim() && form.direction && form.rActual !== "";
   async function handleSave() {
     if (!canSave) return;
@@ -661,11 +678,13 @@ function RJournal({ user }) {
       rPlanned: form.rPlanned === "" ? null : Number(form.rPlanned),
       rActual: Number(form.rActual), rules: form.rules || null,
       emotion: form.emotion, notes: form.notes.trim(), createdAt: Date.now(),
+      entryModel: form.entryModel.trim() || null,
+      entryModelTracked: !!form.entryModelTracked && !!form.entryModel.trim(),
     };
     const next = [trade, ...trades];
     setTrades(next);
     await saveUserData(user.uid, { trades: next });
-    setForm({ date: todayISO(), symbol: "", direction: "", reason: "", riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "" });
+    setForm({ date: todayISO(), symbol: "", direction: "", reason: "", riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "", entryModel: "", entryModelTracked: false });
     setTab("journal");
   }
   async function handleDelete(id) {
@@ -901,13 +920,13 @@ function RJournal({ user }) {
                 <JournalChat user={user} trades={trades} theme={C} />
               </div>
             ) : tab === "log" ? (
-              <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} />
+              <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} />
             ) : tab === "journal" ? (
               <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} />
             ) : tab === "dashboard" ? (
               <Dashboard trades={trades} />
             ) : (
-              <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} />
+              <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} />
             )}
             
           </div>
@@ -1074,7 +1093,113 @@ function DateField({ value, onChange }) {
   );
 }
 
-function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) {
+// ---- Notion-style creatable select: pick an existing tag or type to
+// create a new one, so you don't have to retype the same symbol/model
+// every time. Pills all share one default color (no per-tag rainbow). ----
+function TagSelect({ value, onChange, options, onAddOption, placeholder, uppercase, disabled }) {
+  const C = useTheme();
+  const inputStyle = useInputStyle();
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const norm = (s) => (uppercase ? s.toUpperCase() : s);
+  const trimmedQuery = query.trim();
+  const filtered = options.filter((o) => o.toLowerCase().includes(trimmedQuery.toLowerCase()));
+  const exactMatch = options.some((o) => o.toLowerCase() === trimmedQuery.toLowerCase());
+
+  function openMenu() {
+    if (disabled) return;
+    setQuery(value || "");
+    setOpen(true);
+  }
+  function select(opt) {
+    onChange(opt);
+    setOpen(false);
+  }
+  function createAndSelect() {
+    const v = norm(trimmedQuery);
+    if (!v) return;
+    if (!options.some((o) => o.toLowerCase() === v.toLowerCase())) onAddOption(v);
+    onChange(v);
+    setOpen(false);
+  }
+  function handleKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (exactMatch) select(options.find((o) => o.toLowerCase() === trimmedQuery.toLowerCase()));
+      else createAndSelect();
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
+  }
+
+  return (
+    <div style={{ position: "relative" }}>
+      <input
+        type="text"
+        disabled={disabled}
+        placeholder={placeholder}
+        value={open ? query : value}
+        onFocus={openMenu}
+        onChange={(e) => setQuery(norm(e.target.value))}
+        onKeyDown={handleKeyDown}
+        style={{
+          ...inputStyle, height: 40, padding: "0 16px",
+          textTransform: uppercase ? "uppercase" : "none",
+          opacity: disabled ? 0.5 : 1, cursor: disabled ? "not-allowed" : "text",
+        }}
+      />
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
+          <div style={{
+            position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: "100%", minWidth: 220,
+            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 6, padding: 8,
+            boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
+            maxHeight: 240, overflowY: "auto",
+          }}>
+            {filtered.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: trimmedQuery && !exactMatch ? 8 : 0 }}>
+                {filtered.map((opt) => (
+                  <button
+                    type="button"
+                    key={opt}
+                    onMouseDown={(e) => { e.preventDefault(); select(opt); }}
+                    style={{
+                      border: `1px solid ${C.line}`, borderRadius: 999, padding: "5px 12px",
+                      background: opt === value ? C.btnAccentWash : C.paperSoft,
+                      color: opt === value ? C.btnAccentText : C.ink,
+                      fontSize: 13, fontWeight: 600, fontFamily: SANS, cursor: "pointer",
+                    }}
+                  >{opt}</button>
+                ))}
+              </div>
+            )}
+            {trimmedQuery && !exactMatch && (
+              <button
+                type="button"
+                onMouseDown={(e) => { e.preventDefault(); createAndSelect(); }}
+                style={{
+                  width: "100%", textAlign: "left", border: "none", background: "transparent",
+                  color: C.muted, fontSize: 13, fontFamily: SANS, cursor: "pointer", padding: "6px 4px",
+                }}
+              >
+                + Create "{norm(trimmedQuery)}"
+              </button>
+            )}
+            {filtered.length === 0 && !trimmedQuery && (
+              <div style={{ color: C.faint, fontSize: 13, fontFamily: SANS, padding: "6px 4px" }}>
+                Start typing to create an option.
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, symbolOptions, entryModelOptions, onAddSymbolOption, onAddEntryModelOption }) {
   const C = useTheme();
   const inputStyle = useInputStyle();
   return (
@@ -1083,7 +1208,14 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
         <DateField value={form.date} onChange={(d) => updateForm("date", d)} />
       </Field>
       <Field label="Symbol">
-        <input type="text" placeholder="EURUSD, XAUUSD, ..." value={form.symbol} onChange={(e) => updateForm("symbol", e.target.value.toUpperCase())} style={{ ...inputStyle, textTransform: "uppercase", height: 40, padding: "0 16px" }} />
+        <TagSelect
+          value={form.symbol}
+          onChange={(v) => updateForm("symbol", v)}
+          options={symbolOptions}
+          onAddOption={onAddSymbolOption}
+          placeholder="EURUSD, XAUUSD, ..."
+          uppercase
+        />
       </Field>
       <Field label="Direction">
         <div style={{ display: "flex", gap: 12 }}>
@@ -1095,6 +1227,30 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
       <Field label="Reason / Setup">
         <input type="text" placeholder="Breakout retest, reversal, ..." value={form.reason} onChange={(e) => updateForm("reason", e.target.value)} style={{ ...inputStyle, height: 40, padding: "0 16px" }} />
       </Field>
+      <div style={{ marginBottom: 22 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 9 }}>
+          <div style={{
+            fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
+            color: C.muted, textTransform: "capitalize",
+          }}>Entry Model</div>
+          <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+            <span style={{ fontSize: 11, color: C.muted, fontFamily: SANS }}>Count in stats</span>
+            <input
+              type="checkbox"
+              checked={form.entryModelTracked}
+              onChange={(e) => updateForm("entryModelTracked", e.target.checked)}
+              style={{ width: 16, height: 16, cursor: "pointer", accentColor: C.btnAccent }}
+            />
+          </label>
+        </div>
+        <TagSelect
+          value={form.entryModel}
+          onChange={(v) => updateForm("entryModel", v)}
+          options={entryModelOptions}
+          onAddOption={onAddEntryModelOption}
+          placeholder="Not everyone uses one — optional"
+        />
+      </div>
       <RiskRPanel form={form} updateForm={updateForm} />
       <Field label="Rules Compliance">
         <div style={{ display: "flex", gap: 12 }}>
