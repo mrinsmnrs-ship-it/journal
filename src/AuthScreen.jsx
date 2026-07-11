@@ -18,8 +18,8 @@ const SANS = CHAT_FONT;
 const C = {
   bg: "#e8e8e8", paper: "#FFFFFF", paperSoft: "#F0EEE6",
   pageBg: "#e8e8e8",
-  ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
-  line: "#E5E4DF", lineSoft: "#EDECE8",
+  ink: "#000000", inkSoft: "#000000", muted: "#000000", faint: "#000000",
+  line: "#000000", lineSoft: "#000000",
   inputBg: "#F0EEE6",
   clay: "#011627", clayDeep: "#011627",
   btnAccent: "#011627", btnAccentDeep: "#011627",
