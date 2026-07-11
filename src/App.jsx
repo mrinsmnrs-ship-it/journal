@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, createContext, useContext 
 import { motion, AnimatePresence } from "motion/react";
 import {
   Trash2, Plus, PencilLine, BookOpen, LayoutDashboard,
-  Sun, Moon, ChevronLeft, ChevronRight, LogOut, MessageCircle,
+  Sun, Moon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, LogOut, MessageCircle,
 } from "lucide-react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -1658,6 +1658,57 @@ function SymbolPerformanceChart({ trades }) {
   );
 }
 
+function YearStepper({ year, years, onChange }) {
+  const C = useTheme();
+  const idx = years.indexOf(year);
+  const canUp = idx > 0; // years sorted descending, so index-1 = newer year
+  const canDown = idx !== -1 && idx < years.length - 1;
+  const stepHeight = 42;
+
+  const goUp = () => { if (canUp) onChange(years[idx - 1]); };
+  const goDown = () => { if (canDown) onChange(years[idx + 1]); };
+
+  const btnStyle = (enabled) => ({
+    flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+    background: C.paper, border: "none", padding: 0,
+    color: enabled ? C.ink : C.faint, cursor: enabled ? "pointer" : "default",
+  });
+
+  return (
+    <div style={{ display: "flex", alignItems: "stretch", gap: 8 }}>
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "center",
+        height: stepHeight, minWidth: 90, padding: "0 14px",
+        background: C.inputBg, border: `1px solid ${C.btnAccentBorder}`, borderRadius: 6,
+      }}>
+        <Counter
+          value={year}
+          places={[1000, 100, 10, 1]}
+          fontSize={16}
+          padding={2}
+          gap={1}
+          horizontalPadding={0}
+          textColor={C.inputText}
+          fontWeight={700}
+          topGradientStyle={{ display: "none" }}
+          bottomGradientStyle={{ display: "none" }}
+        />
+      </div>
+      <div style={{
+        display: "flex", flexDirection: "column", height: stepHeight, width: 32,
+        borderRadius: 6, overflow: "hidden", border: `1px solid ${C.line}`,
+      }}>
+        <button type="button" onClick={goUp} disabled={!canUp} style={{ ...btnStyle(canUp), borderBottom: `1px solid ${C.line}` }}>
+          <ChevronUp size={14} strokeWidth={2.5} />
+        </button>
+        <button type="button" onClick={goDown} disabled={!canDown} style={btnStyle(canDown)}>
+          <ChevronDown size={14} strokeWidth={2.5} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Dashboard({ trades }) {
   const C = useTheme();
   const [period, setPeriod] = useState("all");
@@ -1823,9 +1874,7 @@ function Dashboard({ trades }) {
                   <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trade Calendar</div>
                   <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Daily P&amp;L for {heatmapYear}</div>
                 </div>
-                <select value={heatmapYear} onChange={(e) => setHeatmapYear(Number(e.target.value))} style={selectStyle(true)}>
-                  {availableYears.map((y) => <option key={y} value={y}>{y}</option>)}
-                </select>
+                <YearStepper year={heatmapYear} years={availableYears} onChange={setHeatmapYear} />
               </div>
               <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 6, padding: "14px 18px", boxShadow: C.shadowCard }}>
                 <CalendarHeatmap trades={trades} year={heatmapYear} />
