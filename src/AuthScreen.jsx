@@ -16,13 +16,13 @@ const SANS = CHAT_FONT;
 // Tokens copied 1:1 from App.jsx's LIGHT theme so the login page is
 // pixel-identical to the rest of the app — no drift, no separate palette.
 const C = {
-  bg: "#FAF9F5", paper: "#FFFFFF", paperSoft: "#F0EEE6",
-  pageBg: "#E5E4DF",
+  bg: "#e8e8e8", paper: "#FFFFFF", paperSoft: "#F0EEE6",
+  pageBg: "#e8e8e8",
   ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
   line: "#E5E4DF", lineSoft: "#EDECE8",
   inputBg: "#F0EEE6",
-  clay: "#4A7DBD", clayDeep: "#3D6C9C",
-  btnAccent: "#4A7DBD", btnAccentDeep: "#3D6C9C",
+  clay: "#011627", clayDeep: "#011627",
+  btnAccent: "#011627", btnAccentDeep: "#011627",
   rustRed: "#B85C50", rustWash: "#F1E2DE",
   sage: "#788C5D", sageWash: "#E8ECE1",
   shadowCard: "0 1px 2px rgba(20,20,19,0.04)",
@@ -105,7 +105,7 @@ export default function AuthScreen() {
         * { box-sizing: border-box; }
         input::placeholder { color: ${C.faint}; }
         .auth-input { transition: border-color .12s ease, box-shadow .12s ease; box-shadow: none; }
-        .auth-input:focus { outline: none; border-color: ${C.clay} !important; box-shadow: 0 0 0 3px rgba(74,125,189,0.15) !important; }
+        .auth-input:focus { outline: none; border-color: ${C.clay} !important; box-shadow: 0 0 0 3px rgba(1,22,39,0.15) !important; }
         .auth-submit { transition: background .12s ease, transform .1s ease, box-shadow .12s ease; }
         .auth-submit:hover:not(:disabled) { background: ${C.btnAccentDeep}; box-shadow: ${C.shadowRaised}; }
         .auth-submit:active:not(:disabled) { transform: scale(0.98); }
