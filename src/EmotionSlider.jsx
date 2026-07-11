@@ -13,10 +13,17 @@ const EMOTION_ORDER = ["Revenge", "Anxious", "FOMO", "Hesitant", "Bored", "Confi
 // theme: objek warna dari ThemeContext (C) milik App.jsx, dioper sebagai prop
 // supaya slider ini otomatis ikut tema light/dark tanpa hardcode warna.
 export default function EmotionSlider({ value, onChange, className = '', theme }) {
+  // Track pakai versi transparan dari warna ink (hitam di tema light,
+  // putih di tema dark) supaya kontras dengan bagian yang sudah "keisi"
+  // (slider-range, warna solid) tetap kelihatan meski keduanya sama-sama
+  // hitam/putih — bedanya cuma opacity, bukan abu-abu terpisah.
+  const trackTint = theme && theme.ink === "#FFFFFF"
+    ? "rgba(255,255,255,0.22)"
+    : "rgba(0,0,0,0.22)";
   const cssVars = theme
     ? {
         '--es-ink': theme.ink,
-        '--es-track-bg': theme.lineSoft,
+        '--es-track-bg': trackTint,
         '--es-icon-bg': theme.paperSoft,
         '--es-icon-border': theme.line,
       }
