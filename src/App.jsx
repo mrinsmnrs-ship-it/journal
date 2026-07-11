@@ -142,7 +142,7 @@ function PillToggle({ label, active, onClick }) {
       data-active={active}
       className="pill-toggle"
       style={{
-        flex: 1, height: 46, padding: 0, borderRadius: 6,
+        flex: 1, height: 40, padding: 0, borderRadius: 6,
         border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
         background: C.paper, fontFamily: SANS, fontWeight: 700, fontSize: 16,
         "--pill-fill": C.btnAccent,
@@ -238,7 +238,7 @@ function RiskRPanel({ form, updateForm }) {
                 style={{
                   width: "100%", boxSizing: "border-box", background: C.inputBg,
                   border: `1px solid ${active ? C.btnAccentBorder : C.inputBorder}`,
-                  borderRadius: 6, padding: "9px 6px", cursor: "pointer",
+                  borderRadius: 6, height: 40, padding: "0 6px", cursor: "pointer",
                   display: "flex", justifyContent: "center", alignItems: "center", gap: 1,
                 }}
               >
@@ -967,8 +967,8 @@ function DateField({ value, onChange }) {
         onClick={() => setOpen((o) => !o)}
         style={{
           width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
-          borderRadius: 6, padding: "14px 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
-          textAlign: "left", cursor: "pointer",
+          borderRadius: 6, height: 40, padding: "0 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
+          textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center",
           boxShadow: "none",
         }}
       >
@@ -1032,7 +1032,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave }) 
         <DateField value={form.date} onChange={(d) => updateForm("date", d)} />
       </Field>
       <Field label="Symbol">
-        <input type="text" placeholder="EURUSD, XAUUSD, ..." value={form.symbol} onChange={(e) => updateForm("symbol", e.target.value.toUpperCase())} style={{ ...inputStyle, textTransform: "uppercase" }} />
+        <input type="text" placeholder="EURUSD, XAUUSD, ..." value={form.symbol} onChange={(e) => updateForm("symbol", e.target.value.toUpperCase())} style={{ ...inputStyle, textTransform: "uppercase", height: 40, padding: "0 16px" }} />
       </Field>
       <Field label="Direction">
         <div style={{ display: "flex", gap: 12 }}>
