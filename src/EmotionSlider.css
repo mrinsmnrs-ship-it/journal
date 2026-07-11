@@ -60,6 +60,7 @@
   height: 100%;
   border-radius: 9999px;
   background-color: var(--es-ink);
+  transition: width 0.2s ease;
 }
 
 /* Label emosi (mis. "Calm") sekarang ada di alur normal dokumen,
