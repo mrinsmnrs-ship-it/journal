@@ -34,7 +34,7 @@ function getValueRoundedToPlace(value, place) {
 function Digit({ place, value, height, digitStyle }) {
   const isDecimal = place === '.';
   const valueRoundedToPlace = isDecimal ? 0 : getValueRoundedToPlace(value, place);
-  const animatedValue = useSpring(valueRoundedToPlace, { stiffness: 260, damping: 32, mass: 0.6 });
+  const animatedValue = useSpring(valueRoundedToPlace);
 
   useEffect(() => {
     if (!isDecimal) {
