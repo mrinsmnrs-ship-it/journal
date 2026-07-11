@@ -39,13 +39,13 @@ const SHADOW_DARK = {
 const LIGHT = {
   bg: "#e8e8e8", paper: "#e8e8e8", paperSoft: "#e8e8e8",
   paperSoftLight: "#e8e8e8", paperSoftStat: "#e8e8e8",
-  ink: "#141413", inkSoft: "#3D3D3A", muted: "#767470", faint: "#AFAEA9",
-  line: "#C2C0B8", lineSoft: "#D3D1C8",
+  ink: "#000000", inkSoft: "#000000", muted: "#000000", faint: "#000000",
+  line: "#000000", lineSoft: "#000000",
   clay: "#011627", clayDeep: "#011627", clayWash: "#e8e8e8", clayOnWhite: "#011627",
   sage: "#788C5D", sageWash: "#e8e8e8", sageOnWhite: "#5F7048",
   rustRed: "#B85C50", rustWash: "#e8e8e8", rustOnWhite: "#B85C50", dangerBg: "#DC2626",
   amber: "#011627", amberWash: "#e8e8e8", amberOnWhite: "#011627",
-  inputBg: "#e8e8e8", inputText: "#141413", inputPlaceholder: "#AFAEA9", inputBorder: "#C2C0B8",
+  inputBg: "#e8e8e8", inputText: "#000000", inputPlaceholder: "#000000", inputBorder: "#000000",
   btnAccent: "#011627", btnAccentBorder: "#011627", btnAccentWash: "#e8e8e8",
   btnAccentText: "#011627", btnAccentTextActive: "#FFFFFF",
   navActiveBg: "rgba(1, 22, 39, 0.12)",
@@ -54,13 +54,13 @@ const LIGHT = {
 const DARK = {
   bg: "#011627", paper: "#011627", paperSoft: "#011627",
   paperSoftLight: "#011627", paperSoftStat: "#011627",
-  ink: "#FAF9F5", inkSoft: "#D8D6CF", muted: "#9C9A93", faint: "#6E6C64",
-  line: "#6E6C63", lineSoft: "#57564E",
+  ink: "#FFFFFF", inkSoft: "#FFFFFF", muted: "#FFFFFF", faint: "#FFFFFF",
+  line: "#FFFFFF", lineSoft: "#FFFFFF",
   clay: "#e8e8e8", clayDeep: "#e8e8e8", clayWash: "#011627", clayOnWhite: "#e8e8e8",
   sage: "#788C5D", sageWash: "#011627", sageOnWhite: "#9CB27E",
   rustRed: "#D28A7E", rustWash: "#011627", rustOnWhite: "#D28A7E", dangerBg: "#E23F3F",
   amber: "#e8e8e8", amberWash: "#011627", amberOnWhite: "#e8e8e8",
-  inputBg: "#011627", inputText: "#FAF9F5", inputPlaceholder: "#6E6C64", inputBorder: "#6E6C63",
+  inputBg: "#011627", inputText: "#FFFFFF", inputPlaceholder: "#FFFFFF", inputBorder: "#FFFFFF",
   btnAccent: "#e8e8e8", btnAccentBorder: "#e8e8e8", btnAccentWash: "#011627",
   btnAccentText: "#e8e8e8", btnAccentTextActive: "#011627",
   navActiveBg: "rgba(232, 232, 232, 0.18)",
@@ -536,7 +536,7 @@ export default function App() {
   }, []);
   if (user === undefined) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: SANS, color: "#767470" }}>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: SANS, color: "#000000" }}>
         Loading…
       </div>
     );
