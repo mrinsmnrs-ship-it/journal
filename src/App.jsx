@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Trash2, Plus, PencilLine, BookOpen, LayoutDashboard,
   Sun, Moon, ChevronLeft, ChevronRight, LogOut, MessageCircle,
@@ -949,27 +950,45 @@ function RJournal({ user }) {
 }
 
 // ---- Log Trade ----
+const CALENDAR_ROWS = 6;
+const CALENDAR_CELLS = CALENDAR_ROWS * 7;
+
+const calendarSlideVariants = {
+  enter: (dir) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0 }),
+};
+
 function DateField({ value, onChange }) {
   const C = useTheme();
   const [open, setOpen] = useState(false);
   const initial = value ? new Date(value + "T00:00:00") : new Date();
   const [viewYear, setViewYear] = useState(initial.getFullYear());
   const [viewMonth, setViewMonth] = useState(initial.getMonth());
+  const [slideDir, setSlideDir] = useState(1);
   const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
   const pad = (n) => String(n).padStart(2, "0");
   const daysCount = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
-  const cells = [...Array(firstDay).fill(null), ...Array.from({ length: daysCount }, (_, i) => i + 1)];
+  const cells = [
+    ...Array(firstDay).fill(null),
+    ...Array.from({ length: daysCount }, (_, i) => i + 1),
+  ];
+  // Pad to a fixed number of cells so the grid is always the same height,
+  // no matter how many days/rows a given month actually needs.
+  while (cells.length < CALENDAR_CELLS) cells.push(null);
 
   function selectDay(d) {
     onChange(`${viewYear}-${pad(viewMonth + 1)}-${pad(d)}`);
     setOpen(false);
   }
   function prevMonth() {
+    setSlideDir(-1);
     if (viewMonth === 0) { setViewMonth(11); setViewYear(viewYear - 1); } else setViewMonth(viewMonth - 1);
   }
   function nextMonth() {
+    setSlideDir(1);
     if (viewMonth === 11) { setViewMonth(0); setViewYear(viewYear + 1); } else setViewMonth(viewMonth + 1);
   }
 
@@ -1010,25 +1029,43 @@ function DateField({ value, onChange }) {
                 <div key={i} style={{ textAlign: "center", fontSize: 12, color: C.muted, fontWeight: 600, padding: "4px 0" }}>{w}</div>
               ))}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
-              {cells.map((d, i) => {
-                if (!d) return <div key={i} />;
-                const iso = `${viewYear}-${pad(viewMonth + 1)}-${pad(d)}`;
-                const isSelected = iso === value;
-                return (
-                  <button
-                    type="button"
-                    key={i}
-                    onClick={() => selectDay(d)}
-                    style={{
-                      aspectRatio: "1", border: "none", borderRadius: 6, cursor: "pointer",
-                      background: isSelected ? C.btnAccent : "transparent",
-                      color: isSelected ? C.btnAccentTextActive : C.ink,
-                      fontSize: 14, fontFamily: SANS,
-                    }}
-                  >{d}</button>
-                );
-              })}
+            <div style={{ position: "relative", overflow: "hidden" }}>
+              <AnimatePresence initial={false} custom={slideDir} mode="popLayout">
+                <motion.div
+                  key={`${viewYear}-${viewMonth}`}
+                  custom={slideDir}
+                  variants={calendarSlideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  style={{
+                    width: "100%",
+                    display: "grid", gridTemplateColumns: "repeat(7, 1fr)",
+                    gridAutoRows: "1fr", gridTemplateRows: `repeat(${CALENDAR_ROWS}, 1fr)`,
+                    gap: 2,
+                  }}
+                >
+                  {cells.map((d, i) => {
+                    if (!d) return <div key={i} style={{ aspectRatio: "1" }} />;
+                    const iso = `${viewYear}-${pad(viewMonth + 1)}-${pad(d)}`;
+                    const isSelected = iso === value;
+                    return (
+                      <button
+                        type="button"
+                        key={i}
+                        onClick={() => selectDay(d)}
+                        style={{
+                          aspectRatio: "1", border: "none", borderRadius: 6, cursor: "pointer",
+                          background: isSelected ? C.btnAccent : "transparent",
+                          color: isSelected ? C.btnAccentTextActive : C.ink,
+                          fontSize: 14, fontFamily: SANS,
+                        }}
+                      >{d}</button>
+                    );
+                  })}
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
         </>
