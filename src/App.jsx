@@ -46,14 +46,14 @@ const LIGHT = {
   paperSoftLight: "#f6f8fa", paperSoftStat: "#f6f8fa",
   ink: "#1f2328", inkSoft: "#656d76", muted: "#656d76", faint: "#8c959f",
   line: "#d0d7de", lineSoft: "#d8dee4",
-  clay: "#0969da", clayDeep: "#0552a5", clayWash: "#ddf4ff", clayOnWhite: "#0969da",
+  clay: "#044df5", clayDeep: "#0339b8", clayWash: "#e1eafe", clayOnWhite: "#044df5",
   sage: "#1a7f37", sageWash: "#dafbe1", sageOnWhite: "#1a7f37",
   rustRed: "#d1242f", rustWash: "#ffebe9", rustOnWhite: "#d1242f", dangerBg: "#d1242f",
   amber: "#9a6700", amberWash: "#fff8c5", amberOnWhite: "#9a6700",
   inputBg: "#ffffff", inputText: "#1f2328", inputPlaceholder: "#6e7781", inputBorder: "#d0d7de",
-  btnAccent: "#0969da", btnAccentBorder: "#0969da", btnAccentWash: "#ddf4ff",
-  btnAccentText: "#0969da", btnAccentTextActive: "#ffffff",
-  navActiveBg: "rgba(9, 105, 218, 0.1)",
+  btnAccent: "#044df5", btnAccentBorder: "#044df5", btnAccentWash: "#e1eafe",
+  btnAccentText: "#044df5", btnAccentTextActive: "#ffffff",
+  navActiveBg: "rgba(4, 77, 245, 0.1)",
   ...SHADOW_LIGHT,
 };
 const DARK = {
@@ -61,14 +61,14 @@ const DARK = {
   paperSoftLight: "#161b22", paperSoftStat: "#161b22",
   ink: "#e6edf3", inkSoft: "#848d97", muted: "#848d97", faint: "#6e7681",
   line: "#30363d", lineSoft: "#21262d",
-  clay: "#2f81f7", clayDeep: "#1f6feb", clayWash: "rgba(56,139,253,0.15)", clayOnWhite: "#2f81f7",
+  clay: "#044df5", clayDeep: "#0339b8", clayWash: "rgba(4,77,245,0.15)", clayOnWhite: "#044df5",
   sage: "#3fb950", sageWash: "rgba(46,160,67,0.15)", sageOnWhite: "#3fb950",
   rustRed: "#f85149", rustWash: "rgba(248,81,73,0.15)", rustOnWhite: "#f85149", dangerBg: "#f85149",
   amber: "#d29922", amberWash: "rgba(187,128,9,0.15)", amberOnWhite: "#d29922",
   inputBg: "#0d1117", inputText: "#e6edf3", inputPlaceholder: "#6e7681", inputBorder: "#30363d",
-  btnAccent: "#1f6feb", btnAccentBorder: "#1f6feb", btnAccentWash: "rgba(56,139,253,0.15)",
-  btnAccentText: "#2f81f7", btnAccentTextActive: "#ffffff",
-  navActiveBg: "rgba(47, 129, 247, 0.15)",
+  btnAccent: "#044df5", btnAccentBorder: "#044df5", btnAccentWash: "rgba(4,77,245,0.15)",
+  btnAccentText: "#044df5", btnAccentTextActive: "#ffffff",
+  navActiveBg: "rgba(4, 77, 245, 0.15)",
   ...SHADOW_DARK,
 };
 
@@ -1291,23 +1291,16 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
         type="button"
         onClick={handleSave}
         disabled={!canSave}
-        data-active={canSave}
-        className="pill-toggle"
         style={{
           width: "100%", padding: "16px 0", borderRadius: 0, border: "none",
-          background: C.lineSoft,
+          background: canSave ? C.btnAccent : C.lineSoft,
+          color: canSave ? C.btnAccentTextActive : C.faint,
           fontWeight: 700, fontSize: 17, cursor: canSave ? "pointer" : "not-allowed",
           boxShadow: canSave ? C.shadowCard : "none",
-          "--pill-fill": C.btnAccent,
-          "--pill-base-text": C.faint,
-          "--pill-active-text": C.btnAccentTextActive,
+          transition: "background-color 0.15s ease, color 0.15s ease",
         }}
       >
-        <span className="pill-toggle-fill" />
-        <span className="pill-toggle-label-stack">
-          <span className="pill-toggle-label-base">Save Trade</span>
-          <span className="pill-toggle-label-active">Save Trade</span>
-        </span>
+        Save Trade
       </button>
           </div>
   );
