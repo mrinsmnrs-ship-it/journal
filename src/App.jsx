@@ -1048,14 +1048,20 @@ function DateField({ value, onChange }) {
       >
         {value ? fmtDateDisplay(value) : "Select date"}
       </button>
-      {open && (
-        <>
-          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
-          <div style={{
-            position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: 300,
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
-            boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
-          }}>
+      <AnimatePresence>
+        {open && (
+          <>
+            <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: 300,
+                background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
+                boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
+              }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
               <button type="button" onClick={prevMonth} style={{ background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" }}>
                 <ChevronLeft size={18} />
@@ -1108,9 +1114,10 @@ function DateField({ value, onChange }) {
                 </motion.div>
               </AnimatePresence>
             </div>
-          </div>
-        </>
-      )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -1171,15 +1178,21 @@ function TagSelect({ value, onChange, options, onAddOption, placeholder, upperca
           opacity: disabled ? 0.5 : 1, cursor: disabled ? "not-allowed" : "text",
         }}
       />
-      {open && (
-        <>
-          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
-          <div style={{
-            position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: "100%", minWidth: 220,
-            background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 8,
-            boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
-            maxHeight: 240, overflowY: "auto",
-          }}>
+      <AnimatePresence>
+        {open && (
+          <>
+            <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: "100%", minWidth: 220,
+                background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 8,
+                boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
+                maxHeight: 240, overflowY: "auto",
+              }}>
             {filtered.length > 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: trimmedQuery && !exactMatch ? 8 : 0 }}>
                 {filtered.map((opt) => (
@@ -1214,9 +1227,10 @@ function TagSelect({ value, onChange, options, onAddOption, placeholder, upperca
                 Start typing to create an option.
               </div>
             )}
-          </div>
-        </>
-      )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
