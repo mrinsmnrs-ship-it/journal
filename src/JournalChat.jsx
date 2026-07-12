@@ -7,7 +7,7 @@
 // nyambung & kenal pengguna walau tampilan chat sudah bersih.
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowUp, Square } from "lucide-react";
+import { ArrowUp, Square, Paperclip, X } from "lucide-react";
 import { askGemini } from "./gemini";
 import { loadUserData, saveUserData } from "./store";
 
@@ -60,6 +60,8 @@ export default function JournalChat({ user, trades, theme }) {
   const [loaded, setLoaded] = useState(false);
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const [attachedFile, setAttachedFile] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -214,13 +216,12 @@ export default function JournalChat({ user, trades, theme }) {
            tetap), jadi tetap terasa penuh & seimbang di layar sempit
            maupun sangat lebar. Lebar bubble juga proporsional lewat
            persentase, bukan px tetap. */
-        .chat-messages { padding: 18px clamp(14px, 5%, 56px); }
+        .chat-messages { padding: 0 clamp(14px, 5%, 56px); }
         .chat-input-wrap { padding: 14px clamp(6px, 3%, 40px) 8px; }
         .chat-bubble { max-width: min(80%, 720px); }
 
-        /* Kotak input: radius disamakan dengan kotak-kotak lain di app
-           (card/date-box = 8px), dan diberi shadow "raised" tipis khas
-           Claude yang keluar (bukan inset), makin jelas saat difokuskan. */
+        /* Kotak input & elemen lain di halaman chat dibuat tajam (border-radius: 0)
+           biar serasi sama seluruh app yang juga pakai sudut tajam. */
         .chat-input-box {
           transition: box-shadow .15s ease, border-color .15s ease;
           box-shadow: 0 1px 2px rgba(20,20,19,0.06), 0 1px 1px rgba(20,20,19,0.04);
@@ -245,7 +246,7 @@ export default function JournalChat({ user, trades, theme }) {
                 className="chat-bubble"
                 style={{
                   padding: m.role === "user" ? "11px 16px" : "0",
-                  borderRadius: m.role === "user" ? 8 : 0,
+                  borderRadius: 0,
                   background: m.role === "user" ? C.paperSoft : "transparent",
                   border: m.role === "user" ? `1px solid ${C.line}` : "none",
                   boxShadow: m.role === "user" ? "0 1px 2px rgba(20,20,19,0.05)" : "none",
@@ -288,13 +289,28 @@ export default function JournalChat({ user, trades, theme }) {
           className="chat-input-box"
           style={{
             border: `1px solid ${C.line}`,
-            borderRadius: 8,
+            borderRadius: 0,
             background: C.paper,
             padding: "14px 12px 12px 18px",
             width: "100%",
             boxSizing: "border-box",
           }}
         >
+          {attachedFile && (
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 10,
+              border: `1px solid ${C.line}`, borderRadius: 0, background: C.paperSoft,
+              padding: "5px 8px", fontFamily: CHAT_FONT, fontSize: 12, color: C.muted, maxWidth: "100%",
+            }}>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{attachedFile.name}</span>
+              <button
+                type="button"
+                onClick={() => setAttachedFile(null)}
+                style={{ border: "none", background: "transparent", color: C.faint, cursor: "pointer", display: "flex", padding: 0 }}
+                aria-label="Remove attachment"
+              ><X size={13} /></button>
+            </div>
+          )}
           <textarea
             ref={textareaRef}
             className="chat-input"
@@ -313,48 +329,76 @@ export default function JournalChat({ user, trades, theme }) {
             }}
           />
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                background: C.paperSoft,
-                border: `1px solid ${C.line}`,
-                boxShadow: "none",
-                borderRadius: 6,
-                padding: "6px 13px",
-                height: 30,
-                boxSizing: "border-box",
-                fontFamily: CHAT_FONT,
-                fontSize: 12,
-                fontWeight: 400,
-                color: C.muted,
-              }}
-            >
-              {PERSONA_NAME}
-              <span style={{ color: C.faint, margin: "0 5px" }}>•</span>
-              <span style={{ color: C.muted }}>{PERSONA_TITLE}</span>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) setAttachedFile(f);
+                  e.target.value = "";
+                }}
+                style={{ display: "none" }}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                aria-label="Attach file"
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  width: 30, height: 30, flexShrink: 0,
+                  background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 0,
+                  color: C.muted, cursor: "pointer",
+                }}
+              >
+                <Paperclip size={14} strokeWidth={2.2} />
+              </button>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  background: C.paperSoft,
+                  border: `1px solid ${C.line}`,
+                  boxShadow: "none",
+                  borderRadius: 0,
+                  padding: "6px 13px",
+                  height: 30,
+                  boxSizing: "border-box",
+                  fontFamily: CHAT_FONT,
+                  fontSize: 12,
+                  fontWeight: 400,
+                  color: C.muted,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {PERSONA_NAME}
+                <span style={{ color: C.faint, margin: "0 5px" }}>•</span>
+                <span style={{ color: C.muted }}>{PERSONA_TITLE}</span>
+              </div>
             </div>
             <button
               onClick={handleSend}
               disabled={isSending || !input.trim()}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center",
-                width: 30, height: 30, flexShrink: 0,
-                background: C.ink, color: C.paper, border: "none", borderRadius: "50%",
+                width: 30, height: 30, flexShrink: 0, marginLeft: 8,
+                background: C.btnAccent, color: C.btnAccentTextActive, border: "none", borderRadius: 0,
                 cursor: isSending || !input.trim() ? "not-allowed" : "pointer",
                 opacity: isSending ? 1 : (!input.trim() ? 0.3 : 1),
                 boxShadow: !isSending && input.trim() ? "0 1px 2px rgba(20,20,19,0.08)" : "none",
               }}
             >
               {isSending ? (
-                <Square size={11} strokeWidth={2.4} fill={C.paper} style={{ borderRadius: 3 }} />
+                <Square size={11} strokeWidth={2.4} fill={C.btnAccentTextActive} />
               ) : (
                 <ArrowUp size={14} strokeWidth={2.4} />
               )}
             </button>
           </div>
         </div>
-        <div style={{ textAlign: "center", fontSize: 11, color: C.faint, marginTop: 11, fontFamily: CHAT_FONT }}>
+        <div style={{ textAlign: "center", fontSize: 9, color: C.faint, marginTop: 8, fontFamily: CHAT_FONT }}>
           {PERSONA_NAME} is an AI and can make mistakes. Please double-check important information.
         </div>
       </div>
