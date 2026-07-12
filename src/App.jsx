@@ -773,8 +773,10 @@ function RJournal({ user }) {
     if (!files || files.length === 0) return;
     setImageUploading(true);
     try {
-      const encoded = await Promise.all(Array.from(files).map((f) => fileToCompressedDataURL(f)));
-      setForm((f) => ({ ...f, images: [...(f.images || []), ...encoded] }));
+      const remaining = Math.max(0, 8 - (form.images || []).length);
+      const toProcess = Array.from(files).slice(0, remaining);
+      const encoded = await Promise.all(toProcess.map((f) => fileToCompressedDataURL(f)));
+      setForm((f) => ({ ...f, images: [...(f.images || []), ...encoded].slice(0, 8) }));
     } catch (err) {
       console.error("Failed to read image:", err);
     } finally {
@@ -1515,12 +1517,12 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
       <Field label="Notes">
         <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
       </Field>
-      <div style={{ marginBottom: 22 }}>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+      <div style={{ marginTop: -10, marginBottom: 22 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
           {(form.images || []).map((src, i) => (
-            <div key={i} style={{ position: "relative", width: 64, height: 64, flexShrink: 0 }}>
+            <div key={i} style={{ position: "relative", width: "100%", aspectRatio: "1" }}>
               <img src={src} alt="" style={{
-                width: 64, height: 64, objectFit: "cover", border: `1px solid ${C.line}`, borderRadius: 0,
+                width: "100%", height: "100%", objectFit: "cover", border: `1px solid ${C.line}`, borderRadius: 0,
               }} />
               <button
                 type="button"
@@ -1534,19 +1536,21 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
               ><X size={12} /></button>
             </div>
           ))}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={imageUploading}
-            aria-label="Add image"
-            style={{
-              width: 64, height: 64, flexShrink: 0, border: `1px dashed ${C.line}`, borderRadius: 0,
-              background: C.inputBg, color: C.muted, display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: imageUploading ? "wait" : "pointer",
-            }}
-          >
-            <Plus size={22} />
-          </button>
+          {(form.images || []).length < 8 && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={imageUploading}
+              aria-label="Add image"
+              style={{
+                width: "100%", aspectRatio: "1", border: `1px dashed ${C.line}`, borderRadius: 0,
+                background: C.inputBg, color: C.muted, display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: imageUploading ? "wait" : "pointer",
+              }}
+            >
+              <Plus size={22} />
+            </button>
+          )}
           <input
             ref={fileInputRef}
             type="file"
