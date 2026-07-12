@@ -57,6 +57,26 @@ export function getDesktopStyles(C, SANS) {
       .chat-mode .main-area {
         padding: 0;
       }
+
+      .circular-text-dock {
+        display: block;
+        position: fixed; bottom: 24px; right: 24px; z-index: 15;
+      }
+      .circular-text-dock .circular-text {
+        margin: 0; border-radius: 50%;
+        width: 110px; height: 110px;
+        position: relative;
+        font-weight: 900; color: ${C.faint};
+        text-align: center; cursor: pointer;
+        transform-origin: 50% 50%;
+        background: ${C.paperSoft}; border: 1px solid ${C.line};
+      }
+      .circular-text-dock .circular-text span {
+        position: absolute; display: inline-block;
+        left: 0; right: 0; top: 0; bottom: 0;
+        font-size: 10px; letter-spacing: 0.02em;
+        transition: all 0.5s cubic-bezier(0, 0, 0, 1);
+      }
     }
   `;
 }
