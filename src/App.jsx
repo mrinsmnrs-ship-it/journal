@@ -214,9 +214,9 @@ function Chip({ label, active, onClick }) {
       data-active={active}
       className="pill-toggle"
       style={{
-        flex: "1 1 30%", minWidth: 96,
         fontFamily: SANS, fontSize: 14, fontWeight: 600,
-        padding: "9px 17px", borderRadius: 0, textAlign: "center",
+        padding: "9px 12px", borderRadius: 0, textAlign: "center",
+        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
         border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
         background: C.paperSoft,
         cursor: "pointer",
@@ -1981,17 +1981,26 @@ function Dashboard({ trades }) {
 
   return (
     <div style={{ width: "100%", maxWidth: "100%" }}>
-      <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginBottom: 10, alignItems: "center" }}>
-        {PERIODS.map((p) => (
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginBottom: 9 }}>
+        {PERIODS.slice(0, 3).map((p) => (
+          <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
+        ))}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 9, marginBottom: 10 }}>
+        {PERIODS.slice(3).map((p) => (
           <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
         ))}
         <Chip label="Custom Range" active={period === "custom"} onClick={() => setPeriod("custom")} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
       </div>
       {period === "custom" && (
         <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 18, flexWrap: "wrap" }}>
-          <DateField value={customRange.from} onChange={(d) => setCustomRange((r) => ({ ...r, from: d }))} />
+          <div style={{ flex: 1, minWidth: 120 }}>
+            <DateField value={customRange.from} onChange={(d) => setCustomRange((r) => ({ ...r, from: d }))} />
+          </div>
           <span style={{ color: C.muted, fontSize: 13, fontFamily: SANS }}>to</span>
-          <DateField value={customRange.to} onChange={(d) => setCustomRange((r) => ({ ...r, to: d }))} align="right" />
+          <div style={{ flex: 1, minWidth: 120 }}>
+            <DateField value={customRange.to} onChange={(d) => setCustomRange((r) => ({ ...r, to: d }))} align="right" />
+          </div>
         </div>
       )}
       {filteredTrades.length === 0 ? (
