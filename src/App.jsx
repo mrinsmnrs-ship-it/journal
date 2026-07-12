@@ -778,7 +778,7 @@ function RJournal({ user }) {
 
   return (
     <ThemeContext.Provider value={C}>
-      <div className={`app-root${isChatTab ? " chat-mode" : ""}`} style={{ ...getPageBackground(themeMode, C), minHeight: "100vh", color: C.ink, fontFamily: SANS }}>
+      <div className={`app-root${isChatTab ? " chat-mode" : ""}`} style={{ ...getPageBackground(themeMode, C), minHeight: isDesktop ? "100vh" : undefined, color: C.ink, fontFamily: SANS }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&display=swap');
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
