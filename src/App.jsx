@@ -1584,6 +1584,149 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
 }
 
 // ---- Journal ----
+// ---- Collapsible trade card: collapsed shows just symbol / date / R, tap
+// to expand and reveal the rest (reason, tags, notes, images). The height
+// animation uses the CSS grid "0fr -> 1fr" trick — smooth, no manual
+// height measurement needed, same idea as CardNav's expanding menu. ----
+function TradeCard({ t, onDelete }) {
+  const C = useTheme();
+  const [expanded, setExpanded] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState(null);
+  const win = t.rActual > 0;
+  const hasDetails = t.reason || t.direction || t.rules || t.emotion || t.notes || (t.images && t.images.length > 0);
+
+  return (
+    <div style={{
+      background: C.paperSoftLight, border: `1px solid ${C.line}`,
+      borderRadius: 0, boxShadow: C.shadowCard, overflow: "hidden",
+    }}>
+      <button
+        type="button"
+        className="no-press"
+        onClick={() => hasDetails && setExpanded((e) => !e)}
+        style={{
+          width: "100%", background: "transparent", border: "none", padding: "20px 22px",
+          display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+          cursor: hasDetails ? "pointer" : "default", textAlign: "left", color: C.ink,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
+          <div style={{ fontWeight: 700, fontSize: 19 }}>{t.symbol}</div>
+          <div style={{ fontFamily: SANS, fontSize: 10, color: C.faint }}>{t.date}</div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 17, color: win ? C.ink : C.faint }}>
+            {fmtR(t.rActual)}
+          </div>
+          {hasDetails && (
+            <span style={{ display: "flex", color: C.faint, transition: "transform 0.3s ease", transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}>
+              <ChevronDown size={16} />
+            </span>
+          )}
+        </div>
+      </button>
+      <div style={{
+        display: "grid", gridTemplateRows: expanded ? "1fr" : "0fr",
+        transition: "grid-template-rows 0.35s cubic-bezier(0.22, 1, 0.36, 1)",
+      }}>
+        <div style={{ overflow: "hidden" }}>
+          <div style={{ padding: "0 22px 20px" }}>
+            {t.reason && <div style={{ fontSize: 15, color: C.inkSoft, marginTop: 4 }}>{t.reason}</div>}
+            <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginTop: 13 }}>
+              {t.direction && <Tag text={`Direction: ${t.direction}`} />}
+              {t.entryModel && <Tag text={`Model: ${t.entryModel}`} />}
+              {t.rules && <Tag text={`Rules: ${t.rules}`} />}
+              {t.emotion && <Tag text={`Emotion: ${t.emotion}`} />}
+            </div>
+            {t.notes && <div style={{ fontSize: 14, color: C.muted, marginTop: 11, fontStyle: "italic" }}>{t.notes}</div>}
+            {t.images && t.images.length > 0 && (
+              <div style={{ marginTop: 11, marginLeft: -4, marginRight: -4, display: "flex", flexWrap: "wrap" }}>
+                {t.images.map((src, i) => (
+                  <div key={i} style={{ width: "25%", boxSizing: "border-box", padding: 4 }}>
+                    <button
+                      type="button"
+                      className="no-press"
+                      onClick={(e) => { e.stopPropagation(); setLightboxSrc(src); }}
+                      style={{ display: "block", width: "100%", aspectRatio: "1", padding: 0, border: `1px solid ${C.line}`, background: "transparent", cursor: "pointer" }}
+                    >
+                      <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{
+              marginTop: 15, background: "transparent", border: "none", color: C.faint, fontSize: 10,
+              display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: 0,
+            }}><Trash2 size={11} /> Delete</button>
+          </div>
+        </div>
+      </div>
+      <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+    </div>
+  );
+}
+
+// ---- Full-size image popup — same "mobile style" modal treatment as
+// DateField's calendar (portal to <body>, dark backdrop, centered card
+// that scales/blurs in), just holding an <img> instead of a grid. ----
+function ImageLightbox({ src, onClose }) {
+  const C = useTheme();
+  useEffect(() => {
+    if (!src) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prevOverflow; };
+  }, [src]);
+
+  const content = (
+    <AnimatePresence>
+      {src && (
+        <motion.div
+          onClick={onClose}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            position: "fixed", inset: 0, zIndex: 49,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: 20, boxSizing: "border-box",
+            background: "rgba(0,0,0,0.7)",
+          }}
+        >
+          <motion.div
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.94, filter: "blur(14px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 0.94, filter: "blur(14px)" }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            style={{ position: "relative", maxWidth: "100%", maxHeight: "100%" }}
+          >
+            <img src={src} alt="" style={{
+              display: "block", maxWidth: "90vw", maxHeight: "85vh",
+              width: "auto", height: "auto", border: `1px solid ${C.line}`,
+              boxShadow: C.shadowModal, objectFit: "contain",
+            }} />
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              style={{
+                position: "absolute", top: -14, right: -14, width: 30, height: 30, borderRadius: "50%",
+                background: C.ink, color: C.paper, border: `1px solid ${C.paper}`,
+                display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0,
+              }}
+            ><X size={16} /></button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  return createPortal(content, document.body);
+}
+
 function JournalList({ trades, onDelete, onGoLog }) {
   const C = useTheme();
   const [confirmId, setConfirmId] = useState(null);
@@ -1614,45 +1757,9 @@ function JournalList({ trades, onDelete, onGoLog }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%", maxWidth: "100%" }}>
-      {trades.map((t) => {
-        const win = t.rActual > 0;
-        return (
-          <div key={t.id} style={{
-            background: C.paperSoftLight, border: `1px solid ${C.line}`,
-            borderRadius: 0, padding: "20px 22px", boxShadow: C.shadowCard,
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-  <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
-    <div style={{ fontWeight: 700, fontSize: 19 }}>{t.symbol}</div>
-    <div style={{ fontFamily: SANS, fontSize: 10, color: C.faint }}>{t.date}</div>
-  </div>
-  <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 17, color: win ? C.ink : C.faint }}>
-    {fmtR(t.rActual)}
-  </div>
-</div>
-{t.reason && <div style={{ fontSize: 15, color: C.inkSoft, marginTop: 11 }}>{t.reason}</div>}
-<div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginTop: 13 }}>
-  {t.direction && <Tag text={`Direction: ${t.direction}`} />}
-  {t.rules && <Tag text={`Rules: ${t.rules}`} />}
-  {(t.emotions || []).map((e) => <Tag key={e} text={`Emotion: ${e}`} />)}
-</div>
-            {t.notes && <div style={{ fontSize: 14, color: C.muted, marginTop: 11, fontStyle: "italic" }}>{t.notes}</div>}
-            {t.images && t.images.length > 0 && (
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 11 }}>
-                {t.images.map((src, i) => (
-                  <img key={i} src={src} alt="" style={{
-                    width: 64, height: 64, objectFit: "cover", border: `1px solid ${C.line}`, borderRadius: 0,
-                  }} />
-                ))}
-              </div>
-            )}
-            <button onClick={() => setConfirmId(t.id)} style={{
-              marginTop: 15, background: "transparent", border: "none", color: C.faint, fontSize: 10,
-  display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: 0,
-            }}><Trash2 size={11} /> Delete</button>
-          </div>
-        );
-      })}
+      {trades.map((t) => (
+        <TradeCard key={t.id} t={t} onDelete={() => setConfirmId(t.id)} />
+      ))}
       <AnimatePresence>
         {confirmTrade && (
           <motion.div
