@@ -60,7 +60,7 @@ export function getDesktopStyles(C, SANS) {
 
       .circular-text-dock {
         display: block;
-        position: fixed; bottom: 24px; right: 24px; z-index: 15;
+        position: fixed; bottom: 24px; left: 24px; z-index: 15;
       }
       .circular-text-dock .circular-text {
         margin: 0; border-radius: 50%;
@@ -69,7 +69,6 @@ export function getDesktopStyles(C, SANS) {
         font-weight: 900; color: ${C.faint};
         text-align: center; cursor: pointer;
         transform-origin: 50% 50%;
-        background: ${C.paperSoft}; border: 1px solid ${C.line};
       }
       .circular-text-dock .circular-text span {
         position: absolute; display: inline-block;
