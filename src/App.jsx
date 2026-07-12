@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "motion/react";
 import {
   Trash2, Plus, PencilLine, BookOpen, LayoutDashboard,
-  Sun, Moon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, LogOut, MessageCircle, X,
+  Sun, Moon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, LogOut, MessageCircle, X, Check,
 } from "lucide-react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -1262,7 +1262,9 @@ function TagSelect({ value, onChange, options, onAddOption, onDeleteOption, plac
   const trimmedQuery = query.trim();
   const filtered = options.filter((o) => o.value.toLowerCase().includes(trimmedQuery.toLowerCase()));
   const exactMatch = options.some((o) => o.value.toLowerCase() === trimmedQuery.toLowerCase());
-  const isDeletable = (opt) => Date.now() - (opt.createdAt || 0) < ONE_WEEK_MS;
+  // Tag simbol/entry model di sini cuma shortcut biar gak perlu ngetik ulang,
+  // jadi selalu boleh dihapus kapan saja — bukan tag ini yang butuh aturan
+  // 7 hari (itu berlaku untuk trade yang sudah tersimpan di halaman Journal).
 
   // Sama seperti popup kalender: selama terbuka, layar di belakang dikunci
   // supaya tidak ikut discroll.
@@ -1370,7 +1372,7 @@ function TagSelect({ value, onChange, options, onAddOption, onDeleteOption, plac
                       }}
                     >
                       <span>{opt.value}</span>
-                      {isDeletable(opt) && (confirmDelete === opt.value ? (
+                      {(confirmDelete === opt.value ? (
                         <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                           <button
                             type="button"
@@ -1487,15 +1489,29 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
             fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
             color: C.muted, textTransform: "capitalize",
           }}>Entry Model</div>
-          <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+          <div
+            onClick={() => updateForm("entryModelTracked", !form.entryModelTracked)}
+            style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}
+          >
             <span style={{ fontSize: 11, color: C.muted, fontFamily: SANS }}>Count in stats</span>
-            <input
-              type="checkbox"
-              checked={form.entryModelTracked}
-              onChange={(e) => updateForm("entryModelTracked", e.target.checked)}
-              style={{ width: 16, height: 16, cursor: "pointer", accentColor: C.btnAccent }}
-            />
-          </label>
+            <button
+              type="button"
+              role="checkbox"
+              aria-checked={form.entryModelTracked}
+              aria-label="Count in stats"
+              onClick={(e) => { e.stopPropagation(); updateForm("entryModelTracked", !form.entryModelTracked); }}
+              style={{
+                width: 16, height: 16, padding: 0, boxSizing: "border-box", flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                border: `1px solid ${form.entryModelTracked ? C.btnAccent : C.inputBorder}`,
+                borderRadius: 0,
+                background: form.entryModelTracked ? C.btnAccent : C.inputBg,
+                cursor: "pointer",
+              }}
+            >
+              {form.entryModelTracked && <Check size={11} strokeWidth={3} color={C.btnAccentTextActive} />}
+            </button>
+          </div>
         </div>
         <TagSelect
           value={form.entryModel}
@@ -1597,6 +1613,10 @@ function TradeCard({ t, onDelete }) {
   const [lightboxSrc, setLightboxSrc] = useState(null);
   const win = t.rActual > 0;
   const hasDetails = t.reason || t.direction || t.rules || t.emotion || t.notes || (t.images && t.images.length > 0);
+  // Trade yang sudah tersimpan di Journal cuma boleh dihapus dalam 7 hari
+  // sejak dicatat — setelahnya jadi catatan permanen. Trade lama tanpa
+  // `createdAt` (dicatat sebelum aturan ini ada) dianggap sudah lewat masa itu.
+  const canDelete = t.createdAt ? Date.now() - t.createdAt < ONE_WEEK_MS : false;
 
   return (
     <div style={{
@@ -1658,10 +1678,12 @@ function TradeCard({ t, onDelete }) {
                 ))}
               </div>
             )}
-            <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{
-              marginTop: 15, background: "transparent", border: "none", color: C.faint, fontSize: 10,
-              display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: 0,
-            }}><Trash2 size={11} /> Delete</button>
+            {canDelete && (
+              <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{
+                marginTop: 15, background: "transparent", border: "none", color: C.faint, fontSize: 10,
+                display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: 0,
+              }}><Trash2 size={11} /> Delete</button>
+            )}
           </div>
         </div>
       </div>
@@ -1766,6 +1788,7 @@ function JournalList({ trades, onDelete, onGoLog }) {
 
   return (
     <div style={{ width: "100%", maxWidth: "100%" }}>
+      <SectionLabel text={`Trade Log \u00b7 ${filteredTrades.length} trade${filteredTrades.length === 1 ? "" : "s"}`} />
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginBottom: 9 }}>
         {PERIODS.slice(0, 3).map((p) => (
           <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
