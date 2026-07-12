@@ -216,8 +216,8 @@ export default function JournalChat({ user, trades, theme }) {
            tetap), jadi tetap terasa penuh & seimbang di layar sempit
            maupun sangat lebar. Lebar bubble juga proporsional lewat
            persentase, bukan px tetap. */
-        .chat-messages { padding: 0 clamp(14px, 5%, 56px); }
-        .chat-input-wrap { padding: 14px clamp(6px, 3%, 40px) 8px; }
+        .chat-messages { padding: 16px clamp(14px, 5%, 56px) 16px; }
+        .chat-input-wrap { padding: 0 clamp(6px, 3%, 40px) 8px; }
         .chat-bubble { max-width: min(80%, 720px); }
 
         /* Kotak input & elemen lain di halaman chat dibuat tajam (border-radius: 0)
