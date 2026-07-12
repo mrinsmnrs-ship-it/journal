@@ -30,6 +30,7 @@ import MobileDockNav from "./components/nav/MobileDockNav.jsx";
 import LogTradeForm from "./components/trade/LogTradeForm.jsx";
 import JournalList from "./components/JournalList.jsx";
 import Dashboard from "./components/dashboard/Dashboard.jsx";
+import CircularText from "./components/common/CircularText.jsx";
 
 export default function App() {
   const [user, setUser] = useState(undefined); // undefined = checking, null = logged out
@@ -274,7 +275,12 @@ function RJournal({ user }) {
           indicator={navIndicator}
           accentColor={C.btnAccent}
         />
+
+        {/* Decorative spinning badge — desktop only, see .circular-text-dock CSS */}
+        <div className="circular-text-dock">
+          <CircularText text="STAY DISCIPLINED * STAY CONSISTENT *" onHover="speedUp" spinDuration={20} />
+        </div>
       </div>
     </ThemeContext.Provider>
   );
-}
+         }
