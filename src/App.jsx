@@ -728,24 +728,24 @@ function RJournal({ user }) {
   setForm((f) => ({ ...f, emotion: f.emotion === e ? "" : e }));
   }
   async function addSymbolOption(opt) {
-    if (!opt || symbolOptions.includes(opt)) return;
-    const next = [...symbolOptions, opt];
+    if (!opt || symbolOptions.some((o) => o.value === opt)) return;
+    const next = [...symbolOptions, { value: opt, createdAt: Date.now() }];
     setSymbolOptions(next);
     await saveUserData(user.uid, { symbolOptions: next });
   }
   async function addEntryModelOption(opt) {
-    if (!opt || entryModelOptions.includes(opt)) return;
-    const next = [...entryModelOptions, opt];
+    if (!opt || entryModelOptions.some((o) => o.value === opt)) return;
+    const next = [...entryModelOptions, { value: opt, createdAt: Date.now() }];
     setEntryModelOptions(next);
     await saveUserData(user.uid, { entryModelOptions: next });
   }
   async function deleteSymbolOption(opt) {
-    const next = symbolOptions.filter((o) => o !== opt);
+    const next = symbolOptions.filter((o) => o.value !== opt);
     setSymbolOptions(next);
     await saveUserData(user.uid, { symbolOptions: next });
   }
   async function deleteEntryModelOption(opt) {
-    const next = entryModelOptions.filter((o) => o !== opt);
+    const next = entryModelOptions.filter((o) => o.value !== opt);
     setEntryModelOptions(next);
     await saveUserData(user.uid, { entryModelOptions: next });
   }
@@ -1249,6 +1249,8 @@ function DateField({ value, onChange, align = "left" }) {
 // every time. Opens as a centered popup (same "mobile style" modal as
 // DateField) instead of an inline dropdown, and each option row has its
 // own delete (×) button so old/typo'd tags can be cleaned up. ----
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
 function TagSelect({ value, onChange, options, onAddOption, onDeleteOption, placeholder, uppercase, disabled }) {
   const C = useTheme();
   const inputStyle = useInputStyle();
@@ -1258,8 +1260,9 @@ function TagSelect({ value, onChange, options, onAddOption, onDeleteOption, plac
 
   const norm = (s) => (uppercase ? s.toUpperCase() : s);
   const trimmedQuery = query.trim();
-  const filtered = options.filter((o) => o.toLowerCase().includes(trimmedQuery.toLowerCase()));
-  const exactMatch = options.some((o) => o.toLowerCase() === trimmedQuery.toLowerCase());
+  const filtered = options.filter((o) => o.value.toLowerCase().includes(trimmedQuery.toLowerCase()));
+  const exactMatch = options.some((o) => o.value.toLowerCase() === trimmedQuery.toLowerCase());
+  const isDeletable = (opt) => Date.now() - (opt.createdAt || 0) < ONE_WEEK_MS;
 
   // Sama seperti popup kalender: selama terbuka, layar di belakang dikunci
   // supaya tidak ikut discroll.
@@ -1287,14 +1290,14 @@ function TagSelect({ value, onChange, options, onAddOption, onDeleteOption, plac
   function createAndSelect() {
     const v = norm(trimmedQuery);
     if (!v) return;
-    if (!options.some((o) => o.toLowerCase() === v.toLowerCase())) onAddOption(v);
+    if (!options.some((o) => o.value.toLowerCase() === v.toLowerCase())) onAddOption(v);
     onChange(v);
     closeMenu();
   }
   function handleKeyDown(e) {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (exactMatch) select(options.find((o) => o.toLowerCase() === trimmedQuery.toLowerCase()));
+      if (exactMatch) select(options.find((o) => o.value.toLowerCase() === trimmedQuery.toLowerCase()).value);
       else createAndSelect();
     } else if (e.key === "Escape") {
       closeMenu();
@@ -1356,22 +1359,22 @@ function TagSelect({ value, onChange, options, onAddOption, onDeleteOption, plac
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   {filtered.map((opt) => (
                     <div
-                      key={opt}
-                      onClick={() => select(opt)}
+                      key={opt.value}
+                      onClick={() => select(opt.value)}
                       style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         border: `1px solid ${C.line}`, borderRadius: 0, padding: "8px 10px",
-                        background: opt === value ? C.btnAccentWash : C.paperSoft,
-                        color: opt === value ? C.btnAccentText : C.ink,
+                        background: opt.value === value ? C.btnAccentWash : C.paperSoft,
+                        color: opt.value === value ? C.btnAccentText : C.ink,
                         fontSize: 14, fontWeight: 600, fontFamily: SANS, cursor: "pointer",
                       }}
                     >
-                      <span>{opt}</span>
-                      {confirmDelete === opt ? (
+                      <span>{opt.value}</span>
+                      {isDeletable(opt) && (confirmDelete === opt.value ? (
                         <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
                           <button
                             type="button"
-                            onClick={(e) => confirmDeleteNow(e, opt)}
+                            onClick={(e) => confirmDeleteNow(e, opt.value)}
                             style={{
                               border: "none", background: "transparent", color: C.rustRed,
                               fontSize: 12, fontWeight: 700, fontFamily: SANS, cursor: "pointer", padding: "2px 4px",
@@ -1389,14 +1392,14 @@ function TagSelect({ value, onChange, options, onAddOption, onDeleteOption, plac
                       ) : (
                         <button
                           type="button"
-                          onClick={(e) => requestDelete(e, opt)}
+                          onClick={(e) => requestDelete(e, opt.value)}
                           style={{
                             border: "none", background: "transparent", color: C.muted,
                             cursor: "pointer", padding: 2, display: "flex", flexShrink: 0,
                           }}
-                          aria-label={`Delete ${opt}`}
+                          aria-label={`Delete ${opt.value}`}
                         ><X size={15} /></button>
-                      )}
+                      ))}
                     </div>
                   ))}
                 </div>
@@ -1610,7 +1613,7 @@ function TradeCard({ t, onDelete }) {
           cursor: hasDetails ? "pointer" : "default", textAlign: "left", color: C.ink,
         }}
       >
-        <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <div style={{ fontWeight: 700, fontSize: 19 }}>{t.symbol}</div>
           <div style={{ fontFamily: SANS, fontSize: 10, color: C.faint }}>{t.date}</div>
         </div>
@@ -1708,16 +1711,6 @@ function ImageLightbox({ src, onClose }) {
               width: "auto", height: "auto", border: `1px solid ${C.line}`,
               boxShadow: C.shadowModal, objectFit: "contain",
             }} />
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close"
-              style={{
-                position: "absolute", top: -14, right: -14, width: 30, height: 30, borderRadius: "50%",
-                background: C.ink, color: C.paper, border: `1px solid ${C.paper}`,
-                display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0,
-              }}
-            ><X size={16} /></button>
           </motion.div>
         </motion.div>
       )}
@@ -1731,6 +1724,22 @@ function JournalList({ trades, onDelete, onGoLog }) {
   const C = useTheme();
   const [confirmId, setConfirmId] = useState(null);
   const confirmTrade = trades.find((t) => t.id === confirmId) || null;
+  const [period, setPeriod] = useState("all");
+  const [customRange, setCustomRange] = useState({ from: "", to: "" });
+
+  const filteredTrades = useMemo(() => {
+    if (period === "all") return trades;
+    if (period === "week") return trades.filter((t) => parseISO(t.date) >= startOfWeek(new Date()));
+    if (period === "month") return trades.filter((t) => parseISO(t.date) >= startOfMonth(new Date()));
+    if (period === "year") return trades.filter((t) => parseISO(t.date) >= startOfYear(new Date()));
+    if (period === "custom" && customRange.from && customRange.to) {
+      const from = parseISO(customRange.from);
+      const to = parseISO(customRange.to);
+      to.setHours(23, 59, 59, 999);
+      return trades.filter((t) => { const d = parseISO(t.date); return d >= from && d <= to; });
+    }
+    return trades;
+  }, [trades, period, customRange]);
 
   // Kunci scroll di belakang popup delete selama dia terbuka — sama seperti
   // popup kalender. Keluarnya cuma lewat "No" / "Yes, Delete" atau klik di
@@ -1756,10 +1765,38 @@ function JournalList({ trades, onDelete, onGoLog }) {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%", maxWidth: "100%" }}>
-      {trades.map((t) => (
-        <TradeCard key={t.id} t={t} onDelete={() => setConfirmId(t.id)} />
-      ))}
+    <div style={{ width: "100%", maxWidth: "100%" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginBottom: 9 }}>
+        {PERIODS.slice(0, 3).map((p) => (
+          <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
+        ))}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 9, marginBottom: 10 }}>
+        {PERIODS.slice(3).map((p) => (
+          <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
+        ))}
+        <Chip label="Custom Range" active={period === "custom"} onClick={() => setPeriod("custom")} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
+      </div>
+      {period === "custom" && (
+        <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 18, flexWrap: "wrap" }}>
+          <div style={{ flex: 1, minWidth: 120 }}>
+            <DateField value={customRange.from} onChange={(d) => setCustomRange((r) => ({ ...r, from: d }))} />
+          </div>
+          <span style={{ color: C.muted, fontSize: 13, fontFamily: SANS }}>to</span>
+          <div style={{ flex: 1, minWidth: 120 }}>
+            <DateField value={customRange.to} onChange={(d) => setCustomRange((r) => ({ ...r, to: d }))} align="right" />
+          </div>
+        </div>
+      )}
+      {filteredTrades.length === 0 ? (
+        <div style={{ color: C.muted, fontSize: 16, marginBottom: 16 }}>No trades logged in this period.</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%", maxWidth: "100%" }}>
+          {filteredTrades.map((t) => (
+            <TradeCard key={t.id} t={t} onDelete={() => setConfirmId(t.id)} />
+          ))}
+        </div>
+      )}
       <AnimatePresence>
         {confirmTrade && (
           <motion.div
