@@ -245,6 +245,7 @@ export default function JournalChat({ user, trades, theme }) {
               <div
                 className="chat-bubble"
                 style={{
+                  maxWidth: m.role === "user" ? undefined : "100%",
                   padding: m.role === "user" ? "11px 16px" : "0",
                   borderRadius: 0,
                   background: m.role === "user" ? C.paperSoft : "transparent",
@@ -291,7 +292,7 @@ export default function JournalChat({ user, trades, theme }) {
             border: `1px solid ${C.line}`,
             borderRadius: 0,
             background: C.paper,
-            padding: "14px 12px 12px 18px",
+            padding: "14px 12px 12px 12px",
             width: "100%",
             boxSizing: "border-box",
           }}
