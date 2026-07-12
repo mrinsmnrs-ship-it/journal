@@ -214,8 +214,9 @@ function Chip({ label, active, onClick }) {
       data-active={active}
       className="pill-toggle"
       style={{
+        flex: "1 1 30%", minWidth: 96,
         fontFamily: SANS, fontSize: 14, fontWeight: 600,
-        padding: "9px 17px", borderRadius: 0,
+        padding: "9px 17px", borderRadius: 0, textAlign: "center",
         border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
         background: C.paperSoft,
         cursor: "pointer",
@@ -1934,7 +1935,6 @@ function MobileDockNav({ items, activeKey, onSelect, registerItemRef, indicator,
 function Dashboard({ trades }) {
   const C = useTheme();
   const [period, setPeriod] = useState("all");
-  const [selectedYear, setSelectedYear] = useState(null);
   const [customRange, setCustomRange] = useState({ from: "", to: "" });
   const availableYears = useMemo(() => tradeYears(trades), [trades]);
   const [heatmapYear, setHeatmapYear] = useState(() => availableYears[0] || new Date().getFullYear());
@@ -1951,9 +1951,6 @@ function Dashboard({ trades }) {
     if (period === "week") return trades.filter((t) => parseISO(t.date) >= startOfWeek(new Date()));
     if (period === "month") return trades.filter((t) => parseISO(t.date) >= startOfMonth(new Date()));
     if (period === "year") return trades.filter((t) => parseISO(t.date) >= startOfYear(new Date()));
-    if (period === "specificYear" && selectedYear) {
-      return trades.filter((t) => parseISO(t.date).getFullYear() === selectedYear);
-    }
     if (period === "custom" && customRange.from && customRange.to) {
       const from = parseISO(customRange.from);
       const to = parseISO(customRange.to);
@@ -1961,18 +1958,12 @@ function Dashboard({ trades }) {
       return trades.filter((t) => { const d = parseISO(t.date); return d >= from && d <= to; });
     }
     return trades;
-  }, [trades, period, selectedYear, customRange]);
+  }, [trades, period, customRange]);
   const stats = useMemo(() => computeStats(filteredTrades), [filteredTrades]);
 
   if (trades.length === 0) {
     return <div style={{ marginTop: 30, color: C.muted, fontSize: 16 }}>Log a trade to see your performance dashboard.</div>;
   }
-
-  const selectStyle = (active) => ({
-    fontFamily: SANS, fontSize: 14, fontWeight: 600, padding: "9px 12px", borderRadius: 0,
-    border: `1px solid ${active ? C.btnAccentBorder : C.line}`,
-    background: C.paperSoft, color: C.ink, cursor: "pointer",
-  });
 
   // Only one chart's tooltip should be visible at a time. Recharts keeps its
   // hover/tap state internally per-chart, so tapping chart B doesn't close
@@ -1994,16 +1985,6 @@ function Dashboard({ trades }) {
         {PERIODS.map((p) => (
           <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
         ))}
-        {availableYears.length > 0 && (
-          <select
-            value={period === "specificYear" && selectedYear ? String(selectedYear) : ""}
-            onChange={(e) => { setSelectedYear(Number(e.target.value)); setPeriod("specificYear"); }}
-            style={selectStyle(period === "specificYear")}
-          >
-            <option value="" disabled>Year&hellip;</option>
-            {availableYears.map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
-        )}
         <Chip label="Custom Range" active={period === "custom"} onClick={() => setPeriod("custom")} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
       </div>
       {period === "custom" && (
