@@ -1788,7 +1788,6 @@ function JournalList({ trades, onDelete, onGoLog }) {
 
   return (
     <div style={{ width: "100%", maxWidth: "100%" }}>
-      <SectionLabel text={`Trade Log \u00b7 ${filteredTrades.length} trade${filteredTrades.length === 1 ? "" : "s"}`} />
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginBottom: 9 }}>
         {PERIODS.slice(0, 3).map((p) => (
           <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
@@ -1811,6 +1810,9 @@ function JournalList({ trades, onDelete, onGoLog }) {
           </div>
         </div>
       )}
+      <div style={{ marginTop: period === "custom" ? 0 : 14 }}>
+        <SectionLabel text={`Trade Log \u00b7 ${filteredTrades.length} trade${filteredTrades.length === 1 ? "" : "s"}`} />
+      </div>
       {filteredTrades.length === 0 ? (
         <div style={{ color: C.muted, fontSize: 16, marginBottom: 16 }}>No trades logged in this period.</div>
       ) : (
@@ -2383,7 +2385,9 @@ function Dashboard({ trades }) {
         <div style={{ color: C.muted, fontSize: 16, marginBottom: 28 }}>No trades logged in this period.</div>
       ) : (
         <>
-          <SectionLabel text={`Summary \u00b7 ${filteredTrades.length} trade${filteredTrades.length === 1 ? "" : "s"}`} />
+          <div style={{ marginTop: period === "custom" ? 0 : 14 }}>
+            <SectionLabel text={`Summary \u00b7 ${filteredTrades.length} trade${filteredTrades.length === 1 ? "" : "s"}`} />
+          </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 22 }}>
             <StatCard label="Total Trades" value={stats.total} />
             <StatCard label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} color={C.clayDeep} />
@@ -2396,7 +2400,7 @@ function Dashboard({ trades }) {
           <div style={{ marginBottom: 22 }}>
             <div style={{ padding: "0 4px", marginBottom: 16 }}>
               <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Equity Curve</div>
-              <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Cumulative R, trade by trade</div>
+              <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Cumulative R, trade by trade</div>
             </div>
             <div onPointerDown={() => activateChart("equity")}>
               <EquityCurve key={chartKey("equity")} trades={filteredTrades} />
@@ -2406,7 +2410,7 @@ function Dashboard({ trades }) {
           <div style={{ marginBottom: 22 }}>
             <div style={{ padding: "0 4px", marginBottom: 16 }}>
               <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>R per Trade</div>
-              <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Green = win, red = loss</div>
+              <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Green = win, red = loss</div>
             </div>
             <div onPointerDown={() => activateChart("rbar")}>
               <TradeRBarChart key={chartKey("rbar")} trades={filteredTrades} />
@@ -2416,7 +2420,7 @@ function Dashboard({ trades }) {
           <div style={{ marginBottom: 22 }}>
             <div style={{ padding: "0 4px", marginBottom: 16 }}>
               <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Performance by Symbol</div>
-              <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Total R per simbol, diurutkan dari yang paling profitable</div>
+              <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Total R per simbol, diurutkan dari yang paling profitable</div>
             </div>
             <div onPointerDown={() => activateChart("symbol")}>
               <SymbolPerformanceChart key={chartKey("symbol")} trades={filteredTrades} />
@@ -2426,7 +2430,7 @@ function Dashboard({ trades }) {
           <div style={{ marginBottom: 18, marginTop: -6 }}>
   <div style={{ padding: "0 4px", marginBottom: 16 }}>
     <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
-    <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Score 0–100 per dimension</div>
+    <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Score 0–100 per dimension</div>
   </div>
   <div style={{ width: "100%", height: 320, overflow: "visible" }}>
     <ResponsiveContainer>
@@ -2439,8 +2443,25 @@ function Dashboard({ trades }) {
               </ResponsiveContainer>
             </div>
           </div>
-          <SectionLabel text="By Rules Compliance" />
-          <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 0, padding: "4px 18px", boxShadow: C.shadowCard }}>
+
+          {availableYears.length > 0 && (
+            <div style={{ marginTop: 22 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", padding: "0 4px", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
+                <div>
+                  <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trade Calendar</div>
+                  <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Daily P&amp;L for {heatmapYear}</div>
+                </div>
+                <YearStepper year={heatmapYear} years={availableYears} onChange={setHeatmapYear} />
+              </div>
+              <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 0, padding: "14px 18px", boxShadow: C.shadowCard }}>
+                <CalendarHeatmap trades={trades} year={heatmapYear} />
+              </div>
+            </div>
+          )}
+
+          <div style={{ marginTop: 22 }}>
+            <SectionLabel text="By Rules Compliance" />
+            <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 0, padding: "4px 18px", boxShadow: C.shadowCard }}>
   {["Yes", "Partial", "No"].map((r, i) => {
     const d = stats.byRules[r];
     const avg = d.count ? d.total / d.count : 0;
@@ -2453,22 +2474,8 @@ function Dashboard({ trades }) {
       </div>
     );
   })}
-          </div>
-
-          {availableYears.length > 0 && (
-            <div style={{ marginTop: 22 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", padding: "0 4px", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
-                <div>
-                  <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trade Calendar</div>
-                  <div style={{ fontSize: 14, color: C.muted, marginTop: 3, marginBottom: 0 }}>Daily P&amp;L for {heatmapYear}</div>
-                </div>
-                <YearStepper year={heatmapYear} years={availableYears} onChange={setHeatmapYear} />
-              </div>
-              <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 0, padding: "14px 18px", boxShadow: C.shadowCard }}>
-                <CalendarHeatmap trades={trades} year={heatmapYear} />
-              </div>
             </div>
-          )}
+          </div>
         </>
       )}
     </div>
