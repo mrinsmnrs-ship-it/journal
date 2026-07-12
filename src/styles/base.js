@@ -23,6 +23,7 @@ export function getBaseStyles(C, SANS) {
     .mobile-topbar { display: none; }
     .perf-marquee { display: none; }
     .app-footer-mobile { display: none; }
+    .circular-text-dock { display: none; }
 
     .chat-mode { height: var(--app-vh, 100dvh); overflow: hidden; }
     .chat-mode .main-area {
