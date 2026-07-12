@@ -24,7 +24,6 @@ import { computeStats } from "./utils/stats.js";
 import DesktopTopbar from "./components/layout/DesktopTopbar.jsx";
 import MobileTopbar from "./components/layout/MobileTopbar.jsx";
 import PerfMarquee from "./components/layout/PerfMarquee.jsx";
-import DesktopBottomNav from "./components/nav/DesktopBottomNav.jsx";
 import MobileDockNav from "./components/nav/MobileDockNav.jsx";
 
 // ---- Pages ----
@@ -228,6 +227,12 @@ function RJournal({ user }) {
         <style>{getAppStyles(C, SANS)}</style>
         <div className="app-shell">
           <DesktopTopbar
+            navItems={NAV_DESKTOP}
+            activeKey={tab}
+            onSelect={setTab}
+            registerItemRef={(key, el) => { desktopNavRefs.current[key] = el; }}
+            indicator={desktopNavIndicator}
+            accentColor={C.btnAccent}
             themeMode={themeMode}
             onToggleTheme={toggleTheme}
             onLogout={handleLogout}
@@ -257,16 +262,6 @@ function RJournal({ user }) {
             )}
           </div>
         </div>
-
-        {/* Bottom nav (desktop) — floating pill, centered, not full-width */}
-        <DesktopBottomNav
-          items={NAV_DESKTOP}
-          activeKey={tab}
-          onSelect={setTab}
-          registerItemRef={(key, el) => { desktopNavRefs.current[key] = el; }}
-          indicator={desktopNavIndicator}
-          accentColor={C.btnAccent}
-        />
 
         {/* Bottom nav (mobile) */}
         <MobileDockNav

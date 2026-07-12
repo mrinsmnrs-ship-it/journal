@@ -1,8 +1,9 @@
 // src/styles/desktop.js
-// Desktop layout: full-width fixed topbar (branding + theme/logout) at
-// top, a floating centered pill nav at the bottom (not full-width), and
-// main-area filling the space between them. Satu halaman per waktu,
-// termasuk AI Chat yang sekarang jadi salah satu nav item di bottom nav.
+// Desktop layout: single full-width fixed topbar at top holding branding,
+// nav (dock-style, same look/animation as the mobile bottom nav, just
+// relocated here with its sliding indicator on the bottom edge of the
+// bar), and theme/logout — no separate bottom bar, no rounded corners.
+// main-area fills the rest of the viewport below it.
 // Semua di sini disembunyikan di mobile lewat media query src/styles/mobile.js.
 export function getDesktopStyles(C, SANS) {
   return `
@@ -15,17 +16,15 @@ export function getDesktopStyles(C, SANS) {
       background: ${C.bg}; z-index: 20;
     }
 
-    .main-area {
-      flex: 1; min-width: 0; width: 100%;
-      padding: 96px 48px 128px;
-      height: 100vh; overflow-y: auto; box-sizing: border-box;
+    .desktop-top-nav {
+      position: relative; height: 100%;
+      display: flex; align-items: center; gap: 4px;
     }
 
-    .desktop-bottom-nav {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-      display: flex; align-items: center; gap: 2px;
-      background: ${C.paperSoft}; border: 1px solid ${C.line}; border-radius: 999px;
-      padding: 6px; box-shadow: ${C.shadowPopover}; z-index: 20;
+    .main-area {
+      flex: 1; min-width: 0; width: 100%;
+      padding: 96px 48px 60px;
+      height: 100vh; overflow-y: auto; box-sizing: border-box;
     }
   `;
 }

@@ -1,12 +1,14 @@
-// src/components/nav/DesktopBottomNav.jsx
-// Floating bottom nav (desktop) — centered pill, not full-width, with a
-// Dock-style magnify effect on hover. Replaces the old vertical sidebar
-// nav; holds Log Trade / Journal / Dashboard / AI Chat.
+// src/components/nav/DesktopTopNav.jsx
+// Nav embedded inside the desktop topbar (not a separate bar). Same look
+// and magnify animation as the mobile bottom dock (MobileDockNav) — plain
+// text items, no icons, no rounded corners — except the sliding indicator
+// sits at the BOTTOM edge of the topbar instead of the top, since the bar
+// itself is at the top of the screen (indicator faces the page content).
 import React, { useRef } from "react";
 import { motion, useMotionValue, useTransform, useSpring } from "motion/react";
 import { SANS, useTheme } from "../../theme/tokens.js";
 
-function DesktopBottomItem({ label, Icon, active, onClick, mouseX, spring, distance, magnification, registerRef, accentColor }) {
+function DesktopTopNavItem({ label, active, onClick, mouseX, spring, distance, magnification, registerRef }) {
   const C = useTheme();
   const localRef = useRef(null);
   const setRef = (el) => {
@@ -27,48 +29,44 @@ function DesktopBottomItem({ label, Icon, active, onClick, mouseX, spring, dista
       style={{
         scale,
         transformOrigin: "bottom center",
-        display: "flex", alignItems: "center", gap: 8,
         background: active ? C.navActiveBg : "transparent",
-        border: "none", cursor: "pointer",
-        padding: "10px 18px", borderRadius: 999,
+        border: "none", cursor: "pointer", borderRadius: 0,
+        padding: "6px 10px 4px",
         color: active ? C.ink : C.faint,
       }}
     >
-      {Icon && <Icon size={16} style={{ color: active ? accentColor : "currentColor", flexShrink: 0 }} />}
-      <span style={{ fontFamily: SANS, fontSize: 14, fontWeight: 600, letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
+      <span style={{ fontFamily: SANS, fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
         {label}
       </span>
     </motion.button>
   );
 }
 
-export default function DesktopBottomNav({ items, activeKey, onSelect, registerItemRef, indicator, accentColor }) {
+export default function DesktopTopNav({ items, activeKey, onSelect, registerItemRef, indicator, accentColor }) {
   const mouseX = useMotionValue(Infinity);
   const spring = { mass: 0.15, stiffness: 160, damping: 14 };
 
   return (
     <div
-      className="desktop-bottom-nav"
+      className="desktop-top-nav"
       onMouseMove={(e) => mouseX.set(e.clientX)}
       onMouseLeave={() => mouseX.set(Infinity)}
     >
       {items.map((n) => (
-        <DesktopBottomItem
+        <DesktopTopNavItem
           key={n.key}
           label={n.label}
-          Icon={n.icon}
           active={activeKey === n.key}
           onClick={() => onSelect(n.key)}
           mouseX={mouseX}
           spring={spring}
           distance={85}
-          magnification={1.1}
+          magnification={1.32}
           registerRef={(el) => registerItemRef(n.key, el)}
-          accentColor={accentColor}
         />
       ))}
       <div style={{
-        position: "absolute", bottom: 6, height: 3, borderRadius: 999,
+        position: "absolute", bottom: 0, height: 3, borderRadius: 0,
         background: accentColor,
         left: indicator.left, width: indicator.width,
         transition: "left .28s cubic-bezier(.4,0,.2,1), width .28s cubic-bezier(.4,0,.2,1)",

@@ -20,7 +20,6 @@ export function getMobileStyles(C) {
         flex-direction: column;
       }
       .desktop-topbar { display: none; }
-      .desktop-bottom-nav { display: none; }
       .mobile-topbar {
         display: flex; position: static; flex-shrink: 0;
         justify-content: space-between; align-items: center;
