@@ -46,7 +46,7 @@ const SHADOW_DARK = {
 const LIGHT = {
   bg: "#ffffff", paper: "#ffffff", paperSoft: "#f6f8fa",
   paperSoftLight: "#f6f8fa", paperSoftStat: "#f6f8fa",
-  ink: "#1f2328", inkSoft: "#656d76", muted: "#656d76", faint: "#8c959f",
+  ink: "#1f2328", inkSoft: "#57606a", muted: "#57606a", faint: "#6e7781",
   line: "#d0d7de", lineSoft: "#d8dee4",
   clay: "#044df5", clayDeep: "#0339b8", clayWash: "#e1eafe", clayOnWhite: "#044df5",
   sage: "#1a7f37", sageWash: "#dafbe1", sageOnWhite: "#1a7f37",
