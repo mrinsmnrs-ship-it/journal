@@ -843,7 +843,7 @@ function RJournal({ user }) {
           @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&display=swap');
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
           * { box-sizing: border-box; }
-          html, body { margin:0; height: 100%; background: ${C.bg}; overscroll-behavior-y: none; }
+          html, body { margin:0; height: 100%; background: ${C.bg}; }
           button { -webkit-tap-highlight-color: transparent; transition: transform .1s ease; }
           button:active:not(:disabled) { transform: scale(0.96); }
           .no-press, .no-press:active { transform: none !important; }
@@ -1517,12 +1517,13 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
       <Field label="Notes">
         <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
       </Field>
-      <div style={{ marginTop: -10, marginBottom: 22 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-          {(form.images || []).map((src, i) => (
-            <div key={i} style={{ position: "relative", width: "100%", aspectRatio: "1" }}>
+      <div style={{ marginTop: -10, marginBottom: 22, marginLeft: -5, marginRight: -5, display: "flex", flexWrap: "wrap" }}>
+        {(form.images || []).map((src, i) => (
+          <div key={i} style={{ width: "25%", boxSizing: "border-box", padding: "0 5px 10px" }}>
+            <div style={{ position: "relative", width: "100%", aspectRatio: "1" }}>
               <img src={src} alt="" style={{
                 width: "100%", height: "100%", objectFit: "cover", border: `1px solid ${C.line}`, borderRadius: 0,
+                display: "block",
               }} />
               <button
                 type="button"
@@ -1535,8 +1536,10 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
                 }}
               ><X size={12} /></button>
             </div>
-          ))}
-          {(form.images || []).length < 8 && (
+          </div>
+        ))}
+        {(form.images || []).length < 8 && (
+          <div style={{ width: "25%", boxSizing: "border-box", padding: "0 5px 10px" }}>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -1550,16 +1553,16 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
             >
               <Plus size={22} />
             </button>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => { onAddImages(e.target.files); e.target.value = ""; }}
-            style={{ display: "none" }}
-          />
-        </div>
+          </div>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(e) => { onAddImages(e.target.files); e.target.value = ""; }}
+          style={{ display: "none" }}
+        />
       </div>
       <button
         type="button"
