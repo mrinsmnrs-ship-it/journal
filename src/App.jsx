@@ -2427,7 +2427,7 @@ function Dashboard({ trades }) {
             </div>
           </div>
 
-          <div style={{ marginBottom: 18, marginTop: -6 }}>
+          <div style={{ marginBottom: 22 }}>
   <div style={{ padding: "0 4px", marginBottom: 16 }}>
     <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
     <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Score 0–100 per dimension</div>
@@ -2445,7 +2445,7 @@ function Dashboard({ trades }) {
           </div>
 
           {availableYears.length > 0 && (
-            <div style={{ marginTop: 22 }}>
+            <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", padding: "0 4px", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
                 <div>
                   <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trade Calendar</div>
