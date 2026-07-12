@@ -31,5 +31,27 @@ export function getDesktopStyles(C, SANS) {
       max-width: 880px; margin: 0 auto;
       padding: 0 24px; box-sizing: border-box;
     }
+
+    @media (min-width: 821px) {
+      .perf-marquee {
+        display: block;
+        position: fixed; top: 64px; left: 0; right: 0;
+        overflow: hidden; white-space: nowrap;
+        background: ${C.bg}; border-bottom: 1px solid ${C.line};
+        padding: 6px 0; z-index: 19;
+      }
+      .perf-marquee-track {
+        display: inline-flex; width: max-content;
+        animation: perf-marquee-scroll-desktop 32s linear infinite;
+      }
+      @keyframes perf-marquee-scroll-desktop {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); }
+      }
+
+      .main-area {
+        padding-top: 132px;
+      }
+    }
   `;
 }
