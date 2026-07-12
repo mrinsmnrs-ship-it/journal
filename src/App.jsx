@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "motion/react";
 import {
   Trash2, Plus, PencilLine, BookOpen, LayoutDashboard,
-  Sun, Moon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, LogOut, MessageCircle,
+  Sun, Moon, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, LogOut, MessageCircle, X,
 } from "lucide-react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -104,6 +104,36 @@ function useTheme() { return useContext(ThemeContext); }
 
 function uid() {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+}
+// Trade images are stored inline as base64 data URLs inside the same
+// Firestore document as everything else (no Storage bucket wired up),
+// so every image gets downscaled + re-encoded as JPEG here first —
+// otherwise a couple of full-res phone photos would blow past
+// Firestore's 1MB-per-document limit almost immediately.
+function fileToCompressedDataURL(file, maxDim = 1000, quality = 0.72) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error);
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Invalid image"));
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          const scale = maxDim / Math.max(width, height);
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 function todayISO() {
   const d = new Date();
@@ -620,8 +650,9 @@ function RJournal({ user }) {
   const [form, setForm] = useState({
     date: todayISO(), symbol: "", direction: "", reason: "",
     riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "",
-    entryModel: "", entryModelTracked: false,
+    entryModel: "", entryModelTracked: false, images: [],
   });
+  const [imageUploading, setImageUploading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -708,6 +739,16 @@ function RJournal({ user }) {
     setEntryModelOptions(next);
     await saveUserData(user.uid, { entryModelOptions: next });
   }
+  async function deleteSymbolOption(opt) {
+    const next = symbolOptions.filter((o) => o !== opt);
+    setSymbolOptions(next);
+    await saveUserData(user.uid, { symbolOptions: next });
+  }
+  async function deleteEntryModelOption(opt) {
+    const next = entryModelOptions.filter((o) => o !== opt);
+    setEntryModelOptions(next);
+    await saveUserData(user.uid, { entryModelOptions: next });
+  }
   const canSave = form.symbol.trim() && form.direction && form.rActual !== "";
   async function handleSave() {
     if (!canSave) return;
@@ -720,12 +761,28 @@ function RJournal({ user }) {
       emotion: form.emotion, notes: form.notes.trim(), createdAt: Date.now(),
       entryModel: form.entryModel.trim() || null,
       entryModelTracked: !!form.entryModelTracked && !!form.entryModel.trim(),
+      images: form.images || [],
     };
     const next = [trade, ...trades];
     setTrades(next);
     await saveUserData(user.uid, { trades: next });
-    setForm({ date: todayISO(), symbol: "", direction: "", reason: "", riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "", entryModel: "", entryModelTracked: false });
+    setForm({ date: todayISO(), symbol: "", direction: "", reason: "", riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "", entryModel: "", entryModelTracked: false, images: [] });
     setTab("journal");
+  }
+  async function addImages(files) {
+    if (!files || files.length === 0) return;
+    setImageUploading(true);
+    try {
+      const encoded = await Promise.all(Array.from(files).map((f) => fileToCompressedDataURL(f)));
+      setForm((f) => ({ ...f, images: [...(f.images || []), ...encoded] }));
+    } catch (err) {
+      console.error("Failed to read image:", err);
+    } finally {
+      setImageUploading(false);
+    }
+  }
+  function removeImage(index) {
+    setForm((f) => ({ ...f, images: (f.images || []).filter((_, i) => i !== index) }));
   }
   async function handleDelete(id) {
     const next = trades.filter((t) => t.id !== id);
@@ -986,13 +1043,13 @@ function RJournal({ user }) {
                 <JournalChat user={user} trades={trades} theme={C} />
               </div>
             ) : tab === "log" ? (
-              <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} />
+              <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} onDeleteSymbolOption={deleteSymbolOption} onDeleteEntryModelOption={deleteEntryModelOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
             ) : tab === "journal" ? (
               <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} />
             ) : tab === "dashboard" ? (
               <Dashboard trades={trades} />
             ) : (
-              <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} />
+              <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} onDeleteSymbolOption={deleteSymbolOption} onDeleteEntryModelOption={deleteEntryModelOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
             )}
             
           </div>
@@ -1187,33 +1244,50 @@ function DateField({ value, onChange, align = "left" }) {
 
 // ---- Notion-style creatable select: pick an existing tag or type to
 // create a new one, so you don't have to retype the same symbol/model
-// every time. Pills all share one default color (no per-tag rainbow). ----
-function TagSelect({ value, onChange, options, onAddOption, placeholder, uppercase, disabled }) {
+// every time. Opens as a centered popup (same "mobile style" modal as
+// DateField) instead of an inline dropdown, and each option row has its
+// own delete (×) button so old/typo'd tags can be cleaned up. ----
+function TagSelect({ value, onChange, options, onAddOption, onDeleteOption, placeholder, uppercase, disabled }) {
   const C = useTheme();
   const inputStyle = useInputStyle();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   const norm = (s) => (uppercase ? s.toUpperCase() : s);
   const trimmedQuery = query.trim();
   const filtered = options.filter((o) => o.toLowerCase().includes(trimmedQuery.toLowerCase()));
   const exactMatch = options.some((o) => o.toLowerCase() === trimmedQuery.toLowerCase());
 
+  // Sama seperti popup kalender: selama terbuka, layar di belakang dikunci
+  // supaya tidak ikut discroll.
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prevOverflow; };
+  }, [open]);
+
   function openMenu() {
     if (disabled) return;
-    setQuery(value || "");
+    setQuery("");
+    setConfirmDelete(null);
     setOpen(true);
+  }
+  function closeMenu() {
+    setOpen(false);
+    setConfirmDelete(null);
   }
   function select(opt) {
     onChange(opt);
-    setOpen(false);
+    closeMenu();
   }
   function createAndSelect() {
     const v = norm(trimmedQuery);
     if (!v) return;
     if (!options.some((o) => o.toLowerCase() === v.toLowerCase())) onAddOption(v);
     onChange(v);
-    setOpen(false);
+    closeMenu();
   }
   function handleKeyDown(e) {
     if (e.key === "Enter") {
@@ -1221,86 +1295,161 @@ function TagSelect({ value, onChange, options, onAddOption, placeholder, upperca
       if (exactMatch) select(options.find((o) => o.toLowerCase() === trimmedQuery.toLowerCase()));
       else createAndSelect();
     } else if (e.key === "Escape") {
-      setOpen(false);
+      closeMenu();
     }
   }
+  function requestDelete(e, opt) {
+    e.stopPropagation();
+    setConfirmDelete(opt);
+  }
+  function confirmDeleteNow(e, opt) {
+    e.stopPropagation();
+    onDeleteOption?.(opt);
+    if (opt === value) onChange("");
+    setConfirmDelete(null);
+  }
+
+  const popupContent = (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          onClick={closeMenu}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            position: "fixed", inset: 0, zIndex: 29,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: 16, boxSizing: "border-box",
+            background: "rgba(0,0,0,0.35)",
+          }}
+        >
+          <motion.div
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.94, filter: "blur(14px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 0.94, filter: "blur(14px)" }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              width: "min(88vw, 320px)", maxWidth: 320, maxHeight: "min(80vh, 440px)",
+              display: "flex", flexDirection: "column", color: C.ink,
+              background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 14,
+              boxShadow: C.shadowModal,
+            }}>
+            <input
+              type="text"
+              autoFocus
+              placeholder={placeholder}
+              value={query}
+              onChange={(e) => setQuery(norm(e.target.value))}
+              onKeyDown={handleKeyDown}
+              style={{
+                ...inputStyle, height: 40, padding: "0 14px", marginBottom: 10, flexShrink: 0,
+                textTransform: uppercase ? "uppercase" : "none",
+              }}
+            />
+            <div style={{ overflowY: "auto", flex: 1 }}>
+              {filtered.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {filtered.map((opt) => (
+                    <div
+                      key={opt}
+                      onClick={() => select(opt)}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        border: `1px solid ${C.line}`, borderRadius: 0, padding: "8px 10px",
+                        background: opt === value ? C.btnAccentWash : C.paperSoft,
+                        color: opt === value ? C.btnAccentText : C.ink,
+                        fontSize: 14, fontWeight: 600, fontFamily: SANS, cursor: "pointer",
+                      }}
+                    >
+                      <span>{opt}</span>
+                      {confirmDelete === opt ? (
+                        <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <button
+                            type="button"
+                            onClick={(e) => confirmDeleteNow(e, opt)}
+                            style={{
+                              border: "none", background: "transparent", color: C.rustRed,
+                              fontSize: 12, fontWeight: 700, fontFamily: SANS, cursor: "pointer", padding: "2px 4px",
+                            }}
+                          >Delete</button>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setConfirmDelete(null); }}
+                            style={{
+                              border: "none", background: "transparent", color: C.muted,
+                              fontSize: 12, fontFamily: SANS, cursor: "pointer", padding: "2px 4px",
+                            }}
+                          >Cancel</button>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => requestDelete(e, opt)}
+                          style={{
+                            border: "none", background: "transparent", color: C.muted,
+                            cursor: "pointer", padding: 2, display: "flex", flexShrink: 0,
+                          }}
+                          aria-label={`Delete ${opt}`}
+                        ><X size={15} /></button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {trimmedQuery && !exactMatch && (
+                <button
+                  type="button"
+                  onClick={createAndSelect}
+                  style={{
+                    width: "100%", textAlign: "left", border: "none", background: "transparent",
+                    color: C.muted, fontSize: 13, fontFamily: SANS, cursor: "pointer",
+                    padding: "8px 4px", marginTop: filtered.length > 0 ? 6 : 0,
+                  }}
+                >
+                  + Create "{norm(trimmedQuery)}"
+                </button>
+              )}
+              {filtered.length === 0 && !trimmedQuery && (
+                <div style={{ color: C.faint, fontSize: 13, fontFamily: SANS, padding: "6px 4px" }}>
+                  Start typing to create an option.
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <div style={{ position: "relative" }}>
-      <input
-        type="text"
+      <button
+        type="button"
+        className="no-press"
         disabled={disabled}
-        placeholder={placeholder}
-        value={open ? query : value}
-        onFocus={openMenu}
-        onChange={(e) => setQuery(norm(e.target.value))}
-        onKeyDown={handleKeyDown}
+        onClick={openMenu}
         style={{
-          ...inputStyle, height: 40, padding: "0 16px",
-          textTransform: uppercase ? "uppercase" : "none",
-          opacity: disabled ? 0.5 : 1, cursor: disabled ? "not-allowed" : "text",
+          width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
+          borderRadius: 0, height: 40, padding: "0 16px", color: value ? C.inputText : C.faint,
+          fontFamily: SANS, fontSize: 16, textTransform: uppercase ? "uppercase" : "none",
+          textAlign: "left", cursor: disabled ? "not-allowed" : "pointer", display: "flex", alignItems: "center",
+          opacity: disabled ? 0.5 : 1, boxShadow: "none",
         }}
-      />
-      <AnimatePresence>
-        {open && (
-          <>
-            <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-              style={{
-                position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30, width: "100%", minWidth: 220,
-                background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 8,
-                boxShadow: "0 4px 10px -2px rgba(20,20,19,0.12), 0 14px 24px -8px rgba(20,20,19,0.16)",
-                maxHeight: 240, overflowY: "auto",
-              }}>
-            {filtered.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: trimmedQuery && !exactMatch ? 8 : 0 }}>
-                {filtered.map((opt) => (
-                  <button
-                    type="button"
-                    key={opt}
-                    onMouseDown={(e) => { e.preventDefault(); select(opt); }}
-                    style={{
-                      border: `1px solid ${C.line}`, borderRadius: 0, padding: "5px 12px",
-                      background: opt === value ? C.btnAccentWash : C.paperSoft,
-                      color: opt === value ? C.btnAccentText : C.ink,
-                      fontSize: 13, fontWeight: 600, fontFamily: SANS, cursor: "pointer",
-                    }}
-                  >{opt}</button>
-                ))}
-              </div>
-            )}
-            {trimmedQuery && !exactMatch && (
-              <button
-                type="button"
-                onMouseDown={(e) => { e.preventDefault(); createAndSelect(); }}
-                style={{
-                  width: "100%", textAlign: "left", border: "none", background: "transparent",
-                  color: C.muted, fontSize: 13, fontFamily: SANS, cursor: "pointer", padding: "6px 4px",
-                }}
-              >
-                + Create "{norm(trimmedQuery)}"
-              </button>
-            )}
-            {filtered.length === 0 && !trimmedQuery && (
-              <div style={{ color: C.faint, fontSize: 13, fontFamily: SANS, padding: "6px 4px" }}>
-                Start typing to create an option.
-              </div>
-            )}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      >
+        {value || placeholder}
+      </button>
+      {createPortal(popupContent, document.body)}
     </div>
   );
 }
 
-function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, symbolOptions, entryModelOptions, onAddSymbolOption, onAddEntryModelOption }) {
+function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, symbolOptions, entryModelOptions, onAddSymbolOption, onAddEntryModelOption, onDeleteSymbolOption, onDeleteEntryModelOption, onAddImages, onRemoveImage, imageUploading }) {
   const C = useTheme();
   const inputStyle = useInputStyle();
+  const fileInputRef = useRef(null);
   return (
     <div style={{ background: C.paperSoftLight, borderRadius: 0, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
       <Field label="Date">
@@ -1312,6 +1461,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
           onChange={(v) => updateForm("symbol", v)}
           options={symbolOptions}
           onAddOption={onAddSymbolOption}
+          onDeleteOption={onDeleteSymbolOption}
           placeholder="EURUSD, XAUUSD, ..."
           uppercase
         />
@@ -1347,6 +1497,7 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
           onChange={(v) => updateForm("entryModel", v)}
           options={entryModelOptions}
           onAddOption={onAddEntryModelOption}
+          onDeleteOption={onDeleteEntryModelOption}
           placeholder="Not everyone uses one — optional"
         />
       </div>
@@ -1364,6 +1515,48 @@ function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, sy
       <Field label="Notes">
         <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
       </Field>
+      <div style={{ marginBottom: 22 }}>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+          {(form.images || []).map((src, i) => (
+            <div key={i} style={{ position: "relative", width: 64, height: 64, flexShrink: 0 }}>
+              <img src={src} alt="" style={{
+                width: 64, height: 64, objectFit: "cover", border: `1px solid ${C.line}`, borderRadius: 0,
+              }} />
+              <button
+                type="button"
+                onClick={() => onRemoveImage(i)}
+                aria-label="Remove image"
+                style={{
+                  position: "absolute", top: -7, right: -7, width: 20, height: 20, borderRadius: "50%",
+                  background: C.ink, color: C.paper, border: `1px solid ${C.paper}`,
+                  display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0,
+                }}
+              ><X size={12} /></button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={imageUploading}
+            aria-label="Add image"
+            style={{
+              width: 64, height: 64, flexShrink: 0, border: `1px dashed ${C.line}`, borderRadius: 0,
+              background: C.inputBg, color: C.muted, display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: imageUploading ? "wait" : "pointer",
+            }}
+          >
+            <Plus size={22} />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => { onAddImages(e.target.files); e.target.value = ""; }}
+            style={{ display: "none" }}
+          />
+        </div>
+      </div>
       <button
         type="button"
         onClick={handleSave}
@@ -1437,6 +1630,15 @@ function JournalList({ trades, onDelete, onGoLog }) {
   {(t.emotions || []).map((e) => <Tag key={e} text={`Emotion: ${e}`} />)}
 </div>
             {t.notes && <div style={{ fontSize: 14, color: C.muted, marginTop: 11, fontStyle: "italic" }}>{t.notes}</div>}
+            {t.images && t.images.length > 0 && (
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 11 }}>
+                {t.images.map((src, i) => (
+                  <img key={i} src={src} alt="" style={{
+                    width: 64, height: 64, objectFit: "cover", border: `1px solid ${C.line}`, borderRadius: 0,
+                  }} />
+                ))}
+              </div>
+            )}
             <button onClick={() => setConfirmId(t.id)} style={{
               marginTop: 15, background: "transparent", border: "none", color: C.faint, fontSize: 10,
   display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: 0,
@@ -1585,7 +1787,7 @@ function TradeRBarChart({ trades }) {
           <YAxis tick={{ fontFamily: MONO, fontSize: 11, fill: C.muted }} axisLine={false} tickLine={false} width={40} />
           <Tooltip content={<TradeRTooltip />} cursor={{ fill: C.line, opacity: 0.18 }} />
           <ReferenceLine y={0} stroke={C.line} />
-          <Bar dataKey="r" radius={[3, 3, 3, 3]}>
+          <Bar dataKey="r" radius={0}>
             {data.map((d, i) => (
               <Cell key={i} fill={d.r >= 0 ? C.sage : C.rustRed} />
             ))}
@@ -1730,7 +1932,7 @@ function SymbolPerformanceChart({ trades }) {
           />
           <Tooltip content={<SymbolTooltip />} cursor={{ fill: C.line, opacity: 0.18 }} />
           <ReferenceLine x={0} stroke={C.line} />
-          <Bar dataKey="totalR" radius={[3, 3, 3, 3]} barSize={18}>
+          <Bar dataKey="totalR" radius={0} barSize={18}>
             {data.map((d, i) => (
               <Cell key={i} fill={d.totalR >= 0 ? C.sage : C.rustRed} />
             ))}
