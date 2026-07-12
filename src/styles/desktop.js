@@ -28,7 +28,7 @@ export function getDesktopStyles(C, SANS) {
     }
 
     .main-area-inner {
-      max-width: 1300px; margin: 0 auto;
+      max-width: 880px; margin: 0 auto;
       padding: 0 24px; box-sizing: border-box;
     }
   `;
