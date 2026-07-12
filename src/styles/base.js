@@ -28,5 +28,8 @@ export function getBaseStyles(C, SANS) {
     .chat-mode .main-area {
       display: flex; flex-direction: column; overflow: hidden;
     }
+    .chat-mode .main-area-inner {
+      display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden;
+    }
   `;
 }
