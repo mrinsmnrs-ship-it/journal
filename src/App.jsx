@@ -245,21 +245,23 @@ function RJournal({ user }) {
 
           {/* Main content */}
           <div className="main-area">
-            {!loaded ? (
-              <div style={{ color: C.faint, fontSize: 14 }}>Loading…</div>
-            ) : tab === "chat" ? (
-              <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
-                <JournalChat user={user} trades={trades} theme={C} />
-              </div>
-            ) : tab === "log" ? (
-              <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} onDeleteSymbolOption={deleteSymbolOption} onDeleteEntryModelOption={deleteEntryModelOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
-            ) : tab === "journal" ? (
-              <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} />
-            ) : tab === "dashboard" ? (
-              <Dashboard trades={trades} />
-            ) : (
-              <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} onDeleteSymbolOption={deleteSymbolOption} onDeleteEntryModelOption={deleteEntryModelOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
-            )}
+            <div className="main-area-inner">
+              {!loaded ? (
+                <div style={{ color: C.faint, fontSize: 14 }}>Loading…</div>
+              ) : tab === "chat" ? (
+                <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
+                  <JournalChat user={user} trades={trades} theme={C} />
+                </div>
+              ) : tab === "log" ? (
+                <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} onDeleteSymbolOption={deleteSymbolOption} onDeleteEntryModelOption={deleteEntryModelOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
+              ) : tab === "journal" ? (
+                <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} />
+              ) : tab === "dashboard" ? (
+                <Dashboard trades={trades} />
+              ) : (
+                <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} onDeleteSymbolOption={deleteSymbolOption} onDeleteEntryModelOption={deleteEntryModelOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
+              )}
+            </div>
           </div>
         </div>
 
