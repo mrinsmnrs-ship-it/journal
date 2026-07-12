@@ -1,7 +1,8 @@
 // src/styles/desktop.js
-// Desktop layout: fixed sidebar + main area + permanent AI chat panel,
-// all laid out with .app-shell as a flex row. Everything here is hidden
-// on mobile by src/styles/mobile.js's media query.
+// Desktop layout: fixed sidebar + main area (satu halaman per waktu,
+// termasuk AI Chat yang sekarang jadi salah satu nav item, bukan panel
+// permanen), semuanya di .app-shell sebagai flex row. Semua di sini
+// disembunyikan di mobile lewat media query src/styles/mobile.js.
 export function getDesktopStyles(C, SANS) {
   return `
     .app-shell { display: flex; height: 100vh; }
@@ -14,18 +15,9 @@ export function getDesktopStyles(C, SANS) {
     }
     .main-area {
       flex: 1; min-width: 0; padding: 40px 48px 60px;
-      margin-left: 252px; margin-right: calc((100vw - 252px) / 2);
+      margin-left: 252px;
       height: 100vh; overflow-y: auto; box-sizing: border-box;
     }
-
-    .desktop-chat-panel {
-      width: calc((100vw - 252px) / 2);
-      border-left: 1px solid ${C.line};
-      position: fixed; top: 0; right: 0; height: 100vh;
-      background: ${C.bg}; z-index: 15;
-      display: flex; flex-direction: column; align-items: stretch;
-    }
-    .desktop-chat-panel > * { width: 100%; flex: 1; min-width: 0; }
 
     .nav-item-desktop {
       display:flex; align-items:center; padding: 11px 12px; border-radius: 0;

@@ -187,7 +187,7 @@ function RJournal({ user }) {
 
   const stats = useMemo(() => computeStats(trades), [trades]);
 
-  const NAV_DESKTOP = NAV.filter((n) => n.key !== "chat");
+  const NAV_DESKTOP = NAV;
 
   useEffect(() => {
     function updateNavIndicator() {
@@ -218,7 +218,7 @@ function RJournal({ user }) {
   }, [tab, isDesktop]);
 
   const C = themeMode === "dark" ? DARK : LIGHT;
-  const isChatTab = !isDesktop && tab === "chat";
+  const isChatTab = tab === "chat";
 
   return (
     <ThemeContext.Provider value={C}>
@@ -246,7 +246,7 @@ function RJournal({ user }) {
           <div className="main-area">
             {!loaded ? (
               <div style={{ color: C.faint, fontSize: 14 }}>Loading…</div>
-            ) : !isDesktop && tab === "chat" ? (
+            ) : tab === "chat" ? (
               <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
                 <JournalChat user={user} trades={trades} theme={C} />
               </div>
@@ -260,13 +260,6 @@ function RJournal({ user }) {
               <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} onDeleteSymbolOption={deleteSymbolOption} onDeleteEntryModelOption={deleteEntryModelOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
             )}
           </div>
-
-          {/* AI Chat panel permanen (desktop only) — tampil di semua halaman */}
-          {isDesktop && loaded && (
-            <div className="desktop-chat-panel">
-              <JournalChat user={user} trades={trades} theme={C} />
-            </div>
-          )}
         </div>
 
         {/* Bottom nav (mobile) */}
