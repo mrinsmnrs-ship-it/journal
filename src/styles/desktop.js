@@ -52,6 +52,10 @@ export function getDesktopStyles(C, SANS) {
       .main-area {
         padding-top: 132px;
       }
+
+      .chat-mode .main-area-inner {
+        max-width: none; padding: 0;
+      }
     }
   `;
 }
