@@ -17,12 +17,14 @@ import { uid, fileToCompressedDataURL } from "./utils/format.js";
 import { todayISO } from "./utils/date.js";
 import { computeStats } from "./utils/stats.js";
 
-// ---- Layout: desktop sidebar / mobile topbar+marquee live in their own
-// files under components/layout, mobile vs desktop nav under components/nav
-// (see also src/styles/desktop.js + src/styles/mobile.js for their CSS) ----
-import DesktopSidebar from "./components/layout/DesktopSidebar.jsx";
+// ---- Layout: desktop topbar+bottom nav / mobile topbar+marquee live in
+// their own files under components/layout, mobile vs desktop nav under
+// components/nav (see also src/styles/desktop.js + src/styles/mobile.js
+// for their CSS) ----
+import DesktopTopbar from "./components/layout/DesktopTopbar.jsx";
 import MobileTopbar from "./components/layout/MobileTopbar.jsx";
 import PerfMarquee from "./components/layout/PerfMarquee.jsx";
+import DesktopBottomNav from "./components/nav/DesktopBottomNav.jsx";
 import MobileDockNav from "./components/nav/MobileDockNav.jsx";
 
 // ---- Pages ----
@@ -53,7 +55,7 @@ function RJournal({ user }) {
   const navRefs = useRef({});
   const [navIndicator, setNavIndicator] = useState({ left: 0, width: 0 });
   const desktopNavRefs = useRef({});
-  const [desktopNavIndicator, setDesktopNavIndicator] = useState({ top: 0, height: 0 });
+  const [desktopNavIndicator, setDesktopNavIndicator] = useState({ left: 0, width: 0 });
   const [isDesktop, setIsDesktop] = useState(
     typeof window !== "undefined" ? window.innerWidth > DESKTOP_BREAKPOINT : true
   );
@@ -207,8 +209,8 @@ function RJournal({ user }) {
       const el = desktopNavRefs.current[activeKey];
       if (el) {
         setDesktopNavIndicator({
-          top: el.offsetTop,
-          height: el.offsetHeight,
+          left: el.offsetLeft,
+          width: el.offsetWidth,
         });
       }
     }
@@ -225,13 +227,7 @@ function RJournal({ user }) {
       <div className={`app-root${isChatTab ? " chat-mode" : ""}`} style={{ ...getPageBackground(themeMode, C), minHeight: isDesktop ? "100vh" : undefined, color: C.ink, fontFamily: SANS }}>
         <style>{getAppStyles(C, SANS)}</style>
         <div className="app-shell">
-          <DesktopSidebar
-            navItems={NAV_DESKTOP}
-            activeKey={tab}
-            onSelect={setTab}
-            registerItemRef={(key, el) => { desktopNavRefs.current[key] = el; }}
-            indicator={desktopNavIndicator}
-            accentColor={C.btnAccent}
+          <DesktopTopbar
             themeMode={themeMode}
             onToggleTheme={toggleTheme}
             onLogout={handleLogout}
@@ -261,6 +257,16 @@ function RJournal({ user }) {
             )}
           </div>
         </div>
+
+        {/* Bottom nav (desktop) — floating pill, centered, not full-width */}
+        <DesktopBottomNav
+          items={NAV_DESKTOP}
+          activeKey={tab}
+          onSelect={setTab}
+          registerItemRef={(key, el) => { desktopNavRefs.current[key] = el; }}
+          indicator={desktopNavIndicator}
+          accentColor={C.btnAccent}
+        />
 
         {/* Bottom nav (mobile) */}
         <MobileDockNav

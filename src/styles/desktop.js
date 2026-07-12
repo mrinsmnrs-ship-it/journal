@@ -1,30 +1,31 @@
 // src/styles/desktop.js
-// Desktop layout: fixed sidebar + main area (satu halaman per waktu,
-// termasuk AI Chat yang sekarang jadi salah satu nav item, bukan panel
-// permanen), semuanya di .app-shell sebagai flex row. Semua di sini
-// disembunyikan di mobile lewat media query src/styles/mobile.js.
+// Desktop layout: full-width fixed topbar (branding + theme/logout) at
+// top, a floating centered pill nav at the bottom (not full-width), and
+// main-area filling the space between them. Satu halaman per waktu,
+// termasuk AI Chat yang sekarang jadi salah satu nav item di bottom nav.
+// Semua di sini disembunyikan di mobile lewat media query src/styles/mobile.js.
 export function getDesktopStyles(C, SANS) {
   return `
-    .app-shell { display: flex; height: 100vh; }
+    .app-shell { display: flex; flex-direction: column; height: 100vh; }
 
-    .sidebar {
-      width: 252px; flex-shrink: 0; padding: 28px 20px;
-      border-right: 1px solid ${C.line}; display: flex; flex-direction: column;
-      position: fixed; top: 0; left: 0; height: 100vh; overflow: hidden;
-      background: ${C.bg}; z-index: 15;
+    .desktop-topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; border-bottom: 1px solid ${C.line};
+      background: ${C.bg}; z-index: 20;
     }
+
     .main-area {
-      flex: 1; min-width: 0; padding: 40px 48px 60px;
-      margin-left: 252px;
+      flex: 1; min-width: 0; width: 100%;
+      padding: 96px 48px 128px;
       height: 100vh; overflow-y: auto; box-sizing: border-box;
     }
 
-    .nav-item-desktop {
-      display:flex; align-items:center; padding: 11px 12px; border-radius: 0;
-      font-family: ${SANS}; font-size:16px; font-weight:600; letter-spacing: -0.015em;
-      cursor:pointer; border:none; background:transparent;
-      width: calc(100% - 16px); text-align:left; margin-bottom:2px; transition: color .12s ease, background .12s ease;
+    .desktop-bottom-nav {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 2px;
+      background: ${C.paperSoft}; border: 1px solid ${C.line}; border-radius: 999px;
+      padding: 6px; box-shadow: ${C.shadowPopover}; z-index: 20;
     }
-    .nav-item-desktop:hover { color: ${C.ink}; }
   `;
 }

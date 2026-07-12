@@ -1,7 +1,7 @@
 // src/styles/mobile.js
 // Mobile layout, entirely scoped inside one media query: stacks the app
 // into topbar + scrolling content + bottom nav instead of desktop's
-// sidebar + main area + chat panel.
+// full-width topbar + main area + floating bottom nav.
 //
 // Sizing is driven by real flex layout instead of guessed pixel offsets,
 // so the topbar can never clip the top of the content and the bottom nav
@@ -19,8 +19,8 @@ export function getMobileStyles(C) {
         flex: 1; min-height: 0; height: auto;
         flex-direction: column;
       }
-      .sidebar { display: none; }
-      .desktop-chat-panel { display: none; }
+      .desktop-topbar { display: none; }
+      .desktop-bottom-nav { display: none; }
       .mobile-topbar {
         display: flex; position: static; flex-shrink: 0;
         justify-content: space-between; align-items: center;
