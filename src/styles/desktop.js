@@ -27,12 +27,12 @@ export function getDesktopStyles(C, SANS) {
       padding: 96px 0 60px;
     }
 
-    .main-area-inner {
-      max-width: 880px; margin: 0 auto;
-      padding: 0 24px; box-sizing: border-box;
-    }
-
     @media (min-width: 821px) {
+      .main-area-inner {
+        max-width: 880px; margin: 0 auto;
+        padding: 0 24px; box-sizing: border-box;
+      }
+
       .perf-marquee {
         display: block;
         position: fixed; top: 64px; left: 0; right: 0;
