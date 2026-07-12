@@ -22,9 +22,14 @@ export function getDesktopStyles(C, SANS) {
     }
 
     .main-area {
-      flex: 1; min-width: 0; width: 100%; max-width: 1100px;
-      margin: 0 auto; padding: 96px 48px 60px;
+      flex: 1; min-width: 0; width: 100%;
       height: 100vh; overflow-y: auto; box-sizing: border-box;
+      padding: 96px 0 60px;
+    }
+
+    .main-area-inner {
+      max-width: 1300px; margin: 0 auto;
+      padding: 0 24px; box-sizing: border-box;
     }
   `;
 }
