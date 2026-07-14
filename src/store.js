@@ -1,11 +1,11 @@
 // src/store.js
-// Baca & simpan data user (trades, theme, dan riwayat chat AI) dalam satu
-// dokumen Firestore: users/{uid}. Dipakai oleh App.jsx dan JournalChat.jsx.
+// Baca & simpan data user (trades, theme, dll) dalam satu dokumen
+// Firestore: users/{uid}. Dipakai oleh App.jsx.
 
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
-// Tag options (Symbol / Entry Model) used to be stored as plain string
+// Tag options (Symbol) used to be stored as plain string
 // arrays. They're now {value, createdAt} objects so the UI can tell how
 // old a tag is (its delete button only shows up during its first week).
 // Legacy string entries get createdAt: 0, which makes them read as
@@ -24,12 +24,10 @@ export async function loadUserData(uid) {
     return {
       trades: data.trades || [],
       theme: data.theme || "light",
-      chatMessages: data.chatMessages || [],
       symbolOptions: normalizeOptions(data.symbolOptions),
-      entryModelOptions: normalizeOptions(data.entryModelOptions),
     };
   }
-  return { trades: [], theme: "light", chatMessages: [], symbolOptions: [], entryModelOptions: [] };
+  return { trades: [], theme: "light", symbolOptions: [] };
 }
 
 export async function saveUserData(uid, partial) {
