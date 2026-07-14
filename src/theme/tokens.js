@@ -7,7 +7,7 @@
 // baca warna tema aktif tanpa harus lewat props satu-satu (prop drilling).
 // ============================================================================
 import { createContext, useContext } from "react";
-import { Sun, Moon, PencilLine, BookOpen, LayoutDashboard, MessageCircle } from "lucide-react";
+import { Sun, Moon, PencilLine, BookOpen, LayoutDashboard } from "lucide-react";
 
 export const SHADOW_LIGHT = {
   shadowCard: "none",
@@ -65,7 +65,6 @@ export const NAV = [
   { key: "log", label: "Log Trade", icon: PencilLine },
   { key: "journal", label: "Journal", icon: BookOpen },
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { key: "chat", label: "AI Chat", icon: MessageCircle },
 ];
 
 export const DESKTOP_BREAKPOINT = 820;
