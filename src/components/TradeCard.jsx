@@ -58,7 +58,6 @@ export default function TradeCard({ t, onDelete }) {
             {t.reason && <div style={{ fontSize: 15, color: C.inkSoft, marginTop: 4 }}>{t.reason}</div>}
             <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginTop: 13 }}>
               {t.direction && <Tag text={`Direction: ${t.direction}`} />}
-              {t.entryModel && <Tag text={`Model: ${t.entryModel}`} />}
               {t.rules && <Tag text={`Rules: ${t.rules}`} />}
               {t.emotion && <Tag text={`Emotion: ${t.emotion}`} />}
             </div>
