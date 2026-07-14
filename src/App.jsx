@@ -3,7 +3,6 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
 import { loadUserData, saveUserData } from "./store";
 import AuthScreen from "./AuthScreen.jsx";
-import JournalChat from "./JournalChat.jsx";
 import { getAppStyles } from "./styles/index.js";
 
 // ---- Design tokens, util tanggal/format/stats ----
@@ -63,11 +62,10 @@ function RJournal({ user }) {
   const [themeMode, setThemeMode] = useState("light");
   const [loaded, setLoaded] = useState(false);
   const [symbolOptions, setSymbolOptions] = useState([]);
-  const [entryModelOptions, setEntryModelOptions] = useState([]);
   const [form, setForm] = useState({
     date: todayISO(), symbol: "", direction: "", reason: "",
     riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "",
-    entryModel: "", entryModelTracked: false, images: [],
+    images: [],
   });
   const [imageUploading, setImageUploading] = useState(false);
 
@@ -77,7 +75,6 @@ function RJournal({ user }) {
       setTrades(data.trades);
       setThemeMode(THEME_ORDER.includes(data.theme) ? data.theme : "light");
       setSymbolOptions(data.symbolOptions);
-      setEntryModelOptions(data.entryModelOptions);
       setLoaded(true);
     })();
   }, [user.uid]);
@@ -125,21 +122,10 @@ function RJournal({ user }) {
     setSymbolOptions(next);
     await saveUserData(user.uid, { symbolOptions: next });
   }
-  async function addEntryModelOption(opt) {
-    if (!opt || entryModelOptions.some((o) => o.value === opt)) return;
-    const next = [...entryModelOptions, { value: opt, createdAt: Date.now() }];
-    setEntryModelOptions(next);
-    await saveUserData(user.uid, { entryModelOptions: next });
-  }
   async function deleteSymbolOption(opt) {
     const next = symbolOptions.filter((o) => o.value !== opt);
     setSymbolOptions(next);
     await saveUserData(user.uid, { symbolOptions: next });
-  }
-  async function deleteEntryModelOption(opt) {
-    const next = entryModelOptions.filter((o) => o.value !== opt);
-    setEntryModelOptions(next);
-    await saveUserData(user.uid, { entryModelOptions: next });
   }
   const canSave = form.symbol.trim() && form.direction && form.rActual !== "";
   async function handleSave() {
@@ -151,14 +137,12 @@ function RJournal({ user }) {
       rPlanned: form.rPlanned === "" ? null : Number(form.rPlanned),
       rActual: Number(form.rActual), rules: form.rules || null,
       emotion: form.emotion, notes: form.notes.trim(), createdAt: Date.now(),
-      entryModel: form.entryModel.trim() || null,
-      entryModelTracked: !!form.entryModelTracked && !!form.entryModel.trim(),
       images: form.images || [],
     };
     const next = [trade, ...trades];
     setTrades(next);
     await saveUserData(user.uid, { trades: next });
-    setForm({ date: todayISO(), symbol: "", direction: "", reason: "", riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "", entryModel: "", entryModelTracked: false, images: [] });
+    setForm({ date: todayISO(), symbol: "", direction: "", reason: "", riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "", images: [] });
     setTab("journal");
   }
   async function addImages(files) {
@@ -220,11 +204,10 @@ function RJournal({ user }) {
   }, [tab, isDesktop]);
 
   const C = themeMode === "dark" ? DARK : LIGHT;
-  const isChatTab = tab === "chat";
 
   return (
     <ThemeContext.Provider value={C}>
-      <div className={`app-root${isChatTab ? " chat-mode" : ""}`} style={{ ...getPageBackground(themeMode, C), minHeight: isDesktop ? "100vh" : undefined, color: C.ink, fontFamily: SANS }}>
+      <div className="app-root" style={{ ...getPageBackground(themeMode, C), minHeight: isDesktop ? "100vh" : undefined, color: C.ink, fontFamily: SANS }}>
         <style>{getAppStyles(C, SANS)}</style>
         <div className="app-shell">
           <DesktopTopbar
@@ -249,18 +232,14 @@ function RJournal({ user }) {
             <div className="main-area-inner">
               {!loaded ? (
                 <div style={{ color: C.faint, fontSize: 14 }}>Loading…</div>
-              ) : tab === "chat" ? (
-                <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
-                  <JournalChat user={user} trades={trades} theme={C} />
-                </div>
               ) : tab === "log" ? (
-                <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} onDeleteSymbolOption={deleteSymbolOption} onDeleteEntryModelOption={deleteEntryModelOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
+                <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
               ) : tab === "journal" ? (
                 <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} />
               ) : tab === "dashboard" ? (
                 <Dashboard trades={trades} />
               ) : (
-                <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} entryModelOptions={entryModelOptions} onAddSymbolOption={addSymbolOption} onAddEntryModelOption={addEntryModelOption} onDeleteSymbolOption={deleteSymbolOption} onDeleteEntryModelOption={deleteEntryModelOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
+                <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
               )}
             </div>
           </div>
