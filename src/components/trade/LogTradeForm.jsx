@@ -1,7 +1,7 @@
 // src/components/trade/LogTradeForm.jsx
 import React, { useRef } from "react";
-import { Plus, X, Check } from "lucide-react";
-import { LABEL_FONT, SANS, useTheme } from "../../theme/tokens.js";
+import { Plus, X } from "lucide-react";
+import { useTheme } from "../../theme/tokens.js";
 import Field from "../common/Field.jsx";
 import PillToggle from "../common/PillToggle.jsx";
 import useInputStyle from "../common/useInputStyle.js";
@@ -10,7 +10,7 @@ import TagSelect from "../TagSelect.jsx";
 import RiskRPanel from "./RiskRPanel.jsx";
 import EmotionSlider from "../../EmotionSlider.jsx";
 
-export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, symbolOptions, entryModelOptions, onAddSymbolOption, onAddEntryModelOption, onDeleteSymbolOption, onDeleteEntryModelOption, onAddImages, onRemoveImage, imageUploading }) {
+export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, symbolOptions, onAddSymbolOption, onDeleteSymbolOption, onAddImages, onRemoveImage, imageUploading }) {
   const C = useTheme();
   const inputStyle = useInputStyle();
   const fileInputRef = useRef(null);
@@ -40,45 +40,6 @@ export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSa
       <Field label="Reason / Setup">
         <input type="text" placeholder="Breakout retest, reversal, ..." value={form.reason} onChange={(e) => updateForm("reason", e.target.value)} style={{ ...inputStyle, height: 40, padding: "0 16px" }} />
       </Field>
-      <div style={{ marginBottom: 22 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 9 }}>
-          <div style={{
-            fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
-            color: C.muted, textTransform: "capitalize",
-          }}>Entry Model</div>
-          <div
-            onClick={() => updateForm("entryModelTracked", !form.entryModelTracked)}
-            style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}
-          >
-            <span style={{ fontSize: 11, color: C.muted, fontFamily: SANS }}>Count in stats</span>
-            <button
-              type="button"
-              role="checkbox"
-              aria-checked={form.entryModelTracked}
-              aria-label="Count in stats"
-              onClick={(e) => { e.stopPropagation(); updateForm("entryModelTracked", !form.entryModelTracked); }}
-              style={{
-                width: 16, height: 16, padding: 0, boxSizing: "border-box", flexShrink: 0,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                border: `1px solid ${form.entryModelTracked ? C.btnAccent : C.inputBorder}`,
-                borderRadius: 0,
-                background: form.entryModelTracked ? C.btnAccent : C.inputBg,
-                cursor: "pointer",
-              }}
-            >
-              {form.entryModelTracked && <Check size={11} strokeWidth={3} color={C.btnAccentTextActive} />}
-            </button>
-          </div>
-        </div>
-        <TagSelect
-          value={form.entryModel}
-          onChange={(v) => updateForm("entryModel", v)}
-          options={entryModelOptions}
-          onAddOption={onAddEntryModelOption}
-          onDeleteOption={onDeleteEntryModelOption}
-          placeholder="Not everyone uses one — optional"
-        />
-      </div>
       <RiskRPanel form={form} updateForm={updateForm} />
       <Field label="Rules Compliance">
         <div style={{ display: "flex", gap: 12 }}>
