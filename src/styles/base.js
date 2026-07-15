@@ -77,5 +77,19 @@ export function getBaseStyles(C, SANS) {
     }
     .hamburger-panel-item:hover { background: rgba(128,136,144,0.12); }
     .hamburger-panel-divider { height: 1px; margin: 2px 4px; }
+
+    /* Orientation guard: normalnya tersembunyi. Cuma dimunculkan lewat
+       media query orientation:landscape di bawah, dan dibatasi max-width
+       supaya layar desktop/laptop yang natural-nya landscape TIDAK ikut
+       ketutup — cuma menyasar layar sempit ala HP yang lagi dimiringkan. */
+    .orientation-lock-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 9999;
+      flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; gap: 8px; padding: 24px;
+    }
+    @media (orientation: landscape) and (max-width: 926px) {
+      .orientation-lock-overlay { display: flex; }
+    }
   `;
 }
