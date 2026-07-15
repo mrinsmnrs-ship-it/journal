@@ -13,10 +13,11 @@ export default function PeriodFilterBar({ period, setPeriod, customRange, setCus
   const C = useTheme();
   return (
     <div
+      className="period-filter-sticky"
       style={{
         position: "sticky", top: 0, zIndex: 20,
         background: C.bg,
-        paddingTop: 16, paddingBottom: 12,
+        paddingBottom: 12,
         marginBottom: 14,
         borderBottom: `1px solid ${C.line}`,
       }}
