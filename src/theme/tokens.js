@@ -63,7 +63,7 @@ export const SANS = CHAT_FONT;  // font disatukan dengan halaman lain
 export const MONO = GITHUB_MONO; // dipakai untuk angka/data ala GitHub (diff, code)
 export const NAV = [
   { key: "log", label: "Log Trade", icon: PencilLine },
-  { key: "journal", label: "Journal", icon: BookOpen },
+  { key: "journal", label: "History", icon: BookOpen },
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
 ];
 
