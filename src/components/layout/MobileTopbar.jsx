@@ -2,9 +2,8 @@
 // Top bar shown on mobile only (hidden on desktop via .mobile-topbar CSS,
 // see src/styles/mobile.js). Holds branding, theme toggle, and logout.
 import React from "react";
-import { LogOut } from "lucide-react";
 import { useTheme } from "../../theme/tokens.js";
-import ThemeToggle from "../common/ThemeToggle.jsx";
+import HamburgerMenu from "../common/HamburgerMenu.jsx";
 
 export default function MobileTopbar({ themeMode, onToggleTheme, onLogout }) {
   const C = useTheme();
@@ -16,20 +15,7 @@ export default function MobileTopbar({ themeMode, onToggleTheme, onLogout }) {
           <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
         </span>
       </div>
-      <div style={{ display: "flex", gap: 8 }}>
-        <ThemeToggle mode={themeMode} onToggle={onToggleTheme} compact />
-        <button
-          onClick={onLogout}
-          title="Log out"
-          style={{
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 0,
-            padding: 8, cursor: "pointer", color: C.inkSoft,
-          }}
-        >
-          <LogOut size={15} />
-        </button>
-      </div>
+      <HamburgerMenu themeMode={themeMode} onToggleTheme={onToggleTheme} onLogout={onLogout} />
     </div>
   );
 }
