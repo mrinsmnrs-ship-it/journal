@@ -5,7 +5,6 @@ import { Plus } from "lucide-react";
 import { SERIF, useTheme } from "../theme/tokens.js";
 import { fmtR } from "../utils/format.js";
 import { parseISO, startOfWeek, startOfMonth, startOfYear } from "../utils/date.js";
-import SectionLabel from "./common/SectionLabel.jsx";
 import TradeCard from "./TradeCard.jsx";
 
 export default function JournalList({ trades, onDelete, onGoLog, period, customRange }) {
@@ -52,7 +51,6 @@ export default function JournalList({ trades, onDelete, onGoLog, period, customR
 
   return (
     <div style={{ width: "100%", maxWidth: "100%" }}>
-      <SectionLabel text={`Trade Log \u00b7 ${filteredTrades.length} trade${filteredTrades.length === 1 ? "" : "s"}`} />
       {filteredTrades.length === 0 ? (
         <div style={{ color: C.muted, fontSize: 16, marginBottom: 16 }}>No trades logged in this period.</div>
       ) : (
