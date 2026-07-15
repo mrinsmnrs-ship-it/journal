@@ -27,11 +27,32 @@ export default function RiskRPanel({ form, updateForm }) {
   const C = useTheme();
   const [activeField, setActiveField] = useState("rActual");
   const [partialOpen, setPartialOpen] = useState(false);
+  const [partialMain, setPartialMain] = useState("0");
+  const [partialRows, setPartialRows] = useState([{ a: "0", b: "0" }]);
+  const [partialTarget, setPartialTarget] = useState("main");
 
   const adjust = (delta) => {
     const current = Number(form[activeField]) || 0;
     const next = Math.round((current + delta) * 100) / 100;
     updateForm(activeField, String(next));
+  };
+
+  const adjustPartial = (delta) => {
+    if (partialTarget === "main") {
+      setPartialMain((v) => String(Math.round(((Number(v) || 0) + delta) * 100) / 100));
+      return;
+    }
+    const [idxStr, col] = partialTarget.split(":");
+    const idx = Number(idxStr);
+    setPartialRows((rows) => rows.map((row, i) => {
+      if (i !== idx) return row;
+      const current = Number(row[col]) || 0;
+      return { ...row, [col]: String(Math.round((current + delta) * 100) / 100) };
+    }));
+  };
+
+  const addPartialRow = () => {
+    setPartialRows((rows) => (rows.length >= 15 ? rows : [...rows, { a: "0", b: "0" }]));
   };
 
   return (
@@ -139,11 +160,90 @@ export default function RiskRPanel({ form, updateForm }) {
                 exit={{ opacity: 0, scale: 0.94, filter: "blur(14px)" }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 style={{
-                  width: "min(85vw, 280px)", maxWidth: 280, minHeight: 160, color: C.ink,
+                  width: "min(85vw, 280px)", maxWidth: 280, maxHeight: "80vh", overflowY: "auto",
+                  color: C.ink,
                   background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
                   boxShadow: C.shadowModal,
                 }}
-              />
+              >
+                <button
+                  type="button"
+                  onClick={() => setPartialTarget("main")}
+                  style={{
+                    width: "100%", boxSizing: "border-box", background: C.inputBg,
+                    border: `1px solid ${partialTarget === "main" ? C.btnAccentBorder : C.inputBorder}`,
+                    borderRadius: 0, height: 40, padding: "0 12px", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: C.inputText, fontFamily: SANS, fontSize: 14, fontWeight: 600,
+                    marginBottom: 12,
+                  }}
+                >
+                  {partialMain}
+                </button>
+                <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
+                  {[
+                    { label: "-0.1", delta: -0.1 },
+                    { label: "-", delta: -1 },
+                    { label: "+", delta: 1 },
+                    { label: "+0.1", delta: 0.1 },
+                  ].map(({ label, delta }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => adjustPartial(delta)}
+                      style={{
+                        width: 30, height: 26, padding: 0, borderRadius: 0,
+                        border: `1px solid ${C.line}`, background: C.paperSoft,
+                        color: C.inkSoft, fontWeight: 600, fontSize: 10, cursor: "pointer",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontFamily: SANS, lineHeight: 1,
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                {partialRows.map((row, idx) => (
+                  <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <div style={{ width: 16, flexShrink: 0, fontFamily: SANS, fontSize: 12, fontWeight: 600, color: C.muted }}>
+                      {idx + 1}.
+                    </div>
+                    {["a", "b"].map((col) => {
+                      const target = `${idx}:${col}`;
+                      const active = partialTarget === target;
+                      return (
+                        <button
+                          key={col}
+                          type="button"
+                          onClick={() => setPartialTarget(target)}
+                          style={{
+                            flex: 1, boxSizing: "border-box", background: C.inputBg,
+                            border: `1px solid ${active ? C.btnAccentBorder : C.inputBorder}`,
+                            borderRadius: 0, height: 36, padding: "0 8px", cursor: "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            color: C.inputText, fontFamily: SANS, fontSize: 13, fontWeight: 600,
+                          }}
+                        >
+                          {row[col]}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+                {partialRows.length < 15 && (
+                  <button
+                    type="button"
+                    onClick={addPartialRow}
+                    style={{
+                      width: "100%", boxSizing: "border-box", background: "transparent",
+                      border: `1px dashed ${C.line}`, borderRadius: 0, height: 36, marginTop: 8,
+                      color: C.inkSoft, fontFamily: SANS, fontSize: 13, fontWeight: 600, cursor: "pointer",
+                    }}
+                  >
+                    + Partial
+                  </button>
+                )}
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>,
