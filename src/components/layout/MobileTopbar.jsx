@@ -3,7 +3,7 @@
 // see src/styles/mobile.js). Holds branding, theme toggle, and logout.
 import React from "react";
 import { useTheme } from "../../theme/tokens.js";
-import HamburgerMenu from "../common/HamburgerMenu.jsx";
+import TopbarActions from "../common/TopbarActions.jsx";
 
 export default function MobileTopbar({ themeMode, onToggleTheme, onLogout }) {
   const C = useTheme();
@@ -15,7 +15,7 @@ export default function MobileTopbar({ themeMode, onToggleTheme, onLogout }) {
           <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
         </span>
       </div>
-      <HamburgerMenu themeMode={themeMode} onToggleTheme={onToggleTheme} onLogout={onLogout} />
+      <TopbarActions themeMode={themeMode} onToggleTheme={onToggleTheme} onLogout={onLogout} />
     </div>
   );
 }
