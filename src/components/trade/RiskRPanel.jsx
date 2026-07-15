@@ -8,6 +8,8 @@
 // TODO (dari memory user): tambahkan tombol Reset di antara tombol - dan +.
 // ============================================================================
 import { useState } from "react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "motion/react";
 import { useTheme, SANS, LABEL_FONT } from "../../theme/tokens.js";
 import Counter from "../../Counter.jsx";
 
@@ -24,6 +26,7 @@ const R_FIELDS = [
 export default function RiskRPanel({ form, updateForm }) {
   const C = useTheme();
   const [activeField, setActiveField] = useState("rActual");
+  const [partialOpen, setPartialOpen] = useState(false);
 
   const adjust = (delta) => {
     const current = Number(form[activeField]) || 0;
@@ -101,13 +104,11 @@ export default function RiskRPanel({ form, updateForm }) {
         </div>
         <button
           type="button"
-          onClick={() => updateForm("rules", form.rules === "Partial" ? "" : "Partial")}
+          onClick={() => setPartialOpen(true)}
           style={{
             height: 26, padding: "0 10px", borderRadius: 0,
-            border: `1px solid ${form.rules === "Partial" ? C.btnAccentBorder : C.line}`,
-            background: form.rules === "Partial" ? C.btnAccent : C.paperSoft,
-            color: form.rules === "Partial" ? C.btnAccentTextActive : C.inkSoft,
-            fontWeight: 600, fontSize: 10, cursor: "pointer",
+            border: `1px solid ${C.line}`, background: C.paperSoft,
+            color: C.inkSoft, fontWeight: 600, fontSize: 10, cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontFamily: SANS, lineHeight: 1,
           }}
@@ -115,6 +116,39 @@ export default function RiskRPanel({ form, updateForm }) {
           Partial
         </button>
       </div>
+      {createPortal(
+        <AnimatePresence>
+          {partialOpen && (
+            <motion.div
+              onClick={() => setPartialOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                position: "fixed", inset: 0, zIndex: 29,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                padding: 16, boxSizing: "border-box",
+                background: "rgba(0,0,0,0.35)",
+              }}
+            >
+              <motion.div
+                onClick={(e) => e.stopPropagation()}
+                initial={{ opacity: 0, scale: 0.94, filter: "blur(14px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                exit={{ opacity: 0, scale: 0.94, filter: "blur(14px)" }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                  width: "min(85vw, 280px)", maxWidth: 280, minHeight: 160, color: C.ink,
+                  background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 16,
+                  boxShadow: C.shadowModal,
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
