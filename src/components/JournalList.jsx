@@ -2,12 +2,11 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus } from "lucide-react";
-import { SANS, PERIODS, useTheme } from "../theme/tokens.js";
+import { SERIF, useTheme } from "../theme/tokens.js";
 import { fmtR } from "../utils/format.js";
 import { parseISO, startOfWeek, startOfMonth, startOfYear } from "../utils/date.js";
-import Chip from "./common/Chip.jsx";
+import PeriodFilterBar from "./common/PeriodFilterBar.jsx";
 import SectionLabel from "./common/SectionLabel.jsx";
-import DateField from "./DateField.jsx";
 import TradeCard from "./TradeCard.jsx";
 
 export default function JournalList({ trades, onDelete, onGoLog }) {
@@ -56,31 +55,8 @@ export default function JournalList({ trades, onDelete, onGoLog }) {
 
   return (
     <div style={{ width: "100%", maxWidth: "100%" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginBottom: 9 }}>
-        {PERIODS.slice(0, 3).map((p) => (
-          <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
-        ))}
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 9, marginBottom: 10 }}>
-        {PERIODS.slice(3).map((p) => (
-          <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
-        ))}
-        <Chip label="Custom Range" active={period === "custom"} onClick={() => setPeriod("custom")} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
-      </div>
-      {period === "custom" && (
-        <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 18, flexWrap: "wrap" }}>
-          <div style={{ flex: 1, minWidth: 120 }}>
-            <DateField value={customRange.from} onChange={(d) => setCustomRange((r) => ({ ...r, from: d }))} />
-          </div>
-          <span style={{ color: C.muted, fontSize: 13, fontFamily: SANS }}>to</span>
-          <div style={{ flex: 1, minWidth: 120 }}>
-            <DateField value={customRange.to} onChange={(d) => setCustomRange((r) => ({ ...r, to: d }))} align="right" />
-          </div>
-        </div>
-      )}
-      <div style={{ marginTop: period === "custom" ? 0 : 14 }}>
-        <SectionLabel text={`Trade Log \u00b7 ${filteredTrades.length} trade${filteredTrades.length === 1 ? "" : "s"}`} />
-      </div>
+      <PeriodFilterBar period={period} setPeriod={setPeriod} customRange={customRange} setCustomRange={setCustomRange} />
+      <SectionLabel text={`Trade Log \u00b7 ${filteredTrades.length} trade${filteredTrades.length === 1 ? "" : "s"}`} />
       {filteredTrades.length === 0 ? (
         <div style={{ color: C.muted, fontSize: 16, marginBottom: 16 }}>No trades logged in this period.</div>
       ) : (
@@ -145,4 +121,3 @@ export default function JournalList({ trades, onDelete, onGoLog }) {
     </div>
   );
 }
-
