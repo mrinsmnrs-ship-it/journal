@@ -14,7 +14,6 @@ import { parseISO, startOfWeek, startOfMonth, startOfYear, clamp, tradeYears, fm
 import {
   computeEquityCurve, computeDailyR, computeSymbolStats, computeStats,
 } from "../../utils/stats.js";
-import PeriodFilterBar from "../common/PeriodFilterBar.jsx";
 import Counter from "../../Counter.jsx";
 
 // ---- Dashboard ----
@@ -337,10 +336,8 @@ function YearStepper({ year, years, onChange }) {
   );
 }
 
-export default function Dashboard({ trades }) {
+export default function Dashboard({ trades, period, customRange }) {
   const C = useTheme();
-  const [period, setPeriod] = useState("all");
-  const [customRange, setCustomRange] = useState({ from: "", to: "" });
   const availableYears = useMemo(() => tradeYears(trades), [trades]);
   const [heatmapYear, setHeatmapYear] = useState(() => availableYears[0] || new Date().getFullYear());
 
@@ -372,7 +369,6 @@ export default function Dashboard({ trades }) {
 
   return (
     <div style={{ width: "100%", maxWidth: "100%" }}>
-      <PeriodFilterBar period={period} setPeriod={setPeriod} customRange={customRange} setCustomRange={setCustomRange} />
       {filteredTrades.length === 0 ? (
         <div style={{ color: C.muted, fontSize: 16, marginBottom: 28 }}>No trades logged in this period.</div>
       ) : (
