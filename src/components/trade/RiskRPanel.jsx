@@ -182,6 +182,10 @@ export default function RiskRPanel({ form, updateForm }) {
                   boxShadow: C.shadowModal,
                 }}
               >
+                <div style={{
+                  fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
+                  color: C.muted, marginBottom: 9, textTransform: "capitalize",
+                }}>Total R</div>
                 <button
                   type="button"
                   onClick={() => setPartialTarget("main")}
@@ -233,6 +237,18 @@ export default function RiskRPanel({ form, updateForm }) {
                   >
                     <RotateCcw size={13} />
                   </button>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  <div style={{ width: 16, flexShrink: 0 }} />
+                  <div style={{
+                    flex: 1, fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
+                    color: C.muted, textTransform: "capitalize", textAlign: "center",
+                  }}>Partial R</div>
+                  <div style={{
+                    flex: 1, fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
+                    color: C.muted, textTransform: "capitalize", textAlign: "center",
+                  }}>Qty %</div>
+                  <div style={{ width: 28, flexShrink: 0 }} />
                 </div>
                 {partialRows.map((row, idx) => (
                   <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
