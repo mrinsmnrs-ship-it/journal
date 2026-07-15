@@ -4,18 +4,16 @@
 // Menggantikan pasangan tombol "ThemeToggle + Logout" di pojok topbar dengan
 // satu tombol ikon 2 garis horizontal (tanpa border). Saat dipencet, kedua
 // garis bergerak dari tempatnya dan membentuk silang (X), dan sebuah panel
-// kecil muncul "sembul" dari kanan berisi menu ganti tema & log out.
+// sisi sempit (icon-only, tanpa teks) menempel di tepi kanan layar — mulai
+// tepat di bawah topbar sampai ke bawah layar — berisi ganti tema & log out.
 // ============================================================================
 import { useEffect, useRef, useState } from "react";
 import { LogOut } from "lucide-react";
 import { useTheme, SANS, THEME_ORDER, THEME_META } from "../../theme/tokens.js";
-import LightbulbIcon from "./LightbulbIcon.jsx";
-import HelpModal from "./HelpModal.jsx";
 
 export default function HamburgerMenu({ themeMode, onToggleTheme, onLogout }) {
   const C = useTheme();
   const [open, setOpen] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
   const rootRef = useRef(null);
 
   // Klik di luar atau tekan Escape -> tutup panel.
@@ -54,40 +52,30 @@ export default function HamburgerMenu({ themeMode, onToggleTheme, onLogout }) {
 
       <div
         className={`hamburger-panel${open ? " open" : ""}`}
-        style={{ background: C.paper, border: `1px solid ${C.line}`, boxShadow: C.shadowPopover }}
+        style={{ background: C.paper, borderLeft: `1px solid ${C.line}`, boxShadow: C.shadowPopover }}
       >
         <button
           type="button"
           className="hamburger-panel-item"
           onClick={onToggleTheme}
+          aria-label={`Switch to ${nextLabel}`}
+          title={`Switch to ${nextLabel}`}
           style={{ color: C.inkSoft, fontFamily: SANS }}
         >
-          <ThemeIcon size={16} style={{ color: C.ink }} />
-          <span>Switch to {nextLabel}</span>
-        </button>
-        <div className="hamburger-panel-divider" style={{ background: C.line }} />
-        <button
-          type="button"
-          className="hamburger-panel-item"
-          onClick={() => { setOpen(false); setHelpOpen(true); }}
-          style={{ color: C.inkSoft, fontFamily: SANS }}
-        >
-          <LightbulbIcon size={16} style={{ color: C.ink }} />
-          <span>Petunjuk</span>
+          <ThemeIcon size={18} style={{ color: C.ink }} />
         </button>
         <div className="hamburger-panel-divider" style={{ background: C.line }} />
         <button
           type="button"
           className="hamburger-panel-item"
           onClick={() => { setOpen(false); onLogout(); }}
+          aria-label="Log out"
+          title="Log out"
           style={{ color: C.inkSoft, fontFamily: SANS }}
         >
-          <LogOut size={16} style={{ color: C.ink }} />
-          <span>Log out</span>
+          <LogOut size={18} style={{ color: C.ink }} />
         </button>
       </div>
-
-      <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   );
 }
