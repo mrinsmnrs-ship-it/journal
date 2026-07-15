@@ -180,6 +180,36 @@ function RJournal({ user }) {
 
   const NAV_DESKTOP = NAV;
 
+  // Swipe kiri/kanan pada area konten (mobile) untuk pindah halaman tanpa
+  // pencet tombol nav bawah — urutan halaman mengikuti urutan array NAV.
+  const touchStartRef = useRef({ x: 0, y: 0 });
+  const touchActiveRef = useRef(false);
+  const SWIPE_THRESHOLD = 60; // px minimum jarak horizontal supaya dianggap swipe
+  function handleContentTouchStart(e) {
+    const t = e.touches[0];
+    touchStartRef.current = { x: t.clientX, y: t.clientY };
+    touchActiveRef.current = true;
+  }
+  function handleContentTouchEnd(e) {
+    if (!touchActiveRef.current) return;
+    touchActiveRef.current = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartRef.current.x;
+    const dy = t.clientY - touchStartRef.current.y;
+    // Hanya dianggap swipe halaman kalau geraknya jelas lebih horizontal
+    // daripada vertikal (supaya tidak bentrok dengan scroll konten).
+    if (Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      const order = NAV.map((n) => n.key);
+      const idx = order.indexOf(tab);
+      if (idx === -1) return;
+      if (dx < 0 && idx < order.length - 1) {
+        setTab(order[idx + 1]); // swipe ke kiri -> halaman berikutnya
+      } else if (dx > 0 && idx > 0) {
+        setTab(order[idx - 1]); // swipe ke kanan -> halaman sebelumnya
+      }
+    }
+  }
+
   useEffect(() => {
     function updateNavIndicator() {
       const el = navRefs.current[tab];
@@ -242,7 +272,11 @@ function RJournal({ user }) {
           )}
 
           {/* Main content */}
-          <div className="main-area">
+          <div
+            className="main-area"
+            onTouchStart={handleContentTouchStart}
+            onTouchEnd={handleContentTouchEnd}
+          >
             <div className="main-area-inner">
               {!loaded ? (
                 <div style={{ color: C.faint, fontSize: 14 }}>Loading…</div>
