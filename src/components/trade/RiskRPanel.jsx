@@ -75,28 +75,45 @@ export default function RiskRPanel({ form, updateForm }) {
           );
         })}
       </div>
-      <div style={{ display: "flex", gap: 6, justifyContent: "flex-start" }}>
-        {[
-          { label: "-0.1", delta: -0.1 },
-          { label: "-", delta: -1 },
-          { label: "+", delta: 1 },
-          { label: "+0.1", delta: 0.1 },
-        ].map(({ label, delta }) => (
-          <button
-            key={label}
-            type="button"
-            onClick={() => adjust(delta)}
-            style={{
-              width: 30, height: 26, padding: 0, borderRadius: 0,
-              border: `1px solid ${C.line}`, background: C.paperSoft,
-              color: C.inkSoft, fontWeight: 600, fontSize: 10, cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: SANS, lineHeight: 1,
-            }}
-          >
-            {label}
-          </button>
-        ))}
+      <div style={{ display: "flex", gap: 6, justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 6 }}>
+          {[
+            { label: "-0.1", delta: -0.1 },
+            { label: "-", delta: -1 },
+            { label: "+", delta: 1 },
+            { label: "+0.1", delta: 0.1 },
+          ].map(({ label, delta }) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => adjust(delta)}
+              style={{
+                width: 30, height: 26, padding: 0, borderRadius: 0,
+                border: `1px solid ${C.line}`, background: C.paperSoft,
+                color: C.inkSoft, fontWeight: 600, fontSize: 10, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontFamily: SANS, lineHeight: 1,
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => updateForm("rules", form.rules === "Partial" ? "" : "Partial")}
+          style={{
+            height: 26, padding: "0 10px", borderRadius: 0,
+            border: `1px solid ${form.rules === "Partial" ? C.btnAccentBorder : C.line}`,
+            background: form.rules === "Partial" ? C.btnAccent : C.paperSoft,
+            color: form.rules === "Partial" ? C.btnAccentTextActive : C.inkSoft,
+            fontWeight: 600, fontSize: 10, cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: SANS, lineHeight: 1,
+          }}
+        >
+          Partial
+        </button>
       </div>
     </div>
   );
