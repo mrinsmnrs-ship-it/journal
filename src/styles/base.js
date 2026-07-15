@@ -36,7 +36,9 @@ export function getBaseStyles(C, SANS) {
     }
 
     /* Hamburger menu (topbar): tombol 2 garis tanpa border yang berubah
-       jadi silang saat aktif, membuka panel yang sembul dari kanan. */
+       jadi silang saat aktif, membuka panel sisi (bukan popup) yang
+       menempel di tepi kanan layar, mulai persis di bawah topbar sampai
+       ke bawah layar, sempit dan cuma berisi ikon. */
     .hamburger-root { position: relative; display: inline-flex; }
     .hamburger-btn {
       position: relative;
@@ -59,24 +61,24 @@ export function getBaseStyles(C, SANS) {
     }
 
     .hamburger-panel {
-      position: absolute; top: calc(100% + 10px); right: 0;
-      min-width: 210px; display: flex; flex-direction: column;
-      padding: 6px; border-radius: 0; z-index: 50;
+      position: fixed; top: var(--topbar-h, 64px); right: 0; bottom: 0;
+      width: 56px; display: flex; flex-direction: column; align-items: center;
+      padding: 10px 0; border-radius: 0; z-index: 50;
       opacity: 0; visibility: hidden;
-      transform: translateX(18px);
-      transition: transform .25s cubic-bezier(.4,0,.2,1), opacity .2s ease, visibility .25s;
+      transform: translateX(100%);
+      transition: transform .3s cubic-bezier(.4,0,.2,1), opacity .2s ease, visibility .3s;
     }
     .hamburger-panel.open {
       opacity: 1; visibility: visible;
       transform: translateX(0);
     }
     .hamburger-panel-item {
-      display: flex; align-items: center; gap: 10px; width: 100%;
-      background: transparent; border: none; text-align: left;
-      padding: 10px 12px; cursor: pointer; font-size: 14px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;
+      background: transparent; border: none; text-align: left; border-radius: 0;
+      padding: 0; cursor: pointer; font-size: 14px; font-weight: 600; flex-shrink: 0;
     }
     .hamburger-panel-item:hover { background: rgba(128,136,144,0.12); }
-    .hamburger-panel-divider { height: 1px; margin: 2px 4px; }
+    .hamburger-panel-divider { width: 24px; height: 1px; margin: 4px 0; flex-shrink: 0; }
 
     /* Orientation guard: normalnya tersembunyi. Cuma dimunculkan lewat
        media query orientation:landscape di bawah, dan dibatasi max-width
