@@ -38,6 +38,11 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
     </text>
   );
 }
+function riskConsistencyLabel(score) {
+  if (score >= 75) return "Stabil";
+  if (score >= 50) return "Sedang";
+  return "Tidak Stabil";
+}
 function StatCard({ label, value, color }) {
   const C = useTheme();
   return (
@@ -233,37 +238,61 @@ function SymbolTooltip({ active, payload }) {
     </div>
   );
 }
-function SymbolLineDot(props) {
-  const { cx, cy, payload, C } = props;
-  if (cx == null || cy == null) return null;
-  return <circle cx={cx} cy={cy} r={4} fill={payload.totalR >= 0 ? C.sage : C.rustRed} stroke="none" />;
+function SymbolMiniTooltip({ active, payload }) {
+  const C = useTheme();
+  if (!active || !payload || !payload.length) return null;
+  const d = payload[0].payload;
+  const color = d.cum >= 0 ? C.sage : C.rustRed;
+  return (
+    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: "8px 11px", fontFamily: SANS, fontSize: 11.5, boxShadow: C.shadowPopover }}>
+      <div style={{ color: C.muted, marginBottom: 2 }}>Trade #{d.index}</div>
+      <div style={{ color, fontWeight: 700 }}>{fmtR(d.cum)}</div>
+    </div>
+  );
+}
+function SymbolMiniChart({ item, trades }) {
+  const C = useTheme();
+  const data = useMemo(() => {
+    const symbolTrades = trades
+      .filter((t) => t.symbol === item.symbol)
+      .sort((a, b) => parseISO(a.date) - parseISO(b.date));
+    let cum = 0;
+    return symbolTrades.map((t, i) => {
+      cum += t.rActual;
+      return { index: i + 1, cum };
+    });
+  }, [trades, item.symbol]);
+  const color = item.totalR >= 0 ? C.sage : C.rustRed;
+  return (
+    <div style={{ marginBottom: 22 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8, flexWrap: "wrap", gap: 4 }}>
+        <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 14, color: C.ink }}>{item.symbol}</div>
+        <div style={{ fontFamily: MONO, fontSize: 11.5, color: C.muted }}>
+          <span style={{ color, fontWeight: 700 }}>{fmtR(item.totalR)}</span> &middot; {item.winRate.toFixed(0)}% win &middot; {item.count} trade{item.count === 1 ? "" : "s"}
+        </div>
+      </div>
+      <div style={{ width: "100%", height: 140 }}>
+        <ResponsiveContainer>
+          <LineChart data={data} margin={{ top: 6, right: 8, bottom: 0, left: -20 }}>
+            <CartesianGrid stroke={C.lineSoft} strokeDasharray="3 3" vertical={false} />
+            <XAxis dataKey="index" tick={{ fontFamily: MONO, fontSize: 10, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
+            <YAxis tick={{ fontFamily: MONO, fontSize: 10, fill: C.muted }} axisLine={false} tickLine={false} width={34} />
+            <Tooltip content={<SymbolMiniTooltip />} cursor={{ stroke: C.faint, strokeWidth: 1 }} />
+            <ReferenceLine y={0} stroke={C.line} />
+            <Line type="monotone" dataKey="cum" stroke={color} strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
 }
 function SymbolPerformanceChart({ trades }) {
-  const C = useTheme();
   const data = useMemo(() => computeSymbolStats(trades), [trades]);
   return (
-    <div style={{ width: "100%", height: 260 }}>
-      <ResponsiveContainer>
-        <LineChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: -12 }}>
-          <CartesianGrid stroke={C.lineSoft} strokeDasharray="3 3" vertical={false} />
-          <XAxis
-            dataKey="symbol"
-            tick={{ fontFamily: SANS, fontSize: 12.5, fontWeight: 700, fill: C.ink }}
-            axisLine={{ stroke: C.line }} tickLine={false}
-          />
-          <YAxis tick={{ fontFamily: MONO, fontSize: 11, fill: C.muted }} axisLine={false} tickLine={false} />
-          <Tooltip content={<SymbolTooltip />} cursor={{ stroke: C.line, strokeDasharray: "3 3" }} />
-          <ReferenceLine y={0} stroke={C.line} />
-          <Line
-            type="monotone"
-            dataKey="totalR"
-            stroke={C.sage}
-            strokeWidth={2}
-            dot={(props) => <SymbolLineDot {...props} C={C} key={props.payload.symbol} />}
-            activeDot={{ r: 6 }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+    <div style={{ width: "100%" }}>
+      {data.map((item, i) => (
+        <SymbolMiniChart key={item.symbol + i} item={item} trades={trades} />
+      ))}
     </div>
   );
 }
@@ -399,31 +428,9 @@ export default function Dashboard({ trades }) {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 22 }}>
             <StatCard label="Total Trades" value={stats.total} />
-            <StatCard label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} color={C.clayDeep} />
-            <StatCard label="Total R" value={fmtR(stats.totalR)} color={stats.totalR >= 0 ? C.sage : C.rustRed} />
-            <StatCard label="Expectancy" value={stats.expectancy.toFixed(2)} color={C.clayDeep} />
-            <StatCard label="Avg Win" value={`+${stats.avgWin.toFixed(2)}`} color={C.sage} />
-            <StatCard label="Avg Loss" value={stats.avgLoss.toFixed(2)} color={C.rustRed} />
-          </div>
-
-          <div style={{ marginBottom: 22 }}>
-            <div style={{ padding: "0 4px", marginBottom: 16 }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Equity Curve</div>
-              <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Cumulative R, trade by trade</div>
-            </div>
-            <div onPointerDown={() => activateChart("equity")}>
-              <EquityCurve key={chartKey("equity")} trades={filteredTrades} />
-            </div>
-          </div>
-
-          <div style={{ marginBottom: 22 }}>
-            <div style={{ padding: "0 4px", marginBottom: 16 }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>R per Trade</div>
-              <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Green = win, red = loss</div>
-            </div>
-            <div onPointerDown={() => activateChart("rbar")}>
-              <TradeRBarChart key={chartKey("rbar")} trades={filteredTrades} />
-            </div>
+            <StatCard label="Adherence" value={`${Math.round(stats.disciplineScore)}%`} color={C.clayDeep} />
+            <StatCard label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} color={C.sage} />
+            <StatCard label="Risk Consistency" value={riskConsistencyLabel(stats.riskConsistency)} />
           </div>
 
           <div style={{ marginBottom: 22 }}>
