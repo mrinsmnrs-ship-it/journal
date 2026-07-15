@@ -97,22 +97,24 @@ export default function TagSelect({ value, onChange, options, onAddOption, onDel
             style={{
               width: "min(88vw, 320px)", maxWidth: 320, maxHeight: "min(80vh, 440px)",
               display: "flex", flexDirection: "column", color: C.ink,
-              background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: 14,
+              background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0,
               boxShadow: C.shadowModal,
             }}>
-            <input
-              type="text"
-              autoFocus
-              placeholder={placeholder}
-              value={query}
-              onChange={(e) => setQuery(norm(e.target.value))}
-              onKeyDown={handleKeyDown}
-              style={{
-                ...inputStyle, height: 40, padding: "0 14px", marginBottom: 10, flexShrink: 0,
-                textTransform: uppercase ? "uppercase" : "none",
-              }}
-            />
-            <div style={{ overflowY: "auto", flex: 1 }}>
+            <div style={{ padding: "14px 14px 12px 14px", flexShrink: 0, borderBottom: `1px solid ${C.line}` }}>
+              <input
+                type="text"
+                autoFocus
+                placeholder={placeholder}
+                value={query}
+                onChange={(e) => setQuery(norm(e.target.value))}
+                onKeyDown={handleKeyDown}
+                style={{
+                  ...inputStyle, height: 40, padding: "0 14px",
+                  textTransform: uppercase ? "uppercase" : "none",
+                }}
+              />
+            </div>
+            <div style={{ padding: "12px 14px 14px 14px", overflowY: "auto", flex: 1, minHeight: 0 }}>
               {filtered.length > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   {filtered.map((opt) => (
