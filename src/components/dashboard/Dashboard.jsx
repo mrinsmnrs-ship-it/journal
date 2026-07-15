@@ -252,7 +252,7 @@ function SymbolPerformanceBars({ trades }) {
               </span>
             </div>
             <div style={{ fontFamily: MONO, fontSize: 11, color: C.muted, marginTop: 5, marginLeft: 80 }}>
-              <span style={{ color: item.totalR >= 0 ? C.sage : C.rustRed, fontWeight: 700 }}>{fmtR(item.totalR)}</span>
+              <span style={{ color: item.totalR > 0 ? C.ink : C.faint, fontWeight: 700 }}>{fmtR(item.totalR)}</span>
               {" "}&middot; {item.count} trade{item.count === 1 ? "" : "s"}
             </div>
           </div>
@@ -345,14 +345,6 @@ export default function Dashboard({ trades }) {
   if (trades.length === 0) {
     return <div style={{ marginTop: 30, color: C.muted, fontSize: 16 }}>Log a trade to see your performance dashboard.</div>;
   }
-
-  // The radar chart should not animate on first page load, only when its
-  // data changes afterwards (e.g. switching time range). We flip this ref
-  // to true right after mount, without triggering an extra re-render.
-  const hasMountedRef = useRef(false);
-  useEffect(() => {
-    hasMountedRef.current = true;
-  }, []);
 
   return (
     <div style={{ width: "100%", maxWidth: "100%" }}>
