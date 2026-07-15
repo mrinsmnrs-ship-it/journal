@@ -2,7 +2,7 @@
 // Performance dashboard: stat cards, equity curve, R-per-trade bar chart,
 // symbol performance, trader scorecard (radar), and trade calendar heatmap.
 // Shared between mobile and desktop layouts (styled responsively via CSS).
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, Cell,
@@ -17,7 +17,6 @@ import {
   computeEquityCurve, computeDailyR, computeSymbolStats, computeStats,
 } from "../../utils/stats.js";
 import Chip from "../common/Chip.jsx";
-import SectionLabel from "../common/SectionLabel.jsx";
 import DateField from "../DateField.jsx";
 import Counter from "../../Counter.jsx";
 
@@ -427,6 +426,14 @@ export default function Dashboard({ trades }) {
   };
   const chartKey = (id) => (activeChart === id ? `${id}-active` : `${id}-idle-${chartGen}`);
 
+  // The radar chart should not animate on first page load, only when its
+  // data changes afterwards (e.g. switching time range). We flip this ref
+  // to true right after mount, without triggering an extra re-render.
+  const hasMountedRef = useRef(false);
+  useEffect(() => {
+    hasMountedRef.current = true;
+  }, []);
+
   return (
     <div style={{ width: "100%", maxWidth: "100%" }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginBottom: 9 }}>
@@ -455,8 +462,11 @@ export default function Dashboard({ trades }) {
         <div style={{ color: C.muted, fontSize: 16, marginBottom: 28 }}>No trades logged in this period.</div>
       ) : (
         <>
-          <div style={{ marginTop: period === "custom" ? 0 : 14 }}>
-            <SectionLabel text={`Summary \u00b7 ${filteredTrades.length} trade${filteredTrades.length === 1 ? "" : "s"}`} />
+          <div style={{ marginTop: period === "custom" ? 0 : 14, marginBottom: 16, padding: "0 4px" }}>
+            <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Summary</div>
+            <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>
+              {filteredTrades.length} trade{filteredTrades.length === 1 ? "" : "s"} in this period
+            </div>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 22 }}>
             <StatCard label="Total Trades" value={stats.total} />
@@ -486,7 +496,7 @@ export default function Dashboard({ trades }) {
                   <PolarGrid stroke={C.line} />
                   <PolarAngleAxis dataKey="metric" tick={<ScorecardTick />} />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
-                  <Radar dataKey="value" stroke={C.btnAccent} fill={C.btnAccent} fillOpacity={0.15} strokeWidth={2} dot={{ r: 4, fill: C.btnAccent, fillOpacity: 1, stroke: "none" }} />
+                  <Radar dataKey="value" stroke={C.btnAccent} fill={C.btnAccent} fillOpacity={0.15} strokeWidth={2} dot={{ r: 4, fill: C.btnAccent, fillOpacity: 1, stroke: "none" }} isAnimationActive={hasMountedRef.current} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
@@ -507,23 +517,6 @@ export default function Dashboard({ trades }) {
             </div>
           )}
 
-          <div style={{ marginTop: 22 }}>
-            <SectionLabel text="By Rules Compliance" />
-            <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 0, padding: "4px 18px", boxShadow: C.shadowCard }}>
-  {["Yes", "Partial", "No"].map((r, i) => {
-    const d = stats.byRules[r];
-    const avg = d.count ? d.total / d.count : 0;
-    return (
-      <div key={r} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 0", borderTop: i > 0 ? `1px solid ${C.lineSoft}` : "none" }}>
-        <div style={{ fontWeight: 700, fontSize: 13, color: C.ink, minWidth: 64 }}>{r}</div>
-        <div style={{ fontFamily: MONO, fontSize: 11.5, color: C.muted, textAlign: "right" }}>
-          {d.count} trade &middot; total {fmtR(d.total)} &middot; avg {avg.toFixed(2)}R
-        </div>
-      </div>
-    );
-  })}
-            </div>
-          </div>
         </>
       )}
     </div>
