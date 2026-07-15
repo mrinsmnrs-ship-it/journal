@@ -14,6 +14,7 @@ export function getMobileStyles(C) {
       .app-root {
         display: flex; flex-direction: column;
         height: var(--app-vh, 100dvh); overflow: hidden;
+        --topbar-h: 62px;
       }
       .app-shell {
         flex: 1; min-height: 0; height: auto;
