@@ -5,7 +5,6 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { auth } from "./firebase";
-import BrandMark from "./BrandMark.jsx";
 import "./PillToggle.css";
 
 // Font stack unified with App.jsx: GitHub's system font stack (Primer).
@@ -118,8 +117,7 @@ export default function AuthScreen() {
         border: `1px solid ${C.line}`, borderRadius: 0, padding: 32,
         boxShadow: C.shadowRaised,
       }}>
-        <div style={{ marginBottom: 4, display: "flex", alignItems: "center", gap: 6, fontSize: "clamp(16px, 5.4vw, 22px)" }}>
-          <BrandMark style={{ height: "1.15em", width: "auto", color: C.ink, flexShrink: 0 }} />
+        <div style={{ marginBottom: 4, display: "flex", alignItems: "center", gap: 6, fontSize: "clamp(18px, 6.2vw, 25px)" }}>
           <span style={{ lineHeight: 1 }}>
             <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Aftermath</span>
             <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
