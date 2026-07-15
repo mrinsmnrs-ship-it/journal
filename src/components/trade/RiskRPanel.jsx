@@ -75,7 +75,7 @@ export default function RiskRPanel({ form, updateForm }) {
           );
         })}
       </div>
-      <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
+      <div style={{ display: "flex", gap: 6, justifyContent: "flex-start" }}>
         {[
           { label: "-0.1", delta: -0.1 },
           { label: "-", delta: -1 },
