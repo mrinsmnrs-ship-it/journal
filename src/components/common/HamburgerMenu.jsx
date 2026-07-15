@@ -9,10 +9,13 @@
 import { useEffect, useRef, useState } from "react";
 import { LogOut } from "lucide-react";
 import { useTheme, SANS, THEME_ORDER, THEME_META } from "../../theme/tokens.js";
+import LightbulbIcon from "./LightbulbIcon.jsx";
+import HelpModal from "./HelpModal.jsx";
 
 export default function HamburgerMenu({ themeMode, onToggleTheme, onLogout }) {
   const C = useTheme();
   const [open, setOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const rootRef = useRef(null);
 
   // Klik di luar atau tekan Escape -> tutup panel.
@@ -66,6 +69,16 @@ export default function HamburgerMenu({ themeMode, onToggleTheme, onLogout }) {
         <button
           type="button"
           className="hamburger-panel-item"
+          onClick={() => { setOpen(false); setHelpOpen(true); }}
+          style={{ color: C.inkSoft, fontFamily: SANS }}
+        >
+          <LightbulbIcon size={16} style={{ color: C.ink }} />
+          <span>Petunjuk</span>
+        </button>
+        <div className="hamburger-panel-divider" style={{ background: C.line }} />
+        <button
+          type="button"
+          className="hamburger-panel-item"
           onClick={() => { setOpen(false); onLogout(); }}
           style={{ color: C.inkSoft, fontFamily: SANS }}
         >
@@ -73,6 +86,8 @@ export default function HamburgerMenu({ themeMode, onToggleTheme, onLogout }) {
           <span>Log out</span>
         </button>
       </div>
+
+      <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   );
 }
