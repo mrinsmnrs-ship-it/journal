@@ -45,13 +45,17 @@ function BarRow({ label, percent, display, isFirst, sub }) {
   const hasBar = percent !== undefined && percent !== null;
   return (
     <div style={{ padding: "12px 4px", borderTop: isFirst ? "none" : `1px solid ${C.lineSoft}` }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: hasBar ? "flex-start" : "space-between" }}>
-        <span style={{ fontFamily: SANS, fontWeight: 700, fontSize: 13, color: C.ink, minWidth: hasBar ? 128 : "auto", flexShrink: 0 }}>
-          {label}
-        </span>
+      <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 13, color: C.ink, textAlign: "left" }}>
+        {label}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
         {hasBar && (
           <div style={{ flexGrow: 1, height: 6, background: C.lineSoft, overflow: "hidden" }}>
-            <div style={{ width: `${clamp(percent, 0, 100)}%`, height: "100%", background: C.ink }} />
+            {/* Same ink color the Emotion slider uses, but at its "idle" (un-pressed)
+                opacity of 0.7 rather than full strength — these bars are static and
+                never get pressed, so they should always read as the calmer, un-pressed
+                state, not the bold/vivid pressed one. */}
+            <div style={{ width: `${clamp(percent, 0, 100)}%`, height: "100%", background: C.ink, opacity: 0.7 }} />
           </div>
         )}
         <span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 12, color: C.ink, minWidth: 44, textAlign: "right", flexShrink: 0 }}>
@@ -59,7 +63,7 @@ function BarRow({ label, percent, display, isFirst, sub }) {
         </span>
       </div>
       {sub && (
-        <div style={{ fontFamily: MONO, fontSize: 11, color: C.muted, marginTop: 5, marginLeft: hasBar ? 138 : 0 }}>
+        <div style={{ fontFamily: MONO, fontSize: 11, color: C.muted, marginTop: 5 }}>
           {sub}
         </div>
       )}
