@@ -36,49 +36,52 @@ export function getBaseStyles(C, SANS) {
     }
 
     /* Hamburger menu (topbar): tombol 2 garis tanpa border yang berubah
-       jadi silang saat aktif, membuka panel sisi (bukan popup) yang
-       menempel di tepi kanan layar, mulai persis di bawah topbar sampai
-       ke bawah layar, sempit dan cuma berisi ikon. */
-    .hamburger-root { position: relative; display: inline-flex; }
+       jadi silang saat aktif -- sejajar dengan item lain di topbar.
+       Membuka popup kecil, icon-only (tanpa teks), menempel tepat di
+       bawah tombol, menyatu warna dengan topbar, sudut tidak dibulatkan,
+       dan pakai shadow yang sama dengan popover lain di app supaya
+       tidak terlalu tebal. */
+    .hamburger-root { position: relative; display: inline-flex; align-items: center; }
     .hamburger-btn {
       position: relative;
-      width: 34px; height: 34px;
+      width: 30px; height: 30px;
       display: flex; align-items: center; justify-content: center;
       background: transparent; border: none; padding: 0; cursor: pointer;
     }
     .hamburger-line {
-      position: absolute; left: 8px;
-      width: 18px; height: 2px; border-radius: 1px;
+      position: absolute; left: 7px;
+      width: 16px; height: 2px; border-radius: 1px;
       transition: transform .28s cubic-bezier(.4,0,.2,1), top .28s cubic-bezier(.4,0,.2,1);
     }
-    .hamburger-line:first-child { top: 13px; }
-    .hamburger-line:last-child { top: 20px; }
+    .hamburger-line:first-child { top: 12px; }
+    .hamburger-line:last-child { top: 18px; }
     .hamburger-btn.open .hamburger-line:first-child {
-      top: 16px; transform: rotate(45deg);
+      top: 15px; transform: rotate(45deg);
     }
     .hamburger-btn.open .hamburger-line:last-child {
-      top: 16px; transform: rotate(-45deg);
+      top: 15px; transform: rotate(-45deg);
     }
 
     .hamburger-panel {
-      position: fixed; top: var(--topbar-h, 64px); right: 0; bottom: 0;
-      width: 56px; display: flex; flex-direction: column; align-items: center;
-      padding: 10px 0; border-radius: 0; z-index: 50;
+      position: absolute; top: calc(100% + 8px); right: 0;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 4px; border-radius: 0; z-index: 50;
       opacity: 0; visibility: hidden;
-      transform: translateX(100%);
-      transition: transform .3s cubic-bezier(.4,0,.2,1), opacity .2s ease, visibility .3s;
+      transform: translateY(-6px) scale(0.98);
+      transform-origin: top right;
+      transition: transform .24s cubic-bezier(.4,0,.2,1), opacity .2s ease, visibility .24s;
     }
     .hamburger-panel.open {
       opacity: 1; visibility: visible;
-      transform: translateX(0);
+      transform: translateY(0) scale(1);
     }
     .hamburger-panel-item {
-      display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;
       background: transparent; border: none; text-align: left; border-radius: 0;
       padding: 0; cursor: pointer; font-size: 14px; font-weight: 600; flex-shrink: 0;
     }
     .hamburger-panel-item:hover { background: rgba(128,136,144,0.12); }
-    .hamburger-panel-divider { width: 24px; height: 1px; margin: 4px 0; flex-shrink: 0; }
+    .hamburger-panel-divider { width: 20px; height: 1px; margin: 3px 0; flex-shrink: 0; }
 
     /* Orientation guard: normalnya tersembunyi. Cuma dimunculkan lewat
        media query orientation:landscape di bawah, dan dibatasi max-width
