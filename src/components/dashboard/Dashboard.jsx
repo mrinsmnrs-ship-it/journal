@@ -37,6 +37,11 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
     </text>
   );
 }
+function riskConsistencyLabel(score) {
+  if (score >= 75) return "Stabil";
+  if (score >= 50) return "Sedang";
+  return "Tidak Stabil";
+}
 function StatCard({ label, value, color }) {
   const C = useTheme();
   return (
@@ -392,21 +397,9 @@ export default function Dashboard({ trades }) {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 22 }}>
             <StatCard label="Total Trades" value={stats.total} />
-            <StatCard label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} color={C.clayDeep} />
-            <StatCard label="Total R" value={fmtR(stats.totalR)} color={stats.totalR >= 0 ? C.sage : C.rustRed} />
-            <StatCard label="Expectancy" value={stats.expectancy.toFixed(2)} color={C.clayDeep} />
-            <StatCard label="Avg Win" value={`+${stats.avgWin.toFixed(2)}`} color={C.sage} />
-            <StatCard label="Avg Loss" value={stats.avgLoss.toFixed(2)} color={C.rustRed} />
-          </div>
-
-          <div style={{ marginBottom: 22 }}>
-            <div style={{ padding: "0 4px", marginBottom: 16 }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Equity Curve</div>
-              <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Cumulative R, trade by trade</div>
-            </div>
-            <div onPointerDown={() => activateChart("equity")}>
-              <EquityCurve key={chartKey("equity")} trades={filteredTrades} />
-            </div>
+            <StatCard label="Adherence" value={`${Math.round(stats.disciplineScore)}%`} color={C.clayDeep} />
+            <StatCard label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} color={C.sage} />
+            <StatCard label="Risk Consistency" value={riskConsistencyLabel(stats.riskConsistency)} />
           </div>
 
           <div style={{ marginBottom: 22 }}>
