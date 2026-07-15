@@ -10,6 +10,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
+import { RotateCcw, Trash2 } from "lucide-react";
 import { useTheme, SANS, LABEL_FONT } from "../../theme/tokens.js";
 import Counter from "../../Counter.jsx";
 
@@ -53,6 +54,21 @@ export default function RiskRPanel({ form, updateForm }) {
 
   const addPartialRow = () => {
     setPartialRows((rows) => (rows.length >= 15 ? rows : [...rows, { a: "0", b: "0" }]));
+  };
+
+  const resetPartial = () => {
+    if (partialTarget === "main") {
+      setPartialMain("0");
+      return;
+    }
+    const [idxStr, col] = partialTarget.split(":");
+    const idx = Number(idxStr);
+    setPartialRows((rows) => rows.map((row, i) => (i === idx ? { ...row, [col]: "0" } : row)));
+  };
+
+  const deletePartialRow = (idx) => {
+    setPartialRows((rows) => rows.filter((_, i) => i !== idx));
+    setPartialTarget("main");
   };
 
   return (
@@ -180,28 +196,43 @@ export default function RiskRPanel({ form, updateForm }) {
                 >
                   {partialMain}
                 </button>
-                <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
-                  {[
-                    { label: "-0.1", delta: -0.1 },
-                    { label: "-", delta: -1 },
-                    { label: "+", delta: 1 },
-                    { label: "+0.1", delta: 0.1 },
-                  ].map(({ label, delta }) => (
-                    <button
-                      key={label}
-                      type="button"
-                      onClick={() => adjustPartial(delta)}
-                      style={{
-                        width: 30, height: 26, padding: 0, borderRadius: 0,
-                        border: `1px solid ${C.line}`, background: C.paperSoft,
-                        color: C.inkSoft, fontWeight: 600, fontSize: 10, cursor: "pointer",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontFamily: SANS, lineHeight: 1,
-                      }}
-                    >
-                      {label}
-                    </button>
-                  ))}
+                <div style={{ display: "flex", gap: 6, marginBottom: 16, alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {[
+                      { label: "-0.1", delta: -0.1 },
+                      { label: "-", delta: -1 },
+                      { label: "+", delta: 1 },
+                      { label: "+0.1", delta: 0.1 },
+                    ].map(({ label, delta }) => (
+                      <button
+                        key={label}
+                        type="button"
+                        onClick={() => adjustPartial(delta)}
+                        style={{
+                          width: 30, height: 26, padding: 0, borderRadius: 0,
+                          border: `1px solid ${C.line}`, background: C.paperSoft,
+                          color: C.inkSoft, fontWeight: 600, fontSize: 10, cursor: "pointer",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontFamily: SANS, lineHeight: 1,
+                        }}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={resetPartial}
+                    aria-label="Reset"
+                    style={{
+                      width: 26, height: 26, padding: 0, borderRadius: 0,
+                      border: `1px solid ${C.line}`, background: C.paperSoft,
+                      color: C.inkSoft, cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}
+                  >
+                    <RotateCcw size={13} />
+                  </button>
                 </div>
                 {partialRows.map((row, idx) => (
                   <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
@@ -228,6 +259,19 @@ export default function RiskRPanel({ form, updateForm }) {
                         </button>
                       );
                     })}
+                    <button
+                      type="button"
+                      onClick={() => deletePartialRow(idx)}
+                      aria-label="Delete row"
+                      style={{
+                        width: 28, height: 36, padding: 0, flexShrink: 0, borderRadius: 0,
+                        border: `1px solid ${C.line}`, background: "transparent",
+                        color: C.inkSoft, cursor: "pointer",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 ))}
                 {partialRows.length < 15 && (
