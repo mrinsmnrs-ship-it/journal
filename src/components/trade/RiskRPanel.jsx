@@ -57,13 +57,9 @@ export default function RiskRPanel({ form, updateForm }) {
   };
 
   const resetPartial = () => {
-    if (partialTarget === "main") {
-      setPartialMain("0");
-      return;
-    }
-    const [idxStr, col] = partialTarget.split(":");
-    const idx = Number(idxStr);
-    setPartialRows((rows) => rows.map((row, i) => (i === idx ? { ...row, [col]: "0" } : row)));
+    setPartialMain("0");
+    setPartialRows([{ a: "0", b: "0" }]);
+    setPartialTarget("main");
   };
 
   const deletePartialRow = (idx) => {
@@ -183,7 +179,7 @@ export default function RiskRPanel({ form, updateForm }) {
                   boxShadow: C.shadowModal,
                 }}
               >
-                <div style={{ padding: "16px 16px 0 16px", flexShrink: 0 }}>
+                <div style={{ padding: "16px 16px 14px 16px", flexShrink: 0, borderBottom: `1px solid ${C.line}` }}>
                   <div style={{
                     fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
                     color: C.muted, marginBottom: 9, textTransform: "capitalize",
@@ -253,7 +249,7 @@ export default function RiskRPanel({ form, updateForm }) {
                     <div style={{ width: 28, flexShrink: 0 }} />
                   </div>
                 </div>
-                <div style={{ padding: "0 16px 16px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
+                <div style={{ padding: "12px 16px 16px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
                   {partialRows.map((row, idx) => (
                     <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                       <div style={{ width: 16, flexShrink: 0, fontFamily: SANS, fontSize: 12, fontWeight: 600, color: C.muted }}>
