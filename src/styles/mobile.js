@@ -43,6 +43,10 @@ export function getMobileStyles(C) {
         flex: 1; min-height: 0; height: auto; overflow-y: auto;
         padding: 16px; max-width: 100%; margin-left: 0; margin-right: 0;
       }
+      .period-filter-sticky {
+        margin-top: -16px;
+        padding-top: 30px;
+      }
       .bottom-nav {
         display: flex; position: relative; flex-shrink: 0;
         background: ${C.bg}; border-top: 1px solid ${C.line};
