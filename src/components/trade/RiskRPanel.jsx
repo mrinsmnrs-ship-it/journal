@@ -24,25 +24,35 @@ const R_FIELDS = [
   { key: "rActual", label: "R Actual" },
 ];
 
+// Risk & R Planned tidak boleh negatif (0-100). R Actual boleh negatif
+// (rugi) tapi dibatasi -100 sampai 100 supaya tidak salah pencet kebablasan.
+const FIELD_LIMITS = {
+  riskPct: { min: 0, max: 100 },
+  rPlanned: { min: 0, max: 100 },
+  rActual: { min: -100, max: 100 },
+};
+
 export default function RiskRPanel({ form, updateForm }) {
   const C = useTheme();
   const [activeField, setActiveField] = useState("rActual");
   const [partialOpen, setPartialOpen] = useState(false);
-  const [partialMain, setPartialMain] = useState("0");
   const [partialRows, setPartialRows] = useState([{ a: "0", b: "0" }]);
-  const [partialTarget, setPartialTarget] = useState("main");
+  const [partialTarget, setPartialTarget] = useState("0:a");
+
+  // Total R = jumlah kontribusi tiap baris (Partial R x Qty%), bukan
+  // input manual lagi -- otomatis mengikuti isi baris di bawahnya.
+  const partialTotal = Math.round(
+    partialRows.reduce((sum, row) => sum + (Number(row.a) || 0) * (Number(row.b) || 0) / 100, 0) * 100
+  ) / 100;
 
   const adjust = (delta) => {
     const current = Number(form[activeField]) || 0;
-    const next = Math.round((current + delta) * 100) / 100;
+    const { min, max } = FIELD_LIMITS[activeField];
+    const next = Math.min(max, Math.max(min, Math.round((current + delta) * 100) / 100));
     updateForm(activeField, String(next));
   };
 
   const adjustPartial = (delta) => {
-    if (partialTarget === "main") {
-      setPartialMain((v) => String(Math.round(((Number(v) || 0) + delta) * 100) / 100));
-      return;
-    }
     const [idxStr, col] = partialTarget.split(":");
     const idx = Number(idxStr);
     setPartialRows((rows) => rows.map((row, i) => {
@@ -57,14 +67,16 @@ export default function RiskRPanel({ form, updateForm }) {
   };
 
   const resetPartial = () => {
-    setPartialMain("0");
     setPartialRows([{ a: "0", b: "0" }]);
-    setPartialTarget("main");
+    setPartialTarget("0:a");
   };
 
   const deletePartialRow = (idx) => {
-    setPartialRows((rows) => rows.filter((_, i) => i !== idx));
-    setPartialTarget("main");
+    setPartialRows((rows) => {
+      const next = rows.filter((_, i) => i !== idx);
+      return next.length ? next : [{ a: "0", b: "0" }];
+    });
+    setPartialTarget("0:a");
   };
 
   return (
@@ -184,20 +196,18 @@ export default function RiskRPanel({ form, updateForm }) {
                     fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
                     color: C.muted, marginBottom: 9, textTransform: "capitalize",
                   }}>Total R</div>
-                  <button
-                    type="button"
-                    onClick={() => setPartialTarget("main")}
+                  <div
                     style={{
-                      width: "100%", boxSizing: "border-box", background: C.inputBg,
-                      border: `1px solid ${partialTarget === "main" ? C.btnAccentBorder : C.inputBorder}`,
-                      borderRadius: 0, height: 40, padding: "0 12px", cursor: "pointer",
+                      width: "100%", boxSizing: "border-box", background: C.paperSoft,
+                      border: `1px solid ${C.line}`,
+                      borderRadius: 0, height: 40, padding: "0 12px",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       color: C.inputText, fontFamily: SANS, fontSize: 14, fontWeight: 600,
                       marginBottom: 12,
                     }}
                   >
-                    {partialMain}
-                  </button>
+                    {partialTotal}
+                  </div>
                   <div style={{ display: "flex", gap: 6, marginBottom: 16, alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", gap: 6 }}>
                       {[
@@ -281,7 +291,7 @@ export default function RiskRPanel({ form, updateForm }) {
                         aria-label="Delete row"
                         style={{
                           width: 28, height: 36, padding: 0, flexShrink: 0, borderRadius: 0,
-                          border: `1px solid ${C.line}`, background: "transparent",
+                          border: "none", background: "transparent",
                           color: C.inkSoft, cursor: "pointer",
                           display: "flex", alignItems: "center", justifyContent: "center",
                         }}
