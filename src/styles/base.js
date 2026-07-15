@@ -18,6 +18,8 @@ export function getBaseStyles(C, SANS) {
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: ${C.line}; border-radius: 0; }
     .recharts-wrapper, .recharts-wrapper svg, .recharts-surface { overflow: visible !important; }
+    .recharts-surface { shape-rendering: geometricPrecision; }
+    .recharts-surface text, .recharts-text { text-rendering: optimizeLegibility; }
 
     .bottom-nav { display: none; }
     .mobile-topbar { display: none; }
