@@ -33,6 +33,16 @@ export function getDesktopStyles(C, SANS) {
       padding: 32px 0 60px;
     }
 
+    /* Pulls the sticky period-filter header up over .main-area's own
+       32px top padding, then re-adds that as padding-top on itself (plus
+       a little extra for breathing room) — so its background box truly
+       starts at the very top of the scrollport with nothing able to
+       peek through above it once it's stuck. */
+    .period-filter-sticky {
+      margin-top: -32px;
+      padding-top: 46px;
+    }
+
     @media (min-width: 821px) {
       .main-area-inner {
         max-width: 880px; margin: 0 auto;
