@@ -33,18 +33,27 @@ export function getDesktopStyles(C, SANS) {
       padding: 32px 0 60px;
     }
 
-    /* Pulls the sticky period-filter header up over .main-area's own
-       32px top padding, then re-adds that as padding-top on itself (plus
-       a little extra for breathing room) — so its background box truly
-       starts at the very top of the scrollport with nothing able to
-       peek through above it once it's stuck. */
-    .period-filter-sticky {
-      margin-top: -32px;
-      padding-top: 46px;
+    /* Period filter header (Dashboard/Journal): a real flex sibling
+       above .main-area, not part of the scrolling area — same idea as
+       .perf-marquee — so it can never be scrolled over or peeked
+       behind, no sticky-positioning edge cases involved. Background
+       and border color come from inline styles set by the component
+       itself (theme-driven), same pattern as .perf-marquee. */
+    .period-filter-header {
+      flex-shrink: 0;
+      padding: 14px 16px 12px;
     }
 
     @media (min-width: 821px) {
       .main-area-inner {
+        max-width: 880px; margin: 0 auto;
+        padding: 0 24px; box-sizing: border-box;
+      }
+
+      .period-filter-header {
+        padding: 16px 0 14px;
+      }
+      .period-filter-header-inner {
         max-width: 880px; margin: 0 auto;
         padding: 0 24px; box-sizing: border-box;
       }
