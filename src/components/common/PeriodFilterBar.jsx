@@ -14,9 +14,9 @@ export default function PeriodFilterBar({ period, setPeriod, customRange, setCus
   return (
     <div
       style={{
-        position: "sticky", top: 0, zIndex: 5,
+        position: "sticky", top: 0, zIndex: 20,
         background: C.bg,
-        paddingTop: 2, paddingBottom: 14,
+        paddingTop: 16, paddingBottom: 12,
         marginBottom: 14,
         borderBottom: `1px solid ${C.line}`,
       }}
