@@ -24,6 +24,7 @@ import DesktopTopbar from "./components/layout/DesktopTopbar.jsx";
 import MobileTopbar from "./components/layout/MobileTopbar.jsx";
 import PerfMarquee from "./components/layout/PerfMarquee.jsx";
 import MobileDockNav from "./components/nav/MobileDockNav.jsx";
+import PeriodFilterBar from "./components/common/PeriodFilterBar.jsx";
 
 // ---- Pages ----
 import LogTradeForm from "./components/trade/LogTradeForm.jsx";
@@ -68,6 +69,10 @@ function RJournal({ user }) {
     images: [],
   });
   const [imageUploading, setImageUploading] = useState(false);
+  const [dashboardPeriod, setDashboardPeriod] = useState("all");
+  const [dashboardCustomRange, setDashboardCustomRange] = useState({ from: "", to: "" });
+  const [journalPeriod, setJournalPeriod] = useState("all");
+  const [journalCustomRange, setJournalCustomRange] = useState({ from: "", to: "" });
 
   useEffect(() => {
     (async () => {
@@ -227,6 +232,15 @@ function RJournal({ user }) {
 
           <PerfMarquee stats={stats} />
 
+          {(tab === "journal" || tab === "dashboard") && (
+            <PeriodFilterBar
+              period={tab === "journal" ? journalPeriod : dashboardPeriod}
+              setPeriod={tab === "journal" ? setJournalPeriod : setDashboardPeriod}
+              customRange={tab === "journal" ? journalCustomRange : dashboardCustomRange}
+              setCustomRange={tab === "journal" ? setJournalCustomRange : setDashboardCustomRange}
+            />
+          )}
+
           {/* Main content */}
           <div className="main-area">
             <div className="main-area-inner">
@@ -235,9 +249,9 @@ function RJournal({ user }) {
               ) : tab === "log" ? (
                 <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
               ) : tab === "journal" ? (
-                <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} />
+                <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} period={journalPeriod} customRange={journalCustomRange} />
               ) : tab === "dashboard" ? (
-                <Dashboard trades={trades} />
+                <Dashboard trades={trades} period={dashboardPeriod} customRange={dashboardCustomRange} />
               ) : (
                 <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
               )}
