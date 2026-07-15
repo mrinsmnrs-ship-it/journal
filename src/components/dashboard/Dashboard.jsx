@@ -225,13 +225,24 @@ function CalendarHeatmap({ trades, year }) {
   );
 }
 
-// Generates a distinct, high-contrast color for any number of symbols.
-// Uses the golden-angle hue rotation so colors stay well-spread no matter
-// how many symbols exist (no fixed list to run out of).
+// 5 base hues: orange, cyan, yellow, purple, violet — no red or green,
+// so a line's color is never confused with win/loss signaling.
+const BASE_HUES = [30, 190, 48, 265, 285]; // orange, cyan, yellow, purple, violet
+
+// Shade levels are spread far apart (not incremented in small steps) so each
+// gradation of the same hue still reads as clearly distinct at a glance.
+const SHADE_LEVELS = [
+  { l: 58, s: 78 }, // vivid mid-tone (used for the first 5 symbols)
+  { l: 32, s: 65 }, // deep/dark
+  { l: 78, s: 55 }, // light/pastel
+  { l: 22, s: 70 }, // very dark
+  { l: 88, s: 42 }, // very light
+];
 function symbolColor(index) {
-  const GOLDEN_ANGLE = 137.508;
-  const hue = (index * GOLDEN_ANGLE) % 360;
-  return `hsl(${hue.toFixed(0)}, 68%, 58%)`;
+  const hue = BASE_HUES[index % BASE_HUES.length];
+  const cycle = Math.floor(index / BASE_HUES.length);
+  const level = SHADE_LEVELS[cycle % SHADE_LEVELS.length];
+  return `hsl(${hue}, ${level.s}%, ${level.l}%)`;
 }
 function SymbolPerformanceChart({ trades }) {
   const C = useTheme();
