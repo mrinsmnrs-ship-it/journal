@@ -168,9 +168,16 @@ function RJournal({ user }) {
     setForm((f) => ({ ...f, images: (f.images || []).filter((_, i) => i !== index) }));
   }
   async function handleDelete(id) {
+    const prev = trades;
     const next = trades.filter((t) => t.id !== id);
     setTrades(next);
-    await saveUserData(user.uid, { trades: next });
+    try {
+      await saveUserData(user.uid, { trades: next });
+    } catch (err) {
+      console.error("Gagal menghapus trade:", err);
+      setTrades(prev); // rollback biar UI tidak beda dengan data tersimpan
+      alert("Gagal menghapus trade. Coba lagi (lihat console untuk detail error).");
+    }
   }
   async function handleLogout() {
     await signOut(auth);
