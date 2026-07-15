@@ -25,6 +25,8 @@ import MobileTopbar from "./components/layout/MobileTopbar.jsx";
 import PerfMarquee from "./components/layout/PerfMarquee.jsx";
 import MobileDockNav from "./components/nav/MobileDockNav.jsx";
 import PeriodFilterBar from "./components/common/PeriodFilterBar.jsx";
+import Footer from "./components/layout/Footer.jsx";
+import OrientationGuard from "./components/layout/OrientationGuard.jsx";
 
 // ---- Pages ----
 import LogTradeForm from "./components/trade/LogTradeForm.jsx";
@@ -262,6 +264,8 @@ function RJournal({ user }) {
               ) : (
                 <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
               )}
+
+              <Footer />
             </div>
           </div>
         </div>
@@ -280,7 +284,11 @@ function RJournal({ user }) {
         <div className="circular-text-dock">
           <CircularText text="STAY DISCIPLINED * STAY CONSISTENT *" onHover="speedUp" spinDuration={20} />
         </div>
+
+        {/* Muncul otomatis lewat CSS saat HP dimiringkan ke landscape,
+            lihat .orientation-lock-overlay di src/styles/base.js */}
+        <OrientationGuard />
       </div>
     </ThemeContext.Provider>
   );
-         }
+}
