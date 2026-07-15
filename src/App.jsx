@@ -180,83 +180,6 @@ function RJournal({ user }) {
 
   const NAV_DESKTOP = NAV;
 
-  // ---- Swipe kiri/kanan untuk pindah halaman ----
-  // Halaman "mengikuti jari" secara live selama drag (transform dimanipulasi
-  // langsung lewat ref, bukan lewat state React) supaya terasa mulus tanpa
-  // lag re-render, lalu snap ke halaman terdekat dengan transisi CSS begitu
-  // jari dilepas — mirip carousel native. Urutan halaman ikut array NAV.
-  const pageOrder = NAV.map((n) => n.key);
-  const mainAreaRef = useRef(null);
-  const trackRef = useRef(null);
-  const dragRef = useRef({ dragging: false, startX: 0, startY: 0, baseIndex: 0, containerWidth: 0, horizontalLock: null });
-
-  function applyTrackTransform(px, withTransition) {
-    const el = trackRef.current;
-    if (!el) return;
-    el.style.transition = withTransition ? "transform .38s cubic-bezier(.22,.61,.36,1)" : "none";
-    el.style.transform = `translateX(${px}px)`;
-  }
-  function snapToTab(key, withTransition) {
-    const idx = Math.max(0, pageOrder.indexOf(key));
-    const width = mainAreaRef.current?.offsetWidth || 0;
-    applyTrackTransform(-idx * width, withTransition);
-  }
-
-  // Setiap kali tab berubah lewat cara lain (klik tombol nav, dsb), track
-  // ikut geser dengan animasi yang sama supaya terasa konsisten dengan swipe.
-  useEffect(() => { snapToTab(tab, true); }, [tab]);
-  useEffect(() => {
-    function onResize() { snapToTab(tab, false); }
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [tab]);
-
-  function handleContentTouchStart(e) {
-    const t = e.touches[0];
-    dragRef.current = {
-      dragging: true, startX: t.clientX, startY: t.clientY,
-      baseIndex: Math.max(0, pageOrder.indexOf(tab)),
-      containerWidth: mainAreaRef.current?.offsetWidth || 1,
-      horizontalLock: null,
-    };
-  }
-  function handleContentTouchMove(e) {
-    const d = dragRef.current;
-    if (!d.dragging) return;
-    const t = e.touches[0];
-    const dx = t.clientX - d.startX;
-    const dy = t.clientY - d.startY;
-    if (d.horizontalLock === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
-      d.horizontalLock = Math.abs(dx) > Math.abs(dy) * 1.2;
-    }
-    if (!d.horizontalLock) return; // biarkan scroll vertikal berjalan normal
-    // sedikit tahanan (resistance) kalau sudah di halaman paling ujung
-    const atFirst = d.baseIndex === 0 && dx > 0;
-    const atLast = d.baseIndex === pageOrder.length - 1 && dx < 0;
-    const effectiveDx = atFirst || atLast ? dx * 0.35 : dx;
-    applyTrackTransform(-d.baseIndex * d.containerWidth + effectiveDx, false);
-  }
-  function handleContentTouchEnd(e) {
-    const d = dragRef.current;
-    if (!d.dragging) return;
-    d.dragging = false;
-    if (!d.horizontalLock) return; // bukan swipe halaman (mis. cuma scroll)
-    const t = e.changedTouches[0];
-    const dx = t.clientX - d.startX;
-    const threshold = Math.min(90, d.containerWidth * 0.18);
-    let newIndex = d.baseIndex;
-    if (dx < -threshold && d.baseIndex < pageOrder.length - 1) newIndex = d.baseIndex + 1;
-    else if (dx > threshold && d.baseIndex > 0) newIndex = d.baseIndex - 1;
-    applyTrackTransform(-newIndex * d.containerWidth, true);
-    if (newIndex !== d.baseIndex) setTab(pageOrder[newIndex]);
-  }
-  function handleContentTouchCancel() {
-    const d = dragRef.current;
-    if (!d.dragging) return;
-    d.dragging = false;
-    applyTrackTransform(-d.baseIndex * d.containerWidth, true);
-  }
-
   useEffect(() => {
     function updateNavIndicator() {
       const el = navRefs.current[tab];
@@ -318,37 +241,21 @@ function RJournal({ user }) {
             />
           )}
 
-          {/* Main content — track geser (swipe) berisi 3 halaman berdampingan */}
-          <div
-            className="main-area"
-            ref={mainAreaRef}
-            style={{ overflowX: "hidden", touchAction: "pan-y" }}
-            onTouchStart={handleContentTouchStart}
-            onTouchMove={handleContentTouchMove}
-            onTouchEnd={handleContentTouchEnd}
-            onTouchCancel={handleContentTouchCancel}
-          >
-            {!loaded ? (
-              <div className="main-area-inner">
+          {/* Main content */}
+          <div className="main-area" style={{ overflowX: "hidden" }}>
+            <div className="main-area-inner">
+              {!loaded ? (
                 <div style={{ color: C.faint, fontSize: 14 }}>Loading…</div>
-              </div>
-            ) : (
-              <div ref={trackRef} style={{ display: "flex", width: `${pageOrder.length * 100}%` }}>
-                {pageOrder.map((key) => (
-                  <div key={key} style={{ width: `${100 / pageOrder.length}%`, flexShrink: 0 }}>
-                    <div className="main-area-inner">
-                      {key === "log" ? (
-                        <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
-                      ) : key === "journal" ? (
-                        <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} period={journalPeriod} customRange={journalCustomRange} />
-                      ) : (
-                        <Dashboard trades={trades} period={dashboardPeriod} customRange={dashboardCustomRange} />
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+              ) : tab === "log" ? (
+                <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
+              ) : tab === "journal" ? (
+                <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} period={journalPeriod} customRange={journalCustomRange} />
+              ) : tab === "dashboard" ? (
+                <Dashboard trades={trades} period={dashboardPeriod} customRange={dashboardCustomRange} />
+              ) : (
+                <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
+              )}
+            </div>
           </div>
         </div>
 
