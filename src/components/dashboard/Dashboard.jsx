@@ -4,7 +4,6 @@
 // Shared between mobile and desktop layouts (styled responsively via CSS).
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
 } from "recharts";
@@ -20,36 +19,50 @@ import DateField from "../DateField.jsx";
 import Counter from "../../Counter.jsx";
 
 // ---- Dashboard ----
-function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
-  const C = useTheme();
-  const dx = x - cx, dy = y - cy;
-  const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-    const push = 12;
-  // Round to whole pixels: sub-pixel x/y forces the browser to anti-alias
-  // the text across two pixels instead of rendering it crisply on one,
-  // which is what reads as blurry/pixelated at this small font size.
-  const nx = Math.round(x + (dx / dist) * push);
-  const ny = Math.round(y + (dy / dist) * push);
-  const words = String(payload.value).split(" ");
-  return (
-    <text x={nx} y={ny} textAnchor={textAnchor} fontFamily={SANS} fontSize={13} fontWeight={700} fill={C.inkSoft}>
-      {words.map((w, i) => (
-        <tspan key={i} x={nx} dy={i === 0 ? (words.length > 1 ? -6 : 4) : 14}>{w}</tspan>
-      ))}
-    </text>
-  );
-}
 function riskConsistencyLabel(score) {
   if (score >= 75) return "Stabil";
   if (score >= 50) return "Sedang";
   return "Tidak Stabil";
 }
-function StatCard({ label, value, color }) {
+
+// Shared boxed-list style used by Summary, Performance by Symbol, and
+// Trader Scorecard so all three read as one consistent visual language
+// (a bordered panel of stacked rows) instead of three different chart types.
+function BarBox({ children }) {
   const C = useTheme();
   return (
-    <div style={{ background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 0, padding: "13px 15px", boxShadow: C.shadowCard }}>
-      <div style={{ fontFamily: SANS, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.04em", color: C.muted, textTransform: "uppercase", marginBottom: 5 }}>{label}</div>
-      <div style={{ fontFamily: SANS, fontSize: 19, fontWeight: 700, color: C.ink }}>{value}</div>
+    <div style={{ width: "100%", background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 0, padding: "6px 10px", boxShadow: C.shadowCard }}>
+      {children}
+    </div>
+  );
+}
+
+// One row: label on the left, a filled track in the middle (omitted when
+// `percent` isn't given, e.g. a raw count like Total Trades), and the
+// display value on the right. `sub` is optional smaller text below the row.
+function BarRow({ label, percent, display, isFirst, sub }) {
+  const C = useTheme();
+  const hasBar = percent !== undefined && percent !== null;
+  return (
+    <div style={{ padding: "12px 4px", borderTop: isFirst ? "none" : `1px solid ${C.lineSoft}` }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: hasBar ? "flex-start" : "space-between" }}>
+        <span style={{ fontFamily: SANS, fontWeight: 700, fontSize: 13, color: C.ink, minWidth: hasBar ? 128 : "auto", flexShrink: 0 }}>
+          {label}
+        </span>
+        {hasBar && (
+          <div style={{ flexGrow: 1, height: 6, background: C.lineSoft, overflow: "hidden" }}>
+            <div style={{ width: `${clamp(percent, 0, 100)}%`, height: "100%", background: C.ink }} />
+          </div>
+        )}
+        <span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 12, color: C.ink, minWidth: 44, textAlign: "right", flexShrink: 0 }}>
+          {display}
+        </span>
+      </div>
+      {sub && (
+        <div style={{ fontFamily: MONO, fontSize: 11, color: C.muted, marginTop: 5, marginLeft: hasBar ? 138 : 0 }}>
+          {sub}
+        </div>
+      )}
     </div>
   );
 }
@@ -233,32 +246,23 @@ function SymbolPerformanceBars({ trades }) {
   if (statsData.length === 0) return null;
 
   return (
-    <div style={{ width: "100%", background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 0, padding: "6px 10px", boxShadow: C.shadowCard }}>
-      {statsData.map((item, i) => {
-        return (
-          <div
-            key={item.symbol}
-            style={{ padding: "12px 4px", borderTop: i > 0 ? `1px solid ${C.lineSoft}` : "none" }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ fontFamily: SANS, fontWeight: 700, fontSize: 13, color: C.ink, minWidth: 70, flexShrink: 0 }}>
-                {item.symbol}
-              </span>
-              <div style={{ flexGrow: 1, height: 6, background: C.lineSoft, overflow: "hidden" }}>
-                <div style={{ width: `${clamp(item.winRate, 0, 100)}%`, height: "100%", background: C.ink }} />
-              </div>
-              <span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 12, color: C.ink, minWidth: 36, textAlign: "right", flexShrink: 0 }}>
-                {item.winRate.toFixed(0)}%
-              </span>
-            </div>
-            <div style={{ fontFamily: MONO, fontSize: 11, color: C.muted, marginTop: 5, marginLeft: 80 }}>
+    <BarBox>
+      {statsData.map((item, i) => (
+        <BarRow
+          key={item.symbol}
+          isFirst={i === 0}
+          label={item.symbol}
+          percent={item.winRate}
+          display={`${item.winRate.toFixed(0)}%`}
+          sub={
+            <>
               <span style={{ color: item.totalR > 0 ? C.ink : C.faint, fontWeight: 700 }}>{fmtR(item.totalR)}</span>
               {" "}&middot; {item.count} trade{item.count === 1 ? "" : "s"}
-            </div>
-          </div>
-        );
-      })}
-    </div>
+            </>
+          }
+        />
+      ))}
+    </BarBox>
   );
 }
 
@@ -380,11 +384,13 @@ export default function Dashboard({ trades }) {
               {filteredTrades.length} trade{filteredTrades.length === 1 ? "" : "s"} in this period
             </div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 22 }}>
-            <StatCard label="Total Trades" value={stats.total} />
-            <StatCard label="Adherence" value={`${Math.round(stats.disciplineScore)}%`} color={C.clayDeep} />
-            <StatCard label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} color={C.sage} />
-            <StatCard label="Risk Consistency" value={riskConsistencyLabel(stats.riskConsistency)} />
+          <div style={{ marginBottom: 22 }}>
+            <BarBox>
+              <BarRow isFirst label="Total Trades" display={stats.total} />
+              <BarRow label="Adherence" percent={stats.disciplineScore} display={`${Math.round(stats.disciplineScore)}%`} />
+              <BarRow label="Win Rate" percent={stats.winRate} display={`${stats.winRate.toFixed(1)}%`} />
+              <BarRow label="Risk Consistency" percent={stats.riskConsistency} display={riskConsistencyLabel(stats.riskConsistency)} />
+            </BarBox>
           </div>
 
           <div style={{ marginBottom: 22 }}>
@@ -396,20 +402,17 @@ export default function Dashboard({ trades }) {
           </div>
 
           <div style={{ marginBottom: 22 }}>
-  <div style={{ padding: "0 4px", marginBottom: 16 }}>
-    <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
-    <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Score 0–100 per dimension</div>
-  </div>
-  <div style={{ width: "100%", height: 320, overflow: "visible" }}>
-    <ResponsiveContainer>
-      <RadarChart data={stats.scorecard} outerRadius="72%" margin={{ top: 4, right: 32, bottom: 4, left: 46 }}>
-                  <PolarGrid stroke={C.line} shapeRendering="geometricPrecision" />
-                  <PolarAngleAxis dataKey="metric" tick={<ScorecardTick />} />
-                  <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
-                  <Radar dataKey="value" stroke={C.btnAccent} fill={C.btnAccent} fillOpacity={0.15} strokeWidth={2} shapeRendering="geometricPrecision" dot={{ r: 4, fill: C.btnAccent, fillOpacity: 1, stroke: "none" }} isAnimationActive={false} />
-                </RadarChart>
-              </ResponsiveContainer>
+            <div style={{ padding: "0 4px", marginBottom: 16 }}>
+              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
+              <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Score 0–100 per dimension</div>
             </div>
+            <BarBox>
+              {stats.scorecard
+                .filter((s) => s.metric !== "Win Rate")
+                .map((s, i) => (
+                  <BarRow key={s.metric} isFirst={i === 0} label={s.metric} percent={s.value} display={`${s.value}%`} />
+                ))}
+            </BarBox>
           </div>
 
           {availableYears.length > 0 && (
