@@ -225,74 +225,95 @@ function CalendarHeatmap({ trades, year }) {
   );
 }
 
-function SymbolTooltip({ active, payload }) {
-  const C = useTheme();
-  if (!active || !payload || !payload.length) return null;
-  const d = payload[0].payload;
-  const color = d.totalR >= 0 ? C.sage : C.rustRed;
-  return (
-    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: "9px 12px", fontFamily: SANS, fontSize: 12, boxShadow: C.shadowPopover }}>
-      <div style={{ color: C.ink, fontWeight: 700, marginBottom: 3 }}>{d.symbol}</div>
-      <div style={{ color, fontWeight: 700, fontSize: 13 }}>{fmtR(d.totalR)}</div>
-      <div style={{ color: C.muted, marginTop: 3 }}>{d.winRate.toFixed(0)}% win rate &middot; {d.count} trade{d.count === 1 ? "" : "s"}</div>
-    </div>
-  );
+// Generates a distinct, high-contrast color for any number of symbols.
+// Uses the golden-angle hue rotation so colors stay well-spread no matter
+// how many symbols exist (no fixed list to run out of).
+function symbolColor(index) {
+  const GOLDEN_ANGLE = 137.508;
+  const hue = (index * GOLDEN_ANGLE) % 360;
+  return `hsl(${hue.toFixed(0)}, 68%, 58%)`;
 }
-function SymbolMiniTooltip({ active, payload }) {
+function SymbolPerformanceChart({ trades }) {
   const C = useTheme();
-  if (!active || !payload || !payload.length) return null;
-  const d = payload[0].payload;
-  const color = d.cum >= 0 ? C.sage : C.rustRed;
-  return (
-    <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, padding: "8px 11px", fontFamily: SANS, fontSize: 11.5, boxShadow: C.shadowPopover }}>
-      <div style={{ color: C.muted, marginBottom: 2 }}>Trade #{d.index}</div>
-      <div style={{ color, fontWeight: 700 }}>{fmtR(d.cum)}</div>
-    </div>
-  );
-}
-function SymbolMiniChart({ item, trades }) {
-  const C = useTheme();
-  const data = useMemo(() => {
-    const symbolTrades = trades
-      .filter((t) => t.symbol === item.symbol)
-      .sort((a, b) => parseISO(a.date) - parseISO(b.date));
-    let cum = 0;
-    return symbolTrades.map((t, i) => {
-      cum += t.rActual;
-      return { index: i + 1, cum };
+  const statsData = useMemo(() => computeSymbolStats(trades), [trades]);
+  const symbols = useMemo(() => statsData.map((s) => s.symbol), [statsData]);
+
+  const chartData = useMemo(() => {
+    let maxLen = 0;
+    const cumBySymbol = {};
+    symbols.forEach((sym) => {
+      const symbolTrades = trades
+        .filter((t) => t.symbol === sym)
+        .sort((a, b) => parseISO(a.date) - parseISO(b.date));
+      let cum = 0;
+      // prepend a 0 starting point so every line begins at the same origin
+      cumBySymbol[sym] = [0, ...symbolTrades.map((t) => (cum += t.rActual))];
+      maxLen = Math.max(maxLen, cumBySymbol[sym].length);
     });
-  }, [trades, item.symbol]);
-  const color = item.totalR >= 0 ? C.sage : C.rustRed;
+    const rows = [];
+    for (let i = 0; i < maxLen; i++) {
+      const row = { index: i };
+      symbols.forEach((sym) => {
+        const arr = cumBySymbol[sym];
+        row[sym] = i < arr.length ? arr[i] : arr[arr.length - 1];
+      });
+      rows.push(row);
+    }
+    return rows;
+  }, [trades, symbols]);
+
+  if (statsData.length === 0) return null;
+
   return (
-    <div style={{ marginBottom: 22 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8, flexWrap: "wrap", gap: 4 }}>
-        <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 14, color: C.ink }}>{item.symbol}</div>
-        <div style={{ fontFamily: MONO, fontSize: 11.5, color: C.muted }}>
-          <span style={{ color, fontWeight: 700 }}>{fmtR(item.totalR)}</span> &middot; {item.winRate.toFixed(0)}% win &middot; {item.count} trade{item.count === 1 ? "" : "s"}
-        </div>
-      </div>
-      <div style={{ width: "100%", height: 140 }}>
+    <div style={{ width: "100%", background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 0, padding: "14px 10px 6px", boxShadow: C.shadowCard }}>
+      <div style={{ width: "100%", height: 240 }}>
         <ResponsiveContainer>
-          <LineChart data={data} margin={{ top: 6, right: 8, bottom: 0, left: -20 }}>
+          <LineChart data={chartData} margin={{ top: 6, right: 14, bottom: 0, left: -16 }}>
             <CartesianGrid stroke={C.lineSoft} strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="index" tick={{ fontFamily: MONO, fontSize: 10, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
-            <YAxis tick={{ fontFamily: MONO, fontSize: 10, fill: C.muted }} axisLine={false} tickLine={false} width={34} />
-            <Tooltip content={<SymbolMiniTooltip />} cursor={{ stroke: C.faint, strokeWidth: 1 }} />
+            <YAxis tick={{ fontFamily: MONO, fontSize: 10, fill: C.muted }} axisLine={false} tickLine={false} width={32} />
             <ReferenceLine y={0} stroke={C.line} />
-            <Line type="monotone" dataKey="cum" stroke={color} strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
+            {symbols.map((sym, i) => (
+              <Line
+                key={sym}
+                type="monotone"
+                dataKey={sym}
+                stroke={symbolColor(i)}
+                strokeWidth={2}
+                dot={false}
+                activeDot={false}
+                isAnimationActive={false}
+              />
+            ))}
           </LineChart>
         </ResponsiveContainer>
       </div>
-    </div>
-  );
-}
-function SymbolPerformanceChart({ trades }) {
-  const data = useMemo(() => computeSymbolStats(trades), [trades]);
-  return (
-    <div style={{ width: "100%" }}>
-      {data.map((item, i) => (
-        <SymbolMiniChart key={item.symbol + i} item={item} trades={trades} />
-      ))}
+
+      {/* Per-symbol stats live below the board, not as a click tooltip */}
+      <div style={{ marginTop: 8, paddingBottom: 2 }}>
+        {statsData.map((item, i) => {
+          const color = symbolColor(i);
+          return (
+            <div
+              key={item.symbol}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "9px 4px", borderTop: i > 0 ? `1px solid ${C.lineSoft}` : "none",
+                flexWrap: "wrap", gap: 4,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 10, height: 10, borderRadius: 2, background: color, flexShrink: 0 }} />
+                <span style={{ fontFamily: SANS, fontWeight: 700, fontSize: 13, color: C.ink }}>{item.symbol}</span>
+              </div>
+              <div style={{ fontFamily: MONO, fontSize: 11, color: C.muted }}>
+                <span style={{ color: item.totalR >= 0 ? C.sage : C.rustRed, fontWeight: 700 }}>{fmtR(item.totalR)}</span>
+                {" "}&middot; {item.winRate.toFixed(0)}% win &middot; {item.count} trade{item.count === 1 ? "" : "s"}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
