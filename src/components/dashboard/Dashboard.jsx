@@ -21,6 +21,97 @@ import DateField from "../DateField.jsx";
 import Counter from "../../Counter.jsx";
 
 // ---- Dashboard ----
+
+// Custom morph animation for chart data points.
+//
+// Recharts' built-in `isAnimationActive` animates a chart by growing it
+// from zero/center whenever the component (re)mounts — it can't tween an
+// already-rendered chart from its OLD values to NEW values. What we want
+// instead is: the points already on screen glide/morph directly to their
+// new position. So we never use Recharts' animation (always
+// isAnimationActive={false}) and instead interpolate the data ourselves
+// with requestAnimationFrame, feeding Recharts a new "displayData" array
+// every frame.
+//
+// This must animate ONLY when `animToken` changes (an explicit signal bumped
+// by user actions: picking a period chip, or confirming a custom range).
+// Any other reason `targetData` changes (new trade added, unrelated
+// re-render, tooltip-driven remount, etc.) should snap instantly with no
+// animation.
+const MORPH_DURATION = 550;
+const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+function useMorphingChartData(targetData, keys, animToken) {
+  const [displayData, setDisplayData] = useState(targetData);
+  const displayRef = useRef(targetData);
+  const prevTargetRef = useRef(targetData);
+  const prevTokenRef = useRef(animToken);
+  const rafRef = useRef(null);
+
+  useEffect(() => {
+    const dataChanged = targetData !== prevTargetRef.current;
+    // Animate ONLY when both the data itself changed AND the token was
+    // explicitly bumped (period chip tap / custom range confirm). A token
+    // bump with unchanged data, or a data change with no token bump (new
+    // trade logged, unrelated re-render, tooltip taps...), never animates.
+    const animate = dataChanged && animToken !== prevTokenRef.current;
+    prevTargetRef.current = targetData;
+    prevTokenRef.current = animToken;
+
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+
+    if (!dataChanged) return undefined;
+
+    if (!animate) {
+      displayRef.current = targetData;
+      setDisplayData(targetData);
+      return undefined;
+    }
+
+    const from = displayRef.current;
+    const to = targetData;
+    const start = performance.now();
+
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / MORPH_DURATION);
+      const eased = easeOutCubic(t);
+      const next = to.map((toRow, i) => {
+        const fromRow = from[i];
+        const row = { ...toRow };
+        keys.forEach((k) => {
+          const b = toRow[k];
+          if (typeof b !== "number") return;
+          // No matching point in the old shape (e.g. a symbol that only
+          // appears in the new period) — morph up from 0 rather than
+          // snapping straight to its final value.
+          const a = fromRow && typeof fromRow[k] === "number" ? fromRow[k] : 0;
+          row[k] = a + (b - a) * eased;
+        });
+        return row;
+      });
+      displayRef.current = next;
+      setDisplayData(next);
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        rafRef.current = null;
+      }
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetData, animToken]);
+
+  return displayData;
+}
+
+const RADAR_MORPH_KEYS = ["value"];
+
 function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
   const C = useTheme();
   const dx = x - cx, dy = y - cy;
@@ -243,7 +334,7 @@ function symbolColor(index) {
   const level = SHADE_LEVELS[cycle % SHADE_LEVELS.length];
   return `hsl(${hue}, ${level.s}%, ${level.l}%)`;
 }
-function SymbolPerformanceChart({ trades }) {
+function SymbolPerformanceChart({ trades, animToken }) {
   const C = useTheme();
   const statsData = useMemo(() => computeSymbolStats(trades), [trades]);
   const symbols = useMemo(() => statsData.map((s) => s.symbol), [statsData]);
@@ -272,13 +363,15 @@ function SymbolPerformanceChart({ trades }) {
     return rows;
   }, [trades, symbols]);
 
+  const displayChartData = useMorphingChartData(chartData, symbols, animToken);
+
   if (statsData.length === 0) return null;
 
   return (
     <div style={{ width: "100%", background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 0, padding: "14px 10px 6px", boxShadow: C.shadowCard }}>
       <div style={{ width: "100%", height: 240 }}>
         <ResponsiveContainer>
-          <LineChart data={chartData} margin={{ top: 6, right: 14, bottom: 0, left: -16 }}>
+          <LineChart data={displayChartData} margin={{ top: 6, right: 14, bottom: 0, left: -16 }}>
             <CartesianGrid stroke={C.lineSoft} strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="index" tick={{ fontFamily: MONO, fontSize: 10, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
             <YAxis tick={{ fontFamily: MONO, fontSize: 10, fill: C.muted }} axisLine={false} tickLine={false} width={32} />
@@ -408,10 +501,6 @@ export default function Dashboard({ trades }) {
   }, [trades, period, customRange]);
   const stats = useMemo(() => computeStats(filteredTrades), [filteredTrades]);
 
-  if (trades.length === 0) {
-    return <div style={{ marginTop: 30, color: C.muted, fontSize: 16 }}>Log a trade to see your performance dashboard.</div>;
-  }
-
   // Only one chart's tooltip should be visible at a time. Recharts keeps its
   // hover/tap state internally per-chart, so tapping chart B doesn't close
   // chart A's tooltip on its own. We force-remount every OTHER chart whenever
@@ -426,26 +515,40 @@ export default function Dashboard({ trades }) {
   };
   const chartKey = (id) => (activeChart === id ? `${id}-active` : `${id}-idle-${chartGen}`);
 
-  // The radar chart should not animate on first page load, only when its
-  // data changes afterwards (e.g. switching time range). We flip this ref
-  // to true right after mount, without triggering an extra re-render.
-  const hasMountedRef = useRef(false);
+  // Bumped only by explicit user actions — picking a period chip, or
+  // completing a custom range — so the charts morph-animate exactly then,
+  // and stay static on any other re-render (new trade logged, tooltip
+  // taps, theme toggle, etc.).
+  const [rangeAnimTrigger, setRangeAnimTrigger] = useState(0);
+  const selectPeriod = (key) => {
+    setPeriod(key);
+    setRangeAnimTrigger((n) => n + 1);
+  };
   useEffect(() => {
-    hasMountedRef.current = true;
-  }, []);
+    if (period === "custom" && customRange.from && customRange.to) {
+      setRangeAnimTrigger((n) => n + 1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customRange.from, customRange.to]);
+
+  const displayScorecard = useMorphingChartData(stats.scorecard, RADAR_MORPH_KEYS, rangeAnimTrigger);
+
+  if (trades.length === 0) {
+    return <div style={{ marginTop: 30, color: C.muted, fontSize: 16 }}>Log a trade to see your performance dashboard.</div>;
+  }
 
   return (
     <div style={{ width: "100%", maxWidth: "100%" }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginBottom: 9 }}>
         {PERIODS.slice(0, 3).map((p) => (
-          <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
+          <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => selectPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
         ))}
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 9, marginBottom: 10 }}>
         {PERIODS.slice(3).map((p) => (
-          <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
+          <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => selectPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
         ))}
-        <Chip label="Custom Range" active={period === "custom"} onClick={() => setPeriod("custom")} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
+        <Chip label="Custom Range" active={period === "custom"} onClick={() => selectPeriod("custom")} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
       </div>
       {period === "custom" && (
         <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 18, flexWrap: "wrap" }}>
@@ -481,7 +584,7 @@ export default function Dashboard({ trades }) {
               <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Total R per simbol, diurutkan dari yang paling profitable</div>
             </div>
             <div onPointerDown={() => activateChart("symbol")}>
-              <SymbolPerformanceChart key={chartKey("symbol")} trades={filteredTrades} />
+              <SymbolPerformanceChart key={chartKey("symbol")} trades={filteredTrades} animToken={rangeAnimTrigger} />
             </div>
           </div>
 
@@ -492,11 +595,11 @@ export default function Dashboard({ trades }) {
   </div>
   <div style={{ width: "100%", height: 320, overflow: "visible" }}>
     <ResponsiveContainer>
-      <RadarChart data={stats.scorecard} outerRadius="72%" margin={{ top: 4, right: 32, bottom: 4, left: 46 }}>
+      <RadarChart data={displayScorecard} outerRadius="72%" margin={{ top: 4, right: 32, bottom: 4, left: 46 }}>
                   <PolarGrid stroke={C.line} />
                   <PolarAngleAxis dataKey="metric" tick={<ScorecardTick />} />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
-                  <Radar dataKey="value" stroke={C.btnAccent} fill={C.btnAccent} fillOpacity={0.15} strokeWidth={2} dot={{ r: 4, fill: C.btnAccent, fillOpacity: 1, stroke: "none" }} isAnimationActive={hasMountedRef.current} />
+                  <Radar dataKey="value" stroke={C.btnAccent} fill={C.btnAccent} fillOpacity={0.15} strokeWidth={2} dot={{ r: 4, fill: C.btnAccent, fillOpacity: 1, stroke: "none" }} isAnimationActive={false} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
