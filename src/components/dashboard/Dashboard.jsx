@@ -25,8 +25,11 @@ function ScorecardTick({ x, y, cx, cy, payload, textAnchor }) {
   const dx = x - cx, dy = y - cy;
   const dist = Math.sqrt(dx * dx + dy * dy) || 1;
     const push = 12;
-  const nx = x + (dx / dist) * push;
-  const ny = y + (dy / dist) * push;
+  // Round to whole pixels: sub-pixel x/y forces the browser to anti-alias
+  // the text across two pixels instead of rendering it crisply on one,
+  // which is what reads as blurry/pixelated at this small font size.
+  const nx = Math.round(x + (dx / dist) * push);
+  const ny = Math.round(y + (dy / dist) * push);
   const words = String(payload.value).split(" ");
   return (
     <text x={nx} y={ny} textAnchor={textAnchor} fontFamily={SANS} fontSize={13} fontWeight={700} fill={C.inkSoft}>
@@ -223,25 +226,6 @@ function CalendarHeatmap({ trades, year }) {
   );
 }
 
-// 5 base hues: orange, cyan, yellow, purple, violet — no red or green,
-// so a line's color is never confused with win/loss signaling.
-const BASE_HUES = [30, 190, 48, 265, 285]; // orange, cyan, yellow, purple, violet
-
-// Shade levels are spread far apart (not incremented in small steps) so each
-// gradation of the same hue still reads as clearly distinct at a glance.
-const SHADE_LEVELS = [
-  { l: 58, s: 78 }, // vivid mid-tone (used for the first 5 symbols)
-  { l: 32, s: 65 }, // deep/dark
-  { l: 78, s: 55 }, // light/pastel
-  { l: 22, s: 70 }, // very dark
-  { l: 88, s: 42 }, // very light
-];
-function symbolColor(index) {
-  const hue = BASE_HUES[index % BASE_HUES.length];
-  const cycle = Math.floor(index / BASE_HUES.length);
-  const level = SHADE_LEVELS[cycle % SHADE_LEVELS.length];
-  return `hsl(${hue}, ${level.s}%, ${level.l}%)`;
-}
 function SymbolPerformanceBars({ trades }) {
   const C = useTheme();
   const statsData = useMemo(() => computeSymbolStats(trades), [trades]);
@@ -251,7 +235,6 @@ function SymbolPerformanceBars({ trades }) {
   return (
     <div style={{ width: "100%", background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 0, padding: "6px 10px", boxShadow: C.shadowCard }}>
       {statsData.map((item, i) => {
-        const color = symbolColor(i);
         return (
           <div
             key={item.symbol}
@@ -262,7 +245,7 @@ function SymbolPerformanceBars({ trades }) {
                 {item.symbol}
               </span>
               <div style={{ flexGrow: 1, height: 6, background: C.lineSoft, overflow: "hidden" }}>
-                <div style={{ width: `${clamp(item.winRate, 0, 100)}%`, height: "100%", background: color }} />
+                <div style={{ width: `${clamp(item.winRate, 0, 100)}%`, height: "100%", background: C.ink }} />
               </div>
               <span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 12, color: C.ink, minWidth: 36, textAlign: "right", flexShrink: 0 }}>
                 {item.winRate.toFixed(0)}%
@@ -428,10 +411,10 @@ export default function Dashboard({ trades }) {
   <div style={{ width: "100%", height: 320, overflow: "visible" }}>
     <ResponsiveContainer>
       <RadarChart data={stats.scorecard} outerRadius="72%" margin={{ top: 4, right: 32, bottom: 4, left: 46 }}>
-                  <PolarGrid stroke={C.line} />
+                  <PolarGrid stroke={C.line} shapeRendering="geometricPrecision" />
                   <PolarAngleAxis dataKey="metric" tick={<ScorecardTick />} />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
-                  <Radar dataKey="value" stroke={C.btnAccent} fill={C.btnAccent} fillOpacity={0.15} strokeWidth={2} dot={{ r: 4, fill: C.btnAccent, fillOpacity: 1, stroke: "none" }} isAnimationActive={hasMountedRef.current} />
+                  <Radar dataKey="value" stroke={C.btnAccent} fill={C.btnAccent} fillOpacity={0.15} strokeWidth={2} shapeRendering="geometricPrecision" dot={{ r: 4, fill: C.btnAccent, fillOpacity: 1, stroke: "none" }} isAnimationActive={hasMountedRef.current} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
