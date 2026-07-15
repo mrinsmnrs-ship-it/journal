@@ -1,11 +1,12 @@
 // ============================================================================
 // components/common/HamburgerMenu.jsx
 // -----------------------------------------------------------------------------
-// Menggantikan pasangan tombol "ThemeToggle + Logout" di pojok topbar dengan
-// satu tombol ikon 2 garis horizontal (tanpa border). Saat dipencet, kedua
-// garis bergerak dari tempatnya dan membentuk silang (X), dan sebuah panel
-// sisi sempit (icon-only, tanpa teks) menempel di tepi kanan layar — mulai
-// tepat di bawah topbar sampai ke bawah layar — berisi ganti tema & log out.
+// Tombol ikon hamburger (3 garis, tanpa border) yang berubah jadi silang (X)
+// saat dipencet. Membuka popup kecil, icon-only (tanpa teks), yang menempel
+// tepat di bawah tombol -- sejajar dengan item lain di topbar, menyatu
+// dengan warna topbar, dan pakai shadow yang sama dengan popover lain di
+// app (C.shadowPopover) supaya tidak terlalu tebal. Sudut popup tidak
+// dibulatkan (border-radius: 0).
 // ============================================================================
 import { useEffect, useRef, useState } from "react";
 import { LogOut } from "lucide-react";
@@ -16,7 +17,7 @@ export default function HamburgerMenu({ themeMode, onToggleTheme, onLogout }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
 
-  // Klik di luar atau tekan Escape -> tutup panel.
+  // Klik di luar atau tekan Escape -> tutup popup.
   useEffect(() => {
     if (!open) return;
     function handlePointerDown(e) {
@@ -52,7 +53,7 @@ export default function HamburgerMenu({ themeMode, onToggleTheme, onLogout }) {
 
       <div
         className={`hamburger-panel${open ? " open" : ""}`}
-        style={{ background: C.paper, borderLeft: `1px solid ${C.line}`, boxShadow: C.shadowPopover }}
+        style={{ background: C.paper, border: `1px solid ${C.line}`, boxShadow: C.shadowPopover }}
       >
         <button
           type="button"
@@ -62,7 +63,7 @@ export default function HamburgerMenu({ themeMode, onToggleTheme, onLogout }) {
           title={`Switch to ${nextLabel}`}
           style={{ color: C.inkSoft, fontFamily: SANS }}
         >
-          <ThemeIcon size={18} style={{ color: C.ink }} />
+          <ThemeIcon size={15} style={{ color: C.ink }} />
         </button>
         <div className="hamburger-panel-divider" style={{ background: C.line }} />
         <button
@@ -73,7 +74,7 @@ export default function HamburgerMenu({ themeMode, onToggleTheme, onLogout }) {
           title="Log out"
           style={{ color: C.inkSoft, fontFamily: SANS }}
         >
-          <LogOut size={18} style={{ color: C.ink }} />
+          <LogOut size={15} style={{ color: C.ink }} />
         </button>
       </div>
     </div>
