@@ -43,7 +43,7 @@ export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSa
       <RiskRPanel form={form} updateForm={updateForm} />
       <Field label="Rules Compliance">
         <div style={{ display: "flex", gap: 12 }}>
-          {["Yes", "No"].map((r) => (
+          {["Yes", "Partial", "No"].map((r) => (
             <PillToggle key={r} label={r} active={form.rules === r} onClick={() => updateForm("rules", r)} />
           ))}
         </div>
