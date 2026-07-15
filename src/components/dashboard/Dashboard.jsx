@@ -6,7 +6,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
+  XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, PieChart, Pie,
 } from "recharts";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { SANS, SERIF, MONO, PERIODS, useTheme } from "../../theme/tokens.js";
@@ -237,31 +237,53 @@ function SymbolTooltip({ active, payload }) {
     </div>
   );
 }
-function SymbolPerformanceChart({ trades }) {
+function SymbolDonutRow({ item }) {
   const C = useTheme();
-  const data = useMemo(() => computeSymbolStats(trades), [trades]);
-  const barHeight = 34;
-  const chartHeight = Math.max(120, data.length * barHeight + 20);
+  const winPct = item.winRate;
+  const lossPct = 100 - winPct;
+  const pieData = [
+    { name: "Win", value: winPct },
+    { name: "Loss", value: lossPct },
+  ];
+  const color = item.totalR >= 0 ? C.sage : C.rustRed;
   return (
-    <div style={{ width: "100%", height: chartHeight }}>
-      <ResponsiveContainer>
-        <BarChart data={data} layout="vertical" margin={{ top: 4, right: 40, bottom: 0, left: 4 }}>
-          <CartesianGrid stroke={C.lineSoft} strokeDasharray="3 3" horizontal={false} />
-          <XAxis type="number" tick={{ fontFamily: MONO, fontSize: 11, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
-          <YAxis
-            type="category" dataKey="symbol" width={70}
-            tick={{ fontFamily: SANS, fontSize: 12.5, fontWeight: 700, fill: C.ink }}
-            axisLine={false} tickLine={false}
-          />
-          <Tooltip content={<SymbolTooltip />} cursor={{ fill: C.line, opacity: 0.18 }} />
-          <ReferenceLine x={0} stroke={C.line} />
-          <Bar dataKey="totalR" radius={0} barSize={18}>
-            {data.map((d, i) => (
-              <Cell key={i} fill={d.totalR >= 0 ? C.sage : C.rustRed} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+    <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
+      <div style={{ width: 46, height: 46, flexShrink: 0 }}>
+        <ResponsiveContainer>
+          <PieChart>
+            <Pie
+              data={pieData}
+              dataKey="value"
+              innerRadius={13}
+              outerRadius={22}
+              startAngle={90}
+              endAngle={-270}
+              stroke="none"
+              isAnimationActive={false}
+            >
+              <Cell fill={C.sage} />
+              <Cell fill={C.rustRed} />
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      <div style={{ width: 16, height: 1, background: C.line, flexShrink: 0 }} />
+      <div style={{ paddingLeft: 10 }}>
+        <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 13, color: C.ink }}>{item.symbol}</div>
+        <div style={{ fontFamily: MONO, fontSize: 11, color: C.muted, marginTop: 2 }}>
+          <span style={{ color }}>{fmtR(item.totalR)}</span> &middot; {winPct.toFixed(0)}% win &middot; {item.count} trade{item.count === 1 ? "" : "s"}
+        </div>
+      </div>
+    </div>
+  );
+}
+function SymbolPerformanceChart({ trades }) {
+  const data = useMemo(() => computeSymbolStats(trades), [trades]);
+  return (
+    <div style={{ width: "100%" }}>
+      {data.map((item, i) => (
+        <SymbolDonutRow key={item.symbol + i} item={item} />
+      ))}
     </div>
   );
 }
@@ -400,16 +422,6 @@ export default function Dashboard({ trades }) {
             <StatCard label="Adherence" value={`${Math.round(stats.disciplineScore)}%`} color={C.clayDeep} />
             <StatCard label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} color={C.sage} />
             <StatCard label="Risk Consistency" value={riskConsistencyLabel(stats.riskConsistency)} />
-          </div>
-
-          <div style={{ marginBottom: 22 }}>
-            <div style={{ padding: "0 4px", marginBottom: 16 }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>R per Trade</div>
-              <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Green = win, red = loss</div>
-            </div>
-            <div onPointerDown={() => activateChart("rbar")}>
-              <TradeRBarChart key={chartKey("rbar")} trades={filteredTrades} />
-            </div>
           </div>
 
           <div style={{ marginBottom: 22 }}>
