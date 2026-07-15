@@ -5,9 +5,8 @@
 // nav) in the middle, and theme toggle + logout on the right — replaces
 // the old vertical sidebar and the separate floating bottom nav.
 import React from "react";
-import { LogOut } from "lucide-react";
 import { useTheme } from "../../theme/tokens.js";
-import ThemeToggle from "../common/ThemeToggle.jsx";
+import HamburgerMenu from "../common/HamburgerMenu.jsx";
 import DesktopTopNav from "../nav/DesktopTopNav.jsx";
 
 export default function DesktopTopbar({
@@ -37,18 +36,7 @@ export default function DesktopTopbar({
         <span title={userEmail} style={{ fontSize: 13, color: C.faint, marginRight: 2, maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {userEmail}
         </span>
-        <ThemeToggle mode={themeMode} onToggle={onToggleTheme} compact />
-        <button
-          onClick={onLogout}
-          title="Log out"
-          style={{
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 0,
-            padding: 9, cursor: "pointer", color: C.inkSoft,
-          }}
-        >
-          <LogOut size={16} />
-        </button>
+        <HamburgerMenu themeMode={themeMode} onToggleTheme={onToggleTheme} onLogout={onLogout} />
       </div>
     </div>
   );
