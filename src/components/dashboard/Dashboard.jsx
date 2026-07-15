@@ -8,22 +8,16 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
 } from "recharts";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { SANS, SERIF, MONO, PERIODS, useTheme } from "../../theme/tokens.js";
+import { SANS, SERIF, MONO, useTheme } from "../../theme/tokens.js";
 import { fmtR } from "../../utils/format.js";
 import { parseISO, startOfWeek, startOfMonth, startOfYear, clamp, tradeYears, fmtDateDisplay } from "../../utils/date.js";
 import {
   computeEquityCurve, computeDailyR, computeSymbolStats, computeStats,
 } from "../../utils/stats.js";
-import Chip from "../common/Chip.jsx";
-import DateField from "../DateField.jsx";
+import PeriodFilterBar from "../common/PeriodFilterBar.jsx";
 import Counter from "../../Counter.jsx";
 
 // ---- Dashboard ----
-function riskConsistencyLabel(score) {
-  if (score >= 75) return "Stabil";
-  if (score >= 50) return "Sedang";
-  return "Tidak Stabil";
-}
 
 // Shared boxed-list style used by Summary, Performance by Symbol, and
 // Trader Scorecard so all three read as one consistent visual language
@@ -43,21 +37,43 @@ function BarBox({ children }) {
 function BarRow({ label, percent, display, isFirst, sub }) {
   const C = useTheme();
   const hasBar = percent !== undefined && percent !== null;
+
+  // No percent bar (e.g. Total Trades, a raw count): keep label and value
+  // on the same line, side by side (label left, value right), instead of
+  // stacking label above value.
+  if (!hasBar) {
+    return (
+      <div style={{ padding: "12px 4px", borderTop: isFirst ? "none" : `1px solid ${C.lineSoft}` }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+          <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 13, color: C.ink, textAlign: "left" }}>
+            {label}
+          </div>
+          <span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 12, color: C.ink, flexShrink: 0 }}>
+            {display}
+          </span>
+        </div>
+        {sub && (
+          <div style={{ fontFamily: MONO, fontSize: 11, color: C.muted, marginTop: 5 }}>
+            {sub}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: "12px 4px", borderTop: isFirst ? "none" : `1px solid ${C.lineSoft}` }}>
       <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 13, color: C.ink, textAlign: "left" }}>
         {label}
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
-        {hasBar && (
-          <div style={{ flexGrow: 1, height: 6, background: C.lineSoft, overflow: "hidden" }}>
-            {/* Same ink color the Emotion slider uses, but at its "idle" (un-pressed)
-                opacity of 0.7 rather than full strength — these bars are static and
-                never get pressed, so they should always read as the calmer, un-pressed
-                state, not the bold/vivid pressed one. */}
-            <div style={{ width: `${clamp(percent, 0, 100)}%`, height: "100%", background: C.ink, opacity: 0.7 }} />
-          </div>
-        )}
+        <div style={{ flexGrow: 1, height: 6, background: C.lineSoft, overflow: "hidden" }}>
+          {/* Same ink color the Emotion slider uses, but at its "idle" (un-pressed)
+              opacity of 0.7 rather than full strength — these bars are static and
+              never get pressed, so they should always read as the calmer, un-pressed
+              state, not the bold/vivid pressed one. */}
+          <div style={{ width: `${clamp(percent, 0, 100)}%`, height: "100%", background: C.ink, opacity: 0.7 }} />
+        </div>
         <span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 12, color: C.ink, minWidth: 44, textAlign: "right", flexShrink: 0 }}>
           {display}
         </span>
@@ -356,33 +372,12 @@ export default function Dashboard({ trades }) {
 
   return (
     <div style={{ width: "100%", maxWidth: "100%" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginBottom: 9 }}>
-        {PERIODS.slice(0, 3).map((p) => (
-          <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
-        ))}
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 9, marginBottom: 10 }}>
-        {PERIODS.slice(3).map((p) => (
-          <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
-        ))}
-        <Chip label="Custom Range" active={period === "custom"} onClick={() => setPeriod("custom")} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
-      </div>
-      {period === "custom" && (
-        <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 18, flexWrap: "wrap" }}>
-          <div style={{ flex: 1, minWidth: 120 }}>
-            <DateField value={customRange.from} onChange={(d) => setCustomRange((r) => ({ ...r, from: d }))} />
-          </div>
-          <span style={{ color: C.muted, fontSize: 13, fontFamily: SANS }}>to</span>
-          <div style={{ flex: 1, minWidth: 120 }}>
-            <DateField value={customRange.to} onChange={(d) => setCustomRange((r) => ({ ...r, to: d }))} align="right" />
-          </div>
-        </div>
-      )}
+      <PeriodFilterBar period={period} setPeriod={setPeriod} customRange={customRange} setCustomRange={setCustomRange} />
       {filteredTrades.length === 0 ? (
         <div style={{ color: C.muted, fontSize: 16, marginBottom: 28 }}>No trades logged in this period.</div>
       ) : (
         <>
-          <div style={{ marginTop: period === "custom" ? 0 : 14, marginBottom: 16, padding: "0 4px" }}>
+          <div style={{ marginTop: 0, marginBottom: 16, padding: "0 4px" }}>
             <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Summary</div>
             <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>
               {filteredTrades.length} trade{filteredTrades.length === 1 ? "" : "s"} in this period
@@ -393,7 +388,7 @@ export default function Dashboard({ trades }) {
               <BarRow isFirst label="Total Trades" display={stats.total} />
               <BarRow label="Adherence" percent={stats.disciplineScore} display={`${Math.round(stats.disciplineScore)}%`} />
               <BarRow label="Win Rate" percent={stats.winRate} display={`${stats.winRate.toFixed(1)}%`} />
-              <BarRow label="Risk Consistency" percent={stats.riskConsistency} display={riskConsistencyLabel(stats.riskConsistency)} />
+              <BarRow label="Risk Consistency" percent={stats.riskConsistency} display={`${Math.round(stats.riskConsistency)}%`} />
             </BarBox>
           </div>
 
