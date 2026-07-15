@@ -6,7 +6,7 @@
 // the old vertical sidebar and the separate floating bottom nav.
 import React from "react";
 import { useTheme } from "../../theme/tokens.js";
-import HamburgerMenu from "../common/HamburgerMenu.jsx";
+import TopbarActions from "../common/TopbarActions.jsx";
 import DesktopTopNav from "../nav/DesktopTopNav.jsx";
 
 export default function DesktopTopbar({
@@ -36,7 +36,7 @@ export default function DesktopTopbar({
         <span title={userEmail} style={{ fontSize: 13, color: C.faint, marginRight: 2, maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {userEmail}
         </span>
-        <HamburgerMenu themeMode={themeMode} onToggleTheme={onToggleTheme} onLogout={onLogout} />
+        <TopbarActions themeMode={themeMode} onToggleTheme={onToggleTheme} onLogout={onLogout} />
       </div>
     </div>
   );
