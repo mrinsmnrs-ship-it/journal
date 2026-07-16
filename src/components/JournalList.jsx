@@ -104,7 +104,7 @@ export default function JournalList({ trades, onDelete, onGoLog, period, customR
                   onClick={() => { onDelete(confirmTrade.id); setConfirmId(null); }}
                   style={{
                     flex: 1, padding: "12px 0", borderRadius: 0, border: "none",
-                    background: C.dangerBg, color: "#FFFFFF", fontWeight: 700, fontSize: 15.5, cursor: "pointer",
+                    background: C.popupDangerRed, color: "#FFFFFF", fontWeight: 700, fontSize: 15.5, cursor: "pointer",
                   }}
                 >Yes, Delete</button>
               </div>
@@ -114,4 +114,4 @@ export default function JournalList({ trades, onDelete, onGoLog, period, customR
       </AnimatePresence>
     </div>
   );
-}
+                    }
