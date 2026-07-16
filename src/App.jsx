@@ -19,6 +19,8 @@ import MobileDockNav from "./components/nav/MobileDockNav.jsx";
 import PeriodFilterBar from "./components/common/PeriodFilterBar.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import OrientationGuard from "./components/layout/OrientationGuard.jsx";
+import LoginModal from "./components/common/LoginModal.jsx";
+import LoadingScreen from "./components/common/LoadingScreen.jsx";
 
 import LogTradeForm from "./components/trade/LogTradeForm.jsx";
 import JournalList from "./components/JournalList.jsx";
@@ -31,11 +33,7 @@ export default function App() {
     return unsub;
   }, []);
   if (user === undefined) {
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: SANS, color: "#000000" }}>
-        Loading…
-      </div>
-    );
+    return <LoadingScreen label="Loading" />;
   }
   return <RJournal user={user} />;
 }
@@ -60,6 +58,8 @@ function RJournal({ user }) {
   const [dashboardCustomRange, setDashboardCustomRange] = useState({ from: "", to: "" });
   const [journalPeriod, setJournalPeriod] = useState("all");
   const [journalCustomRange, setJournalCustomRange] = useState({ from: "", to: "" });
+  const [showLogin, setShowLogin] = useState(false);
+  const openLogin = () => setShowLogin(true);
 
   useEffect(() => {
     if (!user) { setLoaded(true); return; }
@@ -109,8 +109,9 @@ function RJournal({ user }) {
     setSymbolOptions(next);
     if (user) await saveUserData(user.uid, { symbolOptions: next });
   }
-  const canSave = form.symbol.trim() && form.direction && form.rActual !== "";
+  const canSave = !!user && form.symbol.trim() && form.direction && form.rActual !== "";
   async function handleSave() {
+    if (!user) { openLogin(); return; }
     if (!canSave) return;
     const trade = {
       id: uid(), date: form.date || todayISO(), symbol: form.symbol.trim().toUpperCase(),
@@ -183,9 +184,10 @@ function RJournal({ user }) {
             onLogout={handleLogout}
             userEmail={user?.email}
             isLoggedIn={!!user}
+            onOpenLogin={openLogin}
           />
 
-          <MobileTopbar onLogout={handleLogout} isLoggedIn={!!user} />
+          <MobileTopbar onLogout={handleLogout} isLoggedIn={!!user} onOpenLogin={openLogin} />
 
           <PerfMarquee stats={stats} />
 
@@ -201,15 +203,15 @@ function RJournal({ user }) {
           <div className="main-area" style={{ overflowX: "hidden" }}>
             <div className="main-area-inner">
               {!loaded ? (
-                <div style={{ color: C.faint, fontSize: 14 }}>Loading…</div>
+                <LoadingScreen label="Syncing" />
               ) : tab === "log" ? (
-                <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
+                <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} isLoggedIn={!!user} onRequestLogin={openLogin} />
               ) : tab === "journal" ? (
                 <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} period={journalPeriod} customRange={journalCustomRange} />
               ) : tab === "dashboard" ? (
                 <Dashboard trades={trades} period={dashboardPeriod} customRange={dashboardCustomRange} />
               ) : (
-                <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
+                <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} isLoggedIn={!!user} onRequestLogin={openLogin} />
               )}
 
               <Footer />
@@ -227,6 +229,8 @@ function RJournal({ user }) {
         />
 
         <OrientationGuard />
+
+        <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
       </div>
     </ThemeContext.Provider>
   );
