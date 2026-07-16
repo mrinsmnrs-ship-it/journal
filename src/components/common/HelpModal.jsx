@@ -13,15 +13,15 @@ import LightbulbIcon from "./LightbulbIcon.jsx";
 const STEPS = [
   {
     title: "Log Trade",
-    body: "Catat setiap transaksi: simbol, arah (buy/sell), alasan masuk, risiko, dan hasil R. Semakin lengkap datanya, semakin akurat statistik di Dashboard.",
+    body: "Record every trade: symbol, direction (buy/sell), entry reason, risk, and R result. The more complete the data, the more accurate your Dashboard statistics.",
   },
   {
     title: "History",
-    body: "Lihat kembali semua trade yang sudah dicatat, lengkap dengan foto chart, catatan, dan emosi saat itu. Bisa difilter berdasarkan periode.",
+    body: "Look back at every trade you've logged, complete with chart screenshots, notes, and the emotion you felt at the time. Can be filtered by period.",
   },
   {
     title: "Dashboard",
-    body: "Ringkasan performa: win rate, rata-rata R, dan tren dari waktu ke waktu — bantu melihat pola sebelum mengulang kesalahan yang sama.",
+    body: "A performance summary: win rate, average R, and trends over time — helps you spot patterns before repeating the same mistakes.",
   },
 ];
 
@@ -61,7 +61,7 @@ export default function HelpModal({ open, onClose }) {
           <motion.div
             role="dialog"
             aria-modal="true"
-            aria-label="Petunjuk penggunaan"
+            aria-label="How to use"
             onClick={(e) => e.stopPropagation()}
             initial={{ opacity: 0, scale: 0.94, filter: "blur(10px)" }}
             animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
@@ -79,7 +79,7 @@ export default function HelpModal({ open, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              aria-label="Tutup"
+              aria-label="Close"
               style={{
                 position: "absolute", top: 16, right: 16,
                 background: "transparent", border: "none", cursor: "pointer",
@@ -91,7 +91,7 @@ export default function HelpModal({ open, onClose }) {
 
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
               <LightbulbIcon size={20} style={{ color: C.btnAccent }} />
-              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Petunjuk Penggunaan</h2>
+              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>How to Use</h2>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
