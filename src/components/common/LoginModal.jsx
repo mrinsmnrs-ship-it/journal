@@ -1,12 +1,3 @@
-// ============================================================================
-// components/common/LoginModal.jsx
-// -----------------------------------------------------------------------------
-// Popup login, dibuka dari ikon "person" di topbar (lihat TopbarActions.jsx).
-// Tampilan formnya sama seperti AuthScreen.jsx, bedanya: (1) mengikuti tema
-// dark/light aktif (bukan dikunci light), (2) tanpa video kupu-kupu, dan
-// (3) muncul sebagai popup, bukan halaman penuh -- pola modal (portal ke
-// <body>, backdrop gelap, kartu scale+blur) sama seperti HelpModal.jsx.
-// ============================================================================
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
@@ -140,17 +131,13 @@ export default function LoginModal({ open, onClose }) {
               .login-modal-submit:hover:not(:disabled) { box-shadow: ${C.shadowRaised}; }
             `}</style>
 
-            <div style={{ marginBottom: 4, display: "flex", alignItems: "center", gap: 6, fontSize: "clamp(18px, 6.2vw, 25px)" }}>
-              <span style={{ lineHeight: 1 }}>
-                <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Aftermath</span>
-                <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
-              </span>
+            <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 4, color: C.ink }}>
+              {mode === "login" ? "Log In" : "Sign Up"}
             </div>
             <div style={{ fontSize: 12, color: C.muted, marginBottom: 20 }}>
               {mode === "login" ? "Log in to sync your trades." : "Create an account to get started."}
             </div>
 
-            {/* Segmented tabs — sama seperti AuthScreen */}
             <div style={{
               display: "flex", background: C.paperSoft, borderRadius: 0, padding: 4, marginBottom: 20,
             }}>
@@ -272,4 +259,4 @@ export default function LoginModal({ open, onClose }) {
   );
 
   return createPortal(content, document.body);
-  }
+                    }
