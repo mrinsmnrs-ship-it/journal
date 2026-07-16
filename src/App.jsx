@@ -23,7 +23,6 @@ import OrientationGuard from "./components/layout/OrientationGuard.jsx";
 import LogTradeForm from "./components/trade/LogTradeForm.jsx";
 import JournalList from "./components/JournalList.jsx";
 import Dashboard from "./components/dashboard/Dashboard.jsx";
-import CircularText from "./components/common/CircularText.jsx";
 
 export default function App() {
   const [user, setUser] = useState(undefined);
@@ -199,7 +198,7 @@ async function toggleTheme() {
 
           <PerfMarquee stats={stats} />
 
-          {(!isDesktop && (tab === "journal" || tab === "dashboard")) && (
+          {(tab === "journal" || tab === "dashboard") && (
             <PeriodFilterBar
               period={tab === "journal" ? journalPeriod : dashboardPeriod}
               setPeriod={tab === "journal" ? setJournalPeriod : setDashboardPeriod}
@@ -209,24 +208,9 @@ async function toggleTheme() {
           )}
 
           <div className="main-area" style={{ overflowX: "hidden" }}>
-            <div className={`main-area-inner${isDesktop ? " desktop-columns-mode" : ""}`}>
+            <div className="main-area-inner">
               {!loaded ? (
                 <div style={{ color: C.faint, fontSize: 14 }}>Loading…</div>
-              ) : isDesktop ? (
-                <>
-                  <PeriodFilterBar period={dashboardPeriod} setPeriod={setDashboardPeriod} customRange={dashboardCustomRange} setCustomRange={setDashboardCustomRange} />
-                  <div className="desktop-columns">
-                    <div className="desktop-column">
-                      <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
-                    </div>
-                    <div className="desktop-column">
-                      <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => {}} period={dashboardPeriod} customRange={dashboardCustomRange} />
-                    </div>
-                    <div className="desktop-column">
-                      <Dashboard trades={trades} period={dashboardPeriod} customRange={dashboardCustomRange} />
-                    </div>
-                  </div>
-                </>
               ) : tab === "log" ? (
                 <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
               ) : tab === "journal" ? (
@@ -250,10 +234,6 @@ async function toggleTheme() {
           indicator={navIndicator}
           accentColor={C.btnAccent}
         />
-
-        <div className="circular-text-dock">
-          <CircularText text="STAY DISCIPLINED * STAY CONSISTENT *" onHover="speedUp" spinDuration={20} />
-        </div>
 
         <OrientationGuard />
       </div>
