@@ -33,7 +33,7 @@ export default function App() {
     return unsub;
   }, []);
   if (user === undefined) {
-    return <LoadingScreen label="Loading" />;
+    return <LoadingScreen />;
   }
   return <RJournal user={user} />;
 }
@@ -203,7 +203,7 @@ function RJournal({ user }) {
           <div className="main-area" style={{ overflowX: "hidden" }}>
             <div className="main-area-inner">
               {!loaded ? (
-                <LoadingScreen label="Syncing" />
+                <LoadingScreen />
               ) : tab === "log" ? (
                 <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} isLoggedIn={!!user} onRequestLogin={openLogin} />
               ) : tab === "journal" ? (
