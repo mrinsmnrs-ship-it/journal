@@ -135,7 +135,7 @@ export default function LoginModal({ open, onClose }) {
             </div>
 
             <div style={{
-              display: "flex", background: C.paperSoft, borderRadius: 0, padding: 4, marginBottom: 20,
+              display: "flex", background: C.paperSoft, border: `1px solid ${C.line}`, borderRadius: 0, padding: 4, marginBottom: 20,
             }}>
               {["login", "signup"].map((m) => (
                 <button
@@ -220,7 +220,7 @@ export default function LoginModal({ open, onClose }) {
                 disabled={busy}
                 style={{
                   width: "100%", padding: "13px 0", borderRadius: 0, border: "none",
-                  background: C.btnAccent, color: "#FFFFFF", fontWeight: 700, fontSize: 15,
+                  background: C.btnAccent, color: "#FFFFFF", fontFamily: SANS, fontWeight: 700, fontSize: 15,
                   cursor: busy ? "not-allowed" : "pointer", opacity: busy ? 0.6 : 1,
                   boxShadow: C.shadowCard,
                   transition: "background-color 0.15s ease, color 0.15s ease",
