@@ -188,7 +188,7 @@ export default function RiskRPanel({ form, updateForm }) {
                   width: "min(85vw, 280px)", maxWidth: 280, maxHeight: "80vh",
                   display: "flex", flexDirection: "column",
                   color: C.ink,
-                  background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0,
+                  background: C.paperSoftLight, border: `1px solid ${C.line}`, borderRadius: 0,
                   boxShadow: C.shadowModal,
                 }}
               >
@@ -199,7 +199,7 @@ export default function RiskRPanel({ form, updateForm }) {
                   }}>Total R</div>
                   <div
                     style={{
-                      width: "100%", boxSizing: "border-box", background: C.paperSoft,
+                      width: "100%", boxSizing: "border-box", background: C.inputBg,
                       border: `1px solid ${C.line}`,
                       borderRadius: 0, height: 40, padding: "0 12px",
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 1,
@@ -261,20 +261,22 @@ export default function RiskRPanel({ form, updateForm }) {
                       <RotateCcw size={13} />
                     </button>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 22, marginBottom: 4 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, marginBottom: 6 }}>
                     <div style={{ width: 16, flexShrink: 0 }} />
                     <div style={{
                       flex: 1, fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
                       color: C.muted, textTransform: "capitalize", textAlign: "left",
+                      position: "relative", top: 9,
                     }}>R Partial</div>
                     <div style={{
                       flex: 1, fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
                       color: C.muted, textTransform: "capitalize", textAlign: "left",
+                      position: "relative", top: 9,
                     }}>Qty %</div>
                     <div style={{ width: 28, flexShrink: 0 }} />
                   </div>
                 </div>
-                <div style={{ padding: "4px 16px 16px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
+                <div style={{ padding: "12px 16px 16px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
                   {partialRows.map((row, idx) => (
                     <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                       <div style={{ width: 16, flexShrink: 0, fontFamily: SANS, fontSize: 12, fontWeight: 600, color: C.muted }}>
