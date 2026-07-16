@@ -1,6 +1,6 @@
 // src/components/trade/LogTradeForm.jsx
 import React, { useRef } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Lock } from "lucide-react";
 import { useTheme } from "../../theme/tokens.js";
 import Field from "../common/Field.jsx";
 import PillToggle from "../common/PillToggle.jsx";
@@ -10,10 +10,43 @@ import TagSelect from "../TagSelect.jsx";
 import RiskRPanel from "./RiskRPanel.jsx";
 import EmotionSlider from "../../EmotionSlider.jsx";
 
-export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, symbolOptions, onAddSymbolOption, onDeleteSymbolOption, onAddImages, onRemoveImage, imageUploading }) {
+export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, symbolOptions, onAddSymbolOption, onDeleteSymbolOption, onAddImages, onRemoveImage, imageUploading, isLoggedIn = true, onRequestLogin }) {
   const C = useTheme();
   const inputStyle = useInputStyle();
   const fileInputRef = useRef(null);
+
+  if (!isLoggedIn) {
+    return (
+      <div style={{
+        background: C.paperSoftLight, borderRadius: 0, padding: "48px 24px", width: "100%",
+        maxWidth: "100%", boxSizing: "border-box", border: `1px solid ${C.line}`, boxShadow: C.shadowCard,
+        display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 14,
+      }}>
+        <div style={{
+          width: 48, height: 48, borderRadius: "50%", background: C.paperSoft,
+          display: "flex", alignItems: "center", justifyContent: "center", border: `1px solid ${C.line}`,
+        }}>
+          <Lock size={20} color={C.faint} />
+        </div>
+        <div style={{ fontSize: 17, fontWeight: 700, color: C.ink }}>Log in to add a trade</div>
+        <div style={{ fontSize: 13.5, color: C.muted, maxWidth: 320, lineHeight: 1.5 }}>
+          Create a free account or log in first so your trades are saved and synced to your journal.
+        </div>
+        <button
+          type="button"
+          onClick={onRequestLogin}
+          style={{
+            marginTop: 6, padding: "12px 28px", borderRadius: 0, border: "none",
+            background: C.btnAccent, color: C.btnAccentTextActive, fontWeight: 700, fontSize: 14.5,
+            cursor: "pointer", boxShadow: C.shadowCard,
+          }}
+        >
+          Log In / Sign Up
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div style={{ background: C.paperSoftLight, borderRadius: 0, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16, border: `1px solid ${C.line}`, boxShadow: C.shadowCard }}>
       <Field label="Date">
