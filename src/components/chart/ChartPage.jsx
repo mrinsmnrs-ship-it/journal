@@ -19,7 +19,7 @@ function toTradingViewSymbol(raw) {
   return `NASDAQ:${s}`;
 }
 
-function TradingViewWidget({ symbol, themeMode }) {
+function TradingViewWidget({ symbol, themeMode, C }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -44,11 +44,29 @@ function TradingViewWidget({ symbol, themeMode }) {
       calendar: false,
       hide_side_toolbar: false,
       support_host: "https://www.tradingview.com",
+      toolbar_bg: C.bg,
+      // Match the widget's colors to the app's own theme tokens instead of
+      // TradingView's default light/dark palette — background, grid lines,
+      // axis text, and win/loss candle colors all pull straight from C.
+      overrides: {
+        "paneProperties.background": C.bg,
+        "paneProperties.backgroundType": "solid",
+        "paneProperties.vertGridProperties.color": C.lineSoft,
+        "paneProperties.horzGridProperties.color": C.lineSoft,
+        "scalesProperties.textColor": C.muted,
+        "scalesProperties.lineColor": C.line,
+        "mainSeriesProperties.candleStyle.upColor": C.sage,
+        "mainSeriesProperties.candleStyle.downColor": C.rustRed,
+        "mainSeriesProperties.candleStyle.borderUpColor": C.sage,
+        "mainSeriesProperties.candleStyle.borderDownColor": C.rustRed,
+        "mainSeriesProperties.candleStyle.wickUpColor": C.sage,
+        "mainSeriesProperties.candleStyle.wickDownColor": C.rustRed,
+      },
     });
     container.appendChild(script);
 
     return () => { container.innerHTML = ""; };
-  }, [symbol, themeMode]);
+  }, [symbol, themeMode, C]);
 
   return (
     <div className="tradingview-widget-container" ref={containerRef} style={{ height: "100%", width: "100%" }} />
@@ -131,7 +149,7 @@ export default function ChartPage({ symbolOptions, themeMode }) {
           borderRadius: 0, boxShadow: C.shadowCard, overflow: "hidden",
         }}
       >
-        <TradingViewWidget symbol={activeSymbol} themeMode={themeMode} />
+        <TradingViewWidget symbol={activeSymbol} themeMode={themeMode} C={C} />
       </div>
     </div>
   );
