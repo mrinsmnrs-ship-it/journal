@@ -37,10 +37,10 @@ export const DARK = {
   ...SHADOW_DARK,
 };
 
-export const GITHUB_SANS = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif";
-export const GITHUB_MONO = "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace";
+export const GITHUB_SANS = "'Source Code Pro', ui-monospace, monospace";
+export const GITHUB_MONO = "'Source Code Pro', ui-monospace, monospace";
 export const CHAT_FONT = GITHUB_SANS;
-export const LOGO_FONT = "'Inter', sans-serif"; // reserved for the "Aftermath" wordmark only — logo tetap beda dari UI
+export const LOGO_FONT = "'Press Start 2P', cursive"; // reserved for the "Aftermath Journey" wordmark only — logo tetap beda dari UI
 export const LABEL_FONT = GITHUB_SANS; // label field ikut sistem font GitHub juga
 export const SERIF = CHAT_FONT; // font disatukan dengan halaman lain
 export const SANS = CHAT_FONT;  // font disatukan dengan halaman lain
