@@ -5,7 +5,7 @@ import { loadUserData, saveUserData } from "./store";
 import { getAppStyles } from "./styles/index.js";
 
 import {
-  SANS, DESKTOP_BREAKPOINT, NAV, NAV_DESKTOP,
+  SANS, DESKTOP_BREAKPOINT, NAV,
   ThemeContext, getPageBackground, THEME_ORDER, LIGHT, DARK,
 } from "./theme/tokens.js";
 import { uid, fileToCompressedDataURL } from "./utils/format.js";
@@ -23,7 +23,6 @@ import OrientationGuard from "./components/layout/OrientationGuard.jsx";
 import LogTradeForm from "./components/trade/LogTradeForm.jsx";
 import JournalList from "./components/JournalList.jsx";
 import Dashboard from "./components/dashboard/Dashboard.jsx";
-import ChartPage from "./components/chart/ChartPage.jsx";
 import CircularText from "./components/common/CircularText.jsx";
 
 export default function App() {
@@ -46,8 +45,6 @@ function RJournal({ user }) {
   const [tab, setTab] = useState("log");
   const navRefs = useRef({});
   const [navIndicator, setNavIndicator] = useState({ left: 0, width: 0 });
-  const desktopNavRefs = useRef({});
-  const [desktopNavIndicator, setDesktopNavIndicator] = useState({ left: 0, width: 0 });
   const [isDesktop, setIsDesktop] = useState(
     typeof window !== "undefined" ? window.innerWidth > DESKTOP_BREAKPOINT : true
   );
@@ -183,16 +180,6 @@ async function toggleTheme() {
     return () => window.removeEventListener("resize", updateNavIndicator);
   }, [tab]);
 
-  useEffect(() => {
-    function updateDesktopNavIndicator() {
-      const activeKey = desktopNavRefs.current[tab] ? tab : "log";
-      const el = desktopNavRefs.current[activeKey];
-      if (el) setDesktopNavIndicator({ left: el.offsetLeft, width: el.offsetWidth });
-    }
-    updateDesktopNavIndicator();
-    window.addEventListener("resize", updateDesktopNavIndicator);
-    return () => window.removeEventListener("resize", updateDesktopNavIndicator);
-  }, [tab, isDesktop]);
   const C = themeMode === "dark" ? DARK : LIGHT;
 
   return (
@@ -201,12 +188,6 @@ async function toggleTheme() {
         <style>{getAppStyles(C, SANS)}</style>
         <div className="app-shell">
           <DesktopTopbar
-            navItems={NAV_DESKTOP}
-            activeKey={tab}
-            onSelect={setTab}
-            registerItemRef={(key, el) => { desktopNavRefs.current[key] = el; }}
-            indicator={desktopNavIndicator}
-            accentColor={C.btnAccent}
             themeMode={themeMode}
             onToggleTheme={toggleTheme}
             onLogout={handleLogout}
@@ -218,7 +199,7 @@ async function toggleTheme() {
 
           <PerfMarquee stats={stats} />
 
-          {(tab === "journal" || tab === "dashboard") && (
+          {(!isDesktop && (tab === "journal" || tab === "dashboard")) && (
             <PeriodFilterBar
               period={tab === "journal" ? journalPeriod : dashboardPeriod}
               setPeriod={tab === "journal" ? setJournalPeriod : setDashboardPeriod}
@@ -228,17 +209,29 @@ async function toggleTheme() {
           )}
 
           <div className="main-area" style={{ overflowX: "hidden" }}>
-            <div className="main-area-inner">
+            <div className={`main-area-inner${isDesktop ? " desktop-columns-mode" : ""}`}>
               {!loaded ? (
                 <div style={{ color: C.faint, fontSize: 14 }}>Loading…</div>
+              ) : isDesktop ? (
+                <div className="desktop-columns">
+                  <div className="desktop-column">
+                    <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
+                  </div>
+                  <div className="desktop-column">
+                    <PeriodFilterBar period={journalPeriod} setPeriod={setJournalPeriod} customRange={journalCustomRange} setCustomRange={setJournalCustomRange} />
+                    <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => {}} period={journalPeriod} customRange={journalCustomRange} />
+                  </div>
+                  <div className="desktop-column">
+                    <PeriodFilterBar period={dashboardPeriod} setPeriod={setDashboardPeriod} customRange={dashboardCustomRange} setCustomRange={setDashboardCustomRange} />
+                    <Dashboard trades={trades} period={dashboardPeriod} customRange={dashboardCustomRange} />
+                  </div>
+                </div>
               ) : tab === "log" ? (
                 <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
               ) : tab === "journal" ? (
                 <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} period={journalPeriod} customRange={journalCustomRange} />
               ) : tab === "dashboard" ? (
                 <Dashboard trades={trades} period={dashboardPeriod} customRange={dashboardCustomRange} />
-              ) : tab === "chart" ? (
-                <ChartPage symbolOptions={symbolOptions} themeMode={themeMode} />
               ) : (
                 <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
               )}
