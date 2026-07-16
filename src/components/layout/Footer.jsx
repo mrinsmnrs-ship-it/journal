@@ -23,13 +23,7 @@ export default function Footer() {
         borderTop: `1px solid ${C.line}`,
       }}
     >
-      <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.04em" }}>
-        Aftermath
-      </span>
-      <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.03em" }}>
-        Journey
-      </span>
-      <span> &nbsp;·&nbsp; &copy; {year}</span>
+      <span>&copy; {year} Aftermath. All rights reserved.</span>
     </div>
   );
 }
