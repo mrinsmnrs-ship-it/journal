@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus } from "lucide-react";
-import { SERIF, useTheme } from "../theme/tokens.js";
+import { SERIF, SANS, useTheme } from "../theme/tokens.js";
 import { fmtR } from "../utils/format.js";
 import { parseISO, startOfWeek, startOfMonth, startOfYear } from "../utils/date.js";
 import TradeCard from "./TradeCard.jsx";
@@ -39,11 +39,11 @@ export default function JournalList({ trades, onDelete, onGoLog, period, customR
   if (trades.length === 0) {
     return (
       <div style={{ marginTop: 30, textAlign: "center", color: C.muted }}>
-        <div style={{ fontSize: 16, marginBottom: 16 }}>No trades logged yet.</div>
+        <div style={{ fontSize: 16, marginBottom: 16, fontFamily: SANS }}>No trades logged yet.</div>
         <button onClick={onGoLog} style={{
           display: "inline-flex", alignItems: "center", gap: 8, background: "transparent",
           border: `1px dashed ${C.line}`, color: C.inkSoft, borderRadius: 0, padding: "12px 20px",
-          fontWeight: 600, fontSize: 13, cursor: "pointer",
+          fontFamily: SANS, fontWeight: 600, fontSize: 13, cursor: "pointer",
         }}><Plus size={16} /> Log your first trade</button>
       </div>
     );
