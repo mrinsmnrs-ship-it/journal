@@ -6,7 +6,7 @@ import { getAppStyles } from "./styles/index.js";
 
 import {
   SANS, DESKTOP_BREAKPOINT, NAV,
-  ThemeContext, getPageBackground, THEME_ORDER, LIGHT, DARK,
+  ThemeContext, getPageBackground, DARK,
 } from "./theme/tokens.js";
 import { uid, fileToCompressedDataURL } from "./utils/format.js";
 import { todayISO } from "./utils/date.js";
@@ -48,7 +48,6 @@ function RJournal({ user }) {
     typeof window !== "undefined" ? window.innerWidth > DESKTOP_BREAKPOINT : true
   );
   const [trades, setTrades] = useState([]);
-  const [themeMode, setThemeMode] = useState("light");
   const [loaded, setLoaded] = useState(false);
   const [symbolOptions, setSymbolOptions] = useState([]);
   const [form, setForm] = useState({
@@ -67,7 +66,6 @@ function RJournal({ user }) {
     (async () => {
       const data = await loadUserData(user.uid);
       setTrades(data.trades);
-      setThemeMode(THEME_ORDER.includes(data.theme) ? data.theme : "light");
       setSymbolOptions(data.symbolOptions);
       setLoaded(true);
     })();
@@ -96,11 +94,6 @@ function RJournal({ user }) {
     };
   }, []);
 
-async function toggleTheme() {
-    const next = THEME_ORDER[(THEME_ORDER.indexOf(themeMode) + 1) % THEME_ORDER.length];
-    setThemeMode(next);
-    if (user) await saveUserData(user.uid, { theme: next });
-  }
   function updateForm(key, val) { setForm((f) => ({ ...f, [key]: val })); }
   function toggleEmotion(e) {
     setForm((f) => ({ ...f, emotion: f.emotion === e ? "" : e }));
@@ -179,22 +172,20 @@ async function toggleTheme() {
     return () => window.removeEventListener("resize", updateNavIndicator);
   }, [tab]);
 
-  const C = themeMode === "dark" ? DARK : LIGHT;
+  const C = DARK;
 
   return (
     <ThemeContext.Provider value={C}>
-      <div className="app-root" style={{ ...getPageBackground(themeMode, C), minHeight: isDesktop ? "100vh" : undefined, color: C.ink, fontFamily: SANS }}>
+      <div className="app-root" style={{ ...getPageBackground(C), minHeight: isDesktop ? "100vh" : undefined, color: C.ink, fontFamily: SANS }}>
         <style>{getAppStyles(C, SANS)}</style>
         <div className="app-shell">
           <DesktopTopbar
-            themeMode={themeMode}
-            onToggleTheme={toggleTheme}
             onLogout={handleLogout}
             userEmail={user?.email}
             isLoggedIn={!!user}
           />
 
-          <MobileTopbar themeMode={themeMode} onToggleTheme={toggleTheme} onLogout={handleLogout} isLoggedIn={!!user} />
+          <MobileTopbar onLogout={handleLogout} isLoggedIn={!!user} />
 
           <PerfMarquee stats={stats} />
 
