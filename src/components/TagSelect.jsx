@@ -97,7 +97,7 @@ export default function TagSelect({ value, onChange, options, onAddOption, onDel
             style={{
               width: "min(88vw, 320px)", maxWidth: 320, maxHeight: "min(80vh, 440px)",
               display: "flex", flexDirection: "column", color: C.ink,
-              background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0,
+              background: C.paperSoftLight, border: `1px solid ${C.line}`, borderRadius: 0,
               boxShadow: C.shadowModal,
             }}>
             <div style={{ padding: "14px 14px 12px 14px", flexShrink: 0, borderBottom: `1px solid ${C.line}` }}>
@@ -212,4 +212,3 @@ export default function TagSelect({ value, onChange, options, onAddOption, onDel
     </div>
   );
               }
-                          
