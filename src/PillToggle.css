@@ -15,21 +15,18 @@
 
 .pill-toggle-fill {
   position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: 260px;
-  height: 260px;
-  margin-left: -130px;
-  border-radius: 0;
+  inset: 0;
+  border-radius: inherit;
   background: var(--pill-fill);
-  transform: translateY(45%) scale(0);
+  transform: scaleY(0);
+  transform-origin: bottom;
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   pointer-events: none;
   z-index: 1;
 }
 
 .pill-toggle[data-active="true"] .pill-toggle-fill {
-  transform: translateY(45%) scale(1);
+  transform: scaleY(1);
 }
 
 .pill-toggle-label-stack {
