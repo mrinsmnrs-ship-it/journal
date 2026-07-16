@@ -382,18 +382,12 @@ export default function Dashboard({ trades, period, customRange }) {
           <div style={{ marginBottom: 22 }}>
             <BarBox>
               <BarRow isFirst label="Total Trades" display={stats.total} />
-              <BarRow label="Adherence" percent={stats.disciplineScore} display={`${Math.round(stats.disciplineScore)}%`} />
-              <BarRow label="Win Rate" percent={stats.winRate} display={`${stats.winRate.toFixed(1)}%`} />
-              <BarRow label="Risk Consistency" percent={stats.riskConsistency} display={`${Math.round(stats.riskConsistency)}%`} />
+              <BarRow label="Total R" display={fmtR(stats.totalR)} />
+              <BarRow label="Win Rate" display={`${stats.winRate.toFixed(1)}%`} />
+              <BarRow label="Expectancy" display={fmtR(stats.expectancy)} />
+              <BarRow label="Avg Win" display={fmtR(stats.avgWin)} />
+              <BarRow label="Avg Loss" display={fmtR(stats.avgLoss)} />
             </BarBox>
-          </div>
-
-          <div style={{ marginBottom: 22 }}>
-            <div style={{ padding: "0 4px", marginBottom: 16 }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Performance by Symbol</div>
-              <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Total R per simbol, diurutkan dari yang paling profitable</div>
-            </div>
-            <SymbolPerformanceBars trades={filteredTrades} />
           </div>
 
           <div style={{ marginBottom: 22 }}>
@@ -408,6 +402,14 @@ export default function Dashboard({ trades, period, customRange }) {
                   <BarRow key={s.metric} isFirst={i === 0} label={s.metric} percent={s.value} display={`${s.value}%`} />
                 ))}
             </BarBox>
+          </div>
+
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ padding: "0 4px", marginBottom: 16 }}>
+              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Performance by Symbol</div>
+              <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Total R per symbol, sorted by most profitable</div>
+            </div>
+            <SymbolPerformanceBars trades={filteredTrades} />
           </div>
 
           {availableYears.length > 0 && (
