@@ -13,7 +13,6 @@ import { useState } from "react";
 import { User, LogOut } from "lucide-react";
 import { useTheme } from "../../theme/tokens.js";
 import ConfirmModal from "./ConfirmModal.jsx";
-import LoginModal from "./LoginModal.jsx";
 
 // Style tombol ikon topbar: tanpa background/border sama sekali, jadi
 // tidak ada efek "kotak" saat ditekan -- feedback tekan cuma dari
@@ -25,10 +24,9 @@ const iconButtonStyle = {
   borderRadius: 0, padding: 0, cursor: "pointer",
 };
 
-export default function TopbarActions({ onLogout, isLoggedIn = true }) {
+export default function TopbarActions({ onLogout, isLoggedIn = true, onOpenLogin }) {
   const C = useTheme();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
 
   return (
     <>
@@ -36,7 +34,7 @@ export default function TopbarActions({ onLogout, isLoggedIn = true }) {
         <button
           type="button"
           style={iconButtonStyle}
-          onClick={() => (isLoggedIn ? setShowLogoutConfirm(true) : setShowLogin(true))}
+          onClick={() => (isLoggedIn ? setShowLogoutConfirm(true) : onOpenLogin?.())}
           aria-label={isLoggedIn ? "Log out" : "Log in"}
           title={isLoggedIn ? "Log out" : "Log in"}
         >
@@ -53,8 +51,6 @@ export default function TopbarActions({ onLogout, isLoggedIn = true }) {
         confirmLabel="Yes, log out"
         cancelLabel="Cancel"
       />
-
-      <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
     </>
   );
 }
