@@ -15,8 +15,24 @@ import {
   computeEquityCurve, computeDailyR, computeSymbolStats, computeStats,
 } from "../../utils/stats.js";
 import Counter from "../../Counter.jsx";
+import CountUp from "../../CountUp.jsx";
 
 // ---- Dashboard ----
+
+// Wraps CountUp with the +/- prefix and %/R suffix formatting the stats
+// panels need, so the numbers themselves animate (spring, via CountUp)
+// whenever the underlying value changes — e.g. switching the period
+// filter — instead of just snapping to the new number.
+function AnimatedStat({ value, decimals = 0, prefix = "", suffix = "", separator = "" }) {
+  const v = Number(value) || 0;
+  return (
+    <>
+      {v > 0 ? prefix : ""}
+      <CountUp to={v} decimals={decimals} separator={separator} duration={0.8} />
+      {suffix}
+    </>
+  );
+}
 
 // Shared boxed-list style used by Summary, Performance by Symbol, and
 // Trader Scorecard so all three read as one consistent visual language
@@ -71,7 +87,7 @@ function BarRow({ label, percent, display, isFirst, sub }) {
               opacity of 0.7 rather than full strength — these bars are static and
               never get pressed, so they should always read as the calmer, un-pressed
               state, not the bold/vivid pressed one. */}
-          <div style={{ width: `${clamp(percent, 0, 100)}%`, height: "100%", background: C.ink, opacity: 0.7 }} />
+          <div style={{ width: `${clamp(percent, 0, 100)}%`, height: "100%", background: C.ink, opacity: 0.7, transition: "width 0.7s cubic-bezier(.4,0,.2,1)" }} />
         </div>
         <span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 12, color: C.ink, minWidth: 44, textAlign: "right", flexShrink: 0 }}>
           {display}
@@ -272,10 +288,12 @@ function SymbolPerformanceBars({ trades }) {
           isFirst={i === 0}
           label={item.symbol}
           percent={item.winRate}
-          display={`${item.winRate.toFixed(0)}%`}
+          display={<AnimatedStat value={item.winRate} decimals={0} suffix="%" />}
           sub={
             <>
-              <span style={{ color: item.totalR > 0 ? C.ink : C.faint, fontWeight: 700 }}>{fmtR(item.totalR)}</span>
+              <span style={{ color: item.totalR > 0 ? C.ink : C.faint, fontWeight: 700 }}>
+                <AnimatedStat value={item.totalR} decimals={2} prefix="+" suffix="R" />
+              </span>
               {" "}&middot; {item.count} trade{item.count === 1 ? "" : "s"}
             </>
           }
@@ -381,12 +399,12 @@ export default function Dashboard({ trades, period, customRange }) {
           </div>
           <div style={{ marginBottom: 22 }}>
             <BarBox>
-              <BarRow isFirst label="Total Trades" display={stats.total} />
-              <BarRow label="Total R" display={fmtR(stats.totalR)} />
-              <BarRow label="Win Rate" display={`${stats.winRate.toFixed(1)}%`} />
-              <BarRow label="Expectancy" display={fmtR(stats.expectancy)} />
-              <BarRow label="Avg Win" display={fmtR(stats.avgWin)} />
-              <BarRow label="Avg Loss" display={fmtR(stats.avgLoss)} />
+              <BarRow isFirst label="Total Trades" display={<AnimatedStat value={stats.total} decimals={0} />} />
+              <BarRow label="Total R" display={<AnimatedStat value={stats.totalR} decimals={2} prefix="+" suffix="R" />} />
+              <BarRow label="Win Rate" display={<AnimatedStat value={stats.winRate} decimals={1} suffix="%" />} />
+              <BarRow label="Expectancy" display={<AnimatedStat value={stats.expectancy} decimals={2} prefix="+" suffix="R" />} />
+              <BarRow label="Avg Win" display={<AnimatedStat value={stats.avgWin} decimals={2} prefix="+" suffix="R" />} />
+              <BarRow label="Avg Loss" display={<AnimatedStat value={stats.avgLoss} decimals={2} suffix="R" />} />
             </BarBox>
           </div>
 
@@ -399,7 +417,7 @@ export default function Dashboard({ trades, period, customRange }) {
               {stats.scorecard
                 .filter((s) => s.metric !== "Win Rate")
                 .map((s, i) => (
-                  <BarRow key={s.metric} isFirst={i === 0} label={s.metric} percent={s.value} display={`${s.value}%`} />
+                  <BarRow key={s.metric} isFirst={i === 0} label={s.metric} percent={s.value} display={<AnimatedStat value={s.value} decimals={0} suffix="%" />} />
                 ))}
             </BarBox>
           </div>
