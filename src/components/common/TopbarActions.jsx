@@ -11,7 +11,7 @@
 // ============================================================================
 import { useState } from "react";
 import { User, LogOut } from "lucide-react";
-import { useTheme, THEME_META } from "../../theme/tokens.js";
+import { useTheme } from "../../theme/tokens.js";
 import ConfirmModal from "./ConfirmModal.jsx";
 import LoginModal from "./LoginModal.jsx";
 
@@ -25,24 +25,14 @@ const iconButtonStyle = {
   borderRadius: 0, padding: 0, cursor: "pointer",
 };
 
-export default function TopbarActions({ themeMode, onToggleTheme, onLogout, isLoggedIn = true }) {
+export default function TopbarActions({ onLogout, isLoggedIn = true }) {
   const C = useTheme();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  const { label: themeLabel, Icon: ThemeIcon } = THEME_META[themeMode] || THEME_META.light;
 
   return (
     <>
       <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-        <button
-          type="button"
-          style={iconButtonStyle}
-          onClick={onToggleTheme}
-          aria-label={`Current theme: ${themeLabel}`}
-          title={`Current theme: ${themeLabel}`}
-        >
-          <ThemeIcon size={15} style={{ color: C.ink }} />
-        </button>
         <button
           type="button"
           style={iconButtonStyle}
