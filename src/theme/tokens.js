@@ -7,7 +7,7 @@
 // baca warna tema aktif tanpa harus lewat props satu-satu (prop drilling).
 // ============================================================================
 import { createContext, useContext } from "react";
-import { Sun, Moon, PencilLine, BookOpen, LayoutDashboard } from "lucide-react";
+import { Sun, Moon, PencilLine, BookOpen, LayoutDashboard, LineChart } from "lucide-react";
 
 export const SHADOW_LIGHT = {
   shadowCard: "none",
@@ -67,6 +67,14 @@ export const NAV = [
   { key: "log", label: "Log Trade", icon: PencilLine },
   { key: "journal", label: "History", icon: BookOpen },
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+];
+
+// Desktop top nav gets an extra "Chart" tab (live TradingView chart) —
+// charting needs real screen space, so it's kept off the mobile dock nav
+// and only offered here.
+export const NAV_DESKTOP = [
+  ...NAV,
+  { key: "chart", label: "Chart", icon: LineChart },
 ];
 
 export const DESKTOP_BREAKPOINT = 820;
