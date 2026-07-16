@@ -37,8 +37,8 @@ export const DARK = {
   ...SHADOW_DARK,
 };
 
-export const GITHUB_SANS = "'Source Code Pro', ui-monospace, monospace";
-export const GITHUB_MONO = "'Source Code Pro', ui-monospace, monospace";
+export const GITHUB_SANS = "'Geist Pixel', ui-monospace, monospace";
+export const GITHUB_MONO = "'Geist Pixel', ui-monospace, monospace";
 export const CHAT_FONT = GITHUB_SANS;
 export const LOGO_FONT = "'Press Start 2P', cursive"; // reserved for the "Aftermath Journey" wordmark only — logo tetap beda dari UI
 export const LABEL_FONT = GITHUB_SANS; // label field ikut sistem font GitHub juga
