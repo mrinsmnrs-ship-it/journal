@@ -306,7 +306,7 @@ function YearStepper({ year, years, onChange }) {
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "center",
         height: stepHeight, minWidth: 90, padding: "0 14px",
-        background: C.inputBg, border: `1px solid ${C.btnAccentBorder}`, borderRadius: 0,
+        background: C.inputBg, border: `1px solid ${C.line}`, borderRadius: 0,
       }}>
         <Counter
           value={year}
