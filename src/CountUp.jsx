@@ -17,16 +17,12 @@ export default function CountUp({
   const ref = useRef(null);
   const motionValue = useMotionValue(direction === 'down' ? to : from);
 
-  // Use duration+bounce directly instead of hand-rolled damping/stiffness.
-  // The old formula scaled damping and stiffness together in a way that
-  // kept the system heavily overdamped no matter what `duration` was set
-  // to, so the real settle time stayed around ~2s even when `duration`
-  // said 0.8 — the number just looked slow no matter how low you set it.
-  // duration+bounce is honored literally by the spring, so lowering
-  // `duration` now actually makes it faster.
+  const damping = 20 + 40 * (1 / duration);
+  const stiffness = 100 * (1 / duration);
+
   const springValue = useSpring(motionValue, {
-    duration: duration * 1000,
-    bounce: 0.15
+    damping,
+    stiffness
   });
 
   const isInView = useInView(ref, { once: true, margin: '0px' });
