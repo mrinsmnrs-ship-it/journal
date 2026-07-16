@@ -261,7 +261,7 @@ export default function RiskRPanel({ form, updateForm }) {
                       <RotateCcw size={13} />
                     </button>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 22, marginBottom: 6 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 22, marginBottom: 4 }}>
                     <div style={{ width: 16, flexShrink: 0 }} />
                     <div style={{
                       flex: 1, fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
@@ -274,7 +274,7 @@ export default function RiskRPanel({ form, updateForm }) {
                     <div style={{ width: 28, flexShrink: 0 }} />
                   </div>
                 </div>
-                <div style={{ padding: "12px 16px 16px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
+                <div style={{ padding: "4px 16px 16px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
                   {partialRows.map((row, idx) => (
                     <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                       <div style={{ width: 16, flexShrink: 0, fontFamily: SANS, fontSize: 12, fontWeight: 600, color: C.muted }}>
