@@ -9,8 +9,8 @@ export default function DesktopTopbar({ onLogout, userEmail, isLoggedIn, onOpenL
     <div className="desktop-topbar">
       <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 22, flexShrink: 0 }}>
         <span style={{ lineHeight: 1 }}>
-          <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: "-0.06em", color: C.ink }}>Aftermath</span>
-          <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
+          <span style={{ fontFamily: "'Press Start 2P', cursive", fontWeight: 400, letterSpacing: "-0.02em", color: C.ink }}>Aftermath</span>
+          <span style={{ fontFamily: "'Press Start 2P', cursive", fontWeight: 400, letterSpacing: "-0.02em", marginLeft: "0.15em", color: C.ink }}>Journey</span>
         </span>
       </div>
 
