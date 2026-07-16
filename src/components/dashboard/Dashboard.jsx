@@ -2,19 +2,18 @@
 // Performance dashboard: stat cards, equity curve, R-per-trade bar chart,
 // symbol performance, trader scorecard (radar), and trade calendar heatmap.
 // Shared between mobile and desktop layouts (styled responsively via CSS).
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import {
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
 } from "recharts";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SANS, SERIF, MONO, useTheme } from "../../theme/tokens.js";
 import { fmtR } from "../../utils/format.js";
-import { parseISO, startOfWeek, startOfMonth, startOfYear, clamp, tradeYears, fmtDateDisplay } from "../../utils/date.js";
+import { parseISO, startOfWeek, startOfMonth, startOfYear, clamp, fmtDateDisplay } from "../../utils/date.js";
 import {
   computeEquityCurve, computeDailyR, computeSymbolStats, computeStats,
 } from "../../utils/stats.js";
-import Counter from "../../Counter.jsx";
 import CountUp from "../../CountUp.jsx";
 
 // ---- Dashboard ----
@@ -171,103 +170,101 @@ function TradeRBarChart({ trades }) {
   );
 }
 
-function CalendarHeatmap({ trades, year }) {
+const CAL_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const CAL_WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
+const calPad = (n) => String(n).padStart(2, "0");
+
+// Month-grid trade calendar, styled like the DateField popup (chevron header,
+// weekday row, day cells) but rendered inline in the dashboard flow instead
+// of as a portal/overlay. Days are colored win/loss using the same ink
+// (win) / faint (loss) pair TradeCard uses for R numbers in History, rather
+// than a red/green heatmap.
+function TradeCalendarMonth({ trades }) {
   const C = useTheme();
-  const dailyMap = useMemo(
-    () => computeDailyR(trades.filter((t) => parseISO(t.date).getFullYear() === year)),
-    [trades, year]
-  );
+  const dailyMap = useMemo(() => computeDailyR(trades), [trades]);
 
-  const weeks = useMemo(() => {
-    const start = new Date(year, 0, 1);
-    const gridStart = new Date(start);
-    gridStart.setDate(start.getDate() - start.getDay());
-    const end = new Date(year, 11, 31);
-    const gridEnd = new Date(end);
-    gridEnd.setDate(end.getDate() + (6 - end.getDay()));
-
-    const cols = [];
-    let cur = new Date(gridStart);
-    while (cur <= gridEnd) {
-      const col = [];
-      for (let i = 0; i < 7; i++) {
-        const iso = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`;
-        col.push({ date: new Date(cur), iso, inYear: cur.getFullYear() === year });
-        cur.setDate(cur.getDate() + 1);
-      }
-      cols.push(col);
-    }
-    return cols;
-  }, [year]);
-
-  const maxAbs = useMemo(() => {
-    let m = 0;
-    dailyMap.forEach((v) => { m = Math.max(m, Math.abs(v.total)); });
-    return m || 1;
-  }, [dailyMap]);
-
-  const monthLabels = useMemo(() => {
-    const labels = [];
-    let lastMonth = -1;
-    weeks.forEach((col, i) => {
-      const first = col.find((d) => d.inYear);
-      if (first && first.date.getDate() <= 7 && first.date.getMonth() !== lastMonth) {
-        labels.push({ index: i, label: first.date.toLocaleString("en-US", { month: "short" }) });
-        lastMonth = first.date.getMonth();
-      }
+  // Default to the month of the most recent trade so the calendar opens
+  // somewhere with data, instead of always the current calendar month.
+  const initial = useMemo(() => {
+    if (!trades.length) return new Date();
+    let latest = parseISO(trades[0].date);
+    trades.forEach((t) => {
+      const d = parseISO(t.date);
+      if (d > latest) latest = d;
     });
-    return labels;
-  }, [weeks]);
+    return latest;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const [viewYear, setViewYear] = useState(initial.getFullYear());
+  const [viewMonth, setViewMonth] = useState(initial.getMonth());
 
-  const cell = 11, gap = 3;
+  const daysCount = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+  const rows = Math.ceil((daysCount + firstDay) / 7);
+  const cells = [
+    ...Array(firstDay).fill(null),
+    ...Array.from({ length: daysCount }, (_, i) => i + 1),
+  ];
+  while (cells.length < rows * 7) cells.push(null);
+
+  function prevMonth() {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear((y) => y - 1); } else setViewMonth((m) => m - 1);
+  }
+  function nextMonth() {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear((y) => y + 1); } else setViewMonth((m) => m + 1);
+  }
+
+  const navBtnStyle = { background: "transparent", border: "none", cursor: "pointer", color: C.inkSoft, padding: 4, display: "flex" };
 
   return (
-    <div style={{ overflowX: "auto", paddingBottom: 4 }}>
-      <div style={{ position: "relative", height: 14, marginBottom: 4, marginLeft: 22 }}>
-        {monthLabels.map((m) => (
-          <div key={m.index} style={{ position: "absolute", left: m.index * (cell + gap), fontFamily: SANS, fontSize: 10, color: C.muted }}>{m.label}</div>
+    <div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+        <button type="button" onClick={prevMonth} style={navBtnStyle} aria-label="Previous month">
+          <ChevronLeft size={18} />
+        </button>
+        <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 15, color: C.ink }}>{CAL_MONTHS[viewMonth]} {viewYear}</div>
+        <button type="button" onClick={nextMonth} style={navBtnStyle} aria-label="Next month">
+          <ChevronRight size={18} />
+        </button>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, marginBottom: 4 }}>
+        {CAL_WEEKDAYS.map((w, i) => (
+          <div key={i} style={{ textAlign: "center", fontFamily: SANS, fontSize: 11, fontWeight: 600, color: C.muted, padding: "2px 0" }}>{w}</div>
         ))}
       </div>
-      <div style={{ display: "flex", gap }}>
-        <div style={{ display: "flex", flexDirection: "column", gap, marginRight: 4 }}>
-          {["", "Mon", "", "Wed", "", "Fri", ""].map((d, i) => (
-            <div key={i} style={{ width: 18, height: cell, fontFamily: SANS, fontSize: 9, color: C.muted, lineHeight: `${cell}px` }}>{d}</div>
-          ))}
-        </div>
-        {weeks.map((col, ci) => (
-          <div key={ci} style={{ display: "flex", flexDirection: "column", gap }}>
-            {col.map((d, di) => {
-              const data = dailyMap.get(d.iso);
-              let bg = C.lineSoft;
-              let opacity = d.inYear ? 0.45 : 0;
-              if (d.inYear && data) {
-                const intensity = clamp(Math.abs(data.total) / maxAbs, 0.3, 1);
-                bg = data.total > 0 ? C.sage : data.total < 0 ? C.rustRed : C.lineSoft;
-                opacity = data.total === 0 ? 0.5 : intensity;
-              }
-              const title = data
-                ? `${fmtDateDisplay(d.iso)} \u00b7 ${fmtR(data.total)} \u00b7 ${data.count} trade${data.count === 1 ? "" : "s"}`
-                : fmtDateDisplay(d.iso);
-              return (
-                <div
-                  key={di}
-                  title={title}
-                  style={{ width: cell, height: cell, borderRadius: 0, background: bg, opacity, border: `1px solid ${C.line}` }}
-                />
-              );
-            })}
-          </div>
-        ))}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
+        {cells.map((d, i) => {
+          if (!d) return <div key={i} style={{ aspectRatio: "1" }} />;
+          const iso = `${viewYear}-${calPad(viewMonth + 1)}-${calPad(d)}`;
+          const data = dailyMap.get(iso);
+          let bg = "transparent";
+          let border = `1px solid ${C.lineSoft}`;
+          let textColor = C.inkSoft;
+          if (data && data.total > 0) { bg = C.ink; border = `1px solid ${C.ink}`; textColor = C.bg; }
+          else if (data && data.total < 0) { bg = C.faint; border = `1px solid ${C.faint}`; textColor = C.ink; }
+          else if (data) { bg = C.lineSoft; border = `1px solid ${C.line}`; textColor = C.ink; }
+          const title = data
+            ? `${fmtDateDisplay(iso)} \u00b7 ${fmtR(data.total)} \u00b7 ${data.count} trade${data.count === 1 ? "" : "s"}`
+            : fmtDateDisplay(iso);
+          return (
+            <div
+              key={i}
+              title={title}
+              style={{
+                aspectRatio: "1", display: "flex", alignItems: "center", justifyContent: "center",
+                background: bg, border, borderRadius: 0, color: textColor,
+                fontFamily: MONO, fontSize: 12, fontWeight: 600,
+              }}
+            >
+              {d}
+            </div>
+          );
+        })}
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 10, fontFamily: SANS, fontSize: 10.5, color: C.muted }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 14, fontFamily: SANS, fontSize: 10.5, color: C.muted }}>
+        <div style={{ width: 12, height: 12, borderRadius: 0, background: C.faint, border: `1px solid ${C.faint}` }} />
         <span>Loss</span>
-        {[1, 0.7, 0.4].map((o) => (
-          <div key={`l${o}`} style={{ width: cell, height: cell, borderRadius: 0, background: C.rustRed, opacity: o, border: `1px solid ${C.line}` }} />
-        ))}
-        <div style={{ width: cell, height: cell, borderRadius: 0, background: C.lineSoft, opacity: 0.45, border: `1px solid ${C.line}` }} />
-        {[0.4, 0.7, 1].map((o) => (
-          <div key={`w${o}`} style={{ width: cell, height: cell, borderRadius: 0, background: C.sage, opacity: o, border: `1px solid ${C.line}` }} />
-        ))}
+        <div style={{ width: 12, height: 12, borderRadius: 0, background: C.ink, border: `1px solid ${C.ink}`, marginLeft: 10 }} />
         <span>Win</span>
       </div>
     </div>
@@ -302,7 +299,7 @@ function SymbolPerformanceBars({ trades, filteredTrades }) {
             key={item.symbol}
             isFirst={i === 0}
             label={item.symbol}
-            display={<AnimatedStat value={winRate} decimals={0} suffix="%" />}
+            display={<>Winrate <AnimatedStat value={winRate} decimals={0} suffix="%" /></>}
             sub={
               <>
                 <span style={{ color: totalR > 0 ? C.ink : C.faint, fontWeight: 700 }}>
@@ -318,68 +315,8 @@ function SymbolPerformanceBars({ trades, filteredTrades }) {
   );
 }
 
-function YearStepper({ year, years, onChange }) {
-  const C = useTheme();
-  const idx = years.indexOf(year);
-  const canUp = idx > 0; // years sorted descending, so index-1 = newer year
-  const canDown = idx !== -1 && idx < years.length - 1;
-  const stepHeight = 42;
-
-  const goUp = () => { if (canUp) onChange(years[idx - 1]); };
-  const goDown = () => { if (canDown) onChange(years[idx + 1]); };
-
-  const btnStyle = (enabled) => ({
-    flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-    background: C.paperSoft, border: "none", padding: 0,
-    color: enabled ? C.ink : C.faint, cursor: enabled ? "pointer" : "default",
-  });
-
-  return (
-    <div style={{ display: "flex", alignItems: "stretch", gap: 8 }}>
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "center",
-        height: stepHeight, minWidth: 90, padding: "0 14px",
-        background: C.inputBg, border: `1px solid ${C.line}`, borderRadius: 0,
-      }}>
-        <Counter
-          value={year}
-          places={[1000, 100, 10, 1]}
-          fontSize={16}
-          padding={2}
-          gap={1}
-          horizontalPadding={0}
-          textColor={C.inputText}
-          fontWeight={700}
-          topGradientStyle={{ display: "none" }}
-          bottomGradientStyle={{ display: "none" }}
-        />
-      </div>
-      <div style={{
-        display: "flex", flexDirection: "column", height: stepHeight, width: 32,
-        borderRadius: 0, overflow: "hidden", border: `1px solid ${C.line}`,
-      }}>
-        <button type="button" onClick={goUp} disabled={!canUp} style={{ ...btnStyle(canUp), borderBottom: `1px solid ${C.line}` }}>
-          <ChevronUp size={14} strokeWidth={2.5} />
-        </button>
-        <button type="button" onClick={goDown} disabled={!canDown} style={btnStyle(canDown)}>
-          <ChevronDown size={14} strokeWidth={2.5} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export default function Dashboard({ trades, period, customRange }) {
   const C = useTheme();
-  const availableYears = useMemo(() => tradeYears(trades), [trades]);
-  const [heatmapYear, setHeatmapYear] = useState(() => availableYears[0] || new Date().getFullYear());
-
-  useEffect(() => {
-    if (availableYears.length && !availableYears.includes(heatmapYear)) {
-      setHeatmapYear(availableYears[0]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [availableYears]);
 
   const filteredTrades = useMemo(() => {
     if (period === "all") return trades;
@@ -445,20 +382,15 @@ export default function Dashboard({ trades, period, customRange }) {
             <SymbolPerformanceBars trades={trades} filteredTrades={filteredTrades} />
           </div>
 
-          {availableYears.length > 0 && (
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", padding: "0 4px", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
-                <div>
-                  <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trade Calendar</div>
-                  <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Daily P&amp;L for {heatmapYear}</div>
-                </div>
-                <YearStepper year={heatmapYear} years={availableYears} onChange={setHeatmapYear} />
-              </div>
-              <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 0, padding: "14px 18px", boxShadow: C.shadowCard }}>
-                <CalendarHeatmap trades={trades} year={heatmapYear} />
-              </div>
+          <div>
+            <div style={{ padding: "0 4px", marginBottom: 16 }}>
+              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trade Calendar</div>
+              <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Daily P&amp;L</div>
             </div>
-          )}
+            <div style={{ width: "100%", background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 0, padding: "16px 18px", boxShadow: C.shadowCard }}>
+              <TradeCalendarMonth trades={trades} />
+            </div>
+          </div>
 
         </>
       )}
