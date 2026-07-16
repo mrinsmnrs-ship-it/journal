@@ -1,9 +1,4 @@
 // src/components/layout/DesktopTopbar.jsx
-// Top bar shown on desktop only (hidden on mobile via .desktop-topbar CSS,
-// see src/styles/mobile.js). Full-width, fixed at the top. Holds branding
-// on the left, nav (dock-style, same look/animation as the mobile bottom
-// nav) in the middle, and theme toggle + logout on the right — replaces
-// the old vertical sidebar and the separate floating bottom nav.
 import React from "react";
 import { useTheme } from "../../theme/tokens.js";
 import TopbarActions from "../common/TopbarActions.jsx";
@@ -11,7 +6,7 @@ import DesktopTopNav from "../nav/DesktopTopNav.jsx";
 
 export default function DesktopTopbar({
   navItems, activeKey, onSelect, registerItemRef, indicator, accentColor,
-  themeMode, onToggleTheme, onLogout, userEmail,
+  themeMode, onToggleTheme, onLogout, userEmail, isLoggedIn,
 }) {
   const C = useTheme();
   return (
@@ -33,10 +28,12 @@ export default function DesktopTopbar({
       />
 
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-        <span title={userEmail} style={{ fontSize: 13, color: C.faint, marginRight: 2, maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {userEmail}
-        </span>
-        <TopbarActions themeMode={themeMode} onToggleTheme={onToggleTheme} onLogout={onLogout} />
+        {userEmail && (
+          <span title={userEmail} style={{ fontSize: 13, color: C.faint, marginRight: 2, maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {userEmail}
+          </span>
+        )}
+        <TopbarActions themeMode={themeMode} onToggleTheme={onToggleTheme} onLogout={onLogout} isLoggedIn={isLoggedIn} />
       </div>
     </div>
   );
