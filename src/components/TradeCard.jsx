@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { ChevronDown, Trash2 } from "lucide-react";
 import { SANS, useTheme } from "../theme/tokens.js";
 import { fmtR } from "../utils/format.js";
-import Tag from "./common/Tag.jsx";
 import ImageLightbox from "./ImageLightbox.jsx";
 
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -55,13 +54,36 @@ export default function TradeCard({ t, onDelete }) {
       }}>
         <div style={{ overflow: "hidden" }}>
           <div style={{ padding: "0 22px 20px" }}>
-            {t.reason && <div style={{ fontSize: 15, color: C.inkSoft, marginTop: 4 }}>{t.reason}</div>}
-            <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginTop: 13 }}>
-              {t.direction && <Tag text={`Direction: ${t.direction}`} />}
-              {t.rules && <Tag text={`Rules: ${t.rules}`} />}
-              {t.emotion && <Tag text={`Emotion: ${t.emotion}`} />}
-            </div>
-            {t.notes && <div style={{ fontSize: 14, color: C.muted, marginTop: 11, fontStyle: "italic" }}>{t.notes}</div>}
+            {(() => {
+              const rows = [
+                t.reason && { label: "Setup", value: t.reason },
+                t.direction && { label: "Direction", value: t.direction },
+                t.rules && { label: "Rules", value: t.rules },
+                t.emotion && { label: "Emotion", value: t.emotion },
+                t.notes && { label: "Notes", value: t.notes },
+              ].filter(Boolean);
+              if (rows.length === 0) return null;
+              return (
+                <div style={{ marginTop: 4, border: `1px solid ${C.line}`, borderRadius: 0 }}>
+                  {rows.map((row, i) => (
+                    <div
+                      key={row.label}
+                      style={{
+                        display: "flex", padding: "10px 12px", gap: 12,
+                        borderTop: i === 0 ? "none" : `1px solid ${C.line}`,
+                      }}
+                    >
+                      <div style={{
+                        width: 84, flexShrink: 0, fontFamily: SANS, fontSize: 11,
+                        fontWeight: 700, color: C.faint, textTransform: "uppercase",
+                        letterSpacing: "0.04em", paddingTop: 1,
+                      }}>{row.label}</div>
+                      <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.4 }}>{row.value}</div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
             {t.images && t.images.length > 0 && (
               <div style={{ marginTop: 11, marginLeft: -4, marginRight: -4, display: "flex", flexWrap: "wrap" }}>
                 {t.images.map((src, i) => (
@@ -90,4 +112,4 @@ export default function TradeCard({ t, onDelete }) {
       <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
     </div>
   );
-}
+                                       }
