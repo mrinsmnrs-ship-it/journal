@@ -12,7 +12,7 @@ function MobileDockItem({ label, active, onClick, registerRef }) {
       ref={registerRef}
       onClick={onClick}
       style={{
-        background: active ? C.navActiveBg : "transparent",
+        background: "transparent",
         border: "none", cursor: "pointer",
         padding: "6px 10px 4px", borderRadius: 0,
         color: active ? C.ink : C.faint,
