@@ -161,9 +161,9 @@ async function toggleTheme() {
     try {
       if (user) await saveUserData(user.uid, { trades: next });
     } catch (err) {
-      console.error("Gagal menghapus trade:", err);
+      console.error("Failed to delete trade:", err);
       setTrades(prev);
-      alert("Gagal menghapus trade. Coba lagi (lihat console untuk detail error).");
+      alert("Failed to delete trade. Please try again (check the console for error details).");
     }
   }
   async function handleLogout() {
