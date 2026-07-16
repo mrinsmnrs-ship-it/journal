@@ -1,7 +1,7 @@
 // src/components/trade/LogTradeForm.jsx
 import React, { useRef } from "react";
 import { Plus, X, Lock } from "lucide-react";
-import { useTheme } from "../../theme/tokens.js";
+import { useTheme, SANS } from "../../theme/tokens.js";
 import Field from "../common/Field.jsx";
 import PillToggle from "../common/PillToggle.jsx";
 import useInputStyle from "../common/useInputStyle.js";
@@ -28,8 +28,8 @@ export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSa
         }}>
           <Lock size={20} color={C.faint} />
         </div>
-        <div style={{ fontSize: 17, fontWeight: 700, color: C.ink }}>Log in to add a trade</div>
-        <div style={{ fontSize: 13.5, color: C.muted, maxWidth: 320, lineHeight: 1.5 }}>
+        <div style={{ fontSize: 17, fontWeight: 700, color: C.ink, fontFamily: SANS }}>Log in to add a trade</div>
+        <div style={{ fontSize: 13.5, color: C.muted, maxWidth: 320, lineHeight: 1.5, fontFamily: SANS }}>
           Create a free account or log in first so your trades are saved and synced to your journal.
         </div>
         <button
@@ -37,7 +37,7 @@ export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSa
           onClick={onRequestLogin}
           style={{
             marginTop: 6, padding: "12px 28px", borderRadius: 0, border: "none",
-            background: C.btnAccent, color: C.btnAccentTextActive, fontWeight: 700, fontSize: 14.5,
+            background: C.btnAccent, color: C.btnAccentTextActive, fontFamily: SANS, fontWeight: 700, fontSize: 14.5,
             cursor: "pointer", boxShadow: C.shadowCard,
           }}
         >
@@ -142,7 +142,7 @@ export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSa
           width: "100%", padding: "16px 0", borderRadius: 0, border: "none",
           background: canSave ? C.btnAccent : C.lineSoft,
           color: canSave ? C.btnAccentTextActive : C.faint,
-          fontWeight: 700, fontSize: 17, cursor: canSave ? "pointer" : "not-allowed",
+          fontFamily: SANS, fontWeight: 700, fontSize: 17, cursor: canSave ? "pointer" : "not-allowed",
           boxShadow: canSave ? C.shadowCard : "none",
           transition: "background-color 0.15s ease, color 0.15s ease",
         }}
