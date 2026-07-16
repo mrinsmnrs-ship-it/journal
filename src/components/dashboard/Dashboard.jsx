@@ -8,6 +8,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
 } from "recharts";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { SANS, SERIF, MONO, useTheme } from "../../theme/tokens.js";
 import { fmtR } from "../../utils/format.js";
 import { parseISO, startOfWeek, startOfMonth, startOfYear, clamp, fmtDateDisplay } from "../../utils/date.js";
@@ -172,13 +173,26 @@ function TradeRBarChart({ trades }) {
 
 const CAL_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const CAL_WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
+const CAL_ROWS = 6;
+const CAL_CELLS = CAL_ROWS * 7;
 const calPad = (n) => String(n).padStart(2, "0");
 
+// Same slide variants DateField's popup uses when paging between months,
+// reused here so the inline calendar animates identically.
+const calSlideVariants = {
+  enter: (dir) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0 }),
+};
+
 // Month-grid trade calendar, styled like the DateField popup (chevron header,
-// weekday row, day cells) but rendered inline in the dashboard flow instead
-// of as a portal/overlay. Days are colored win/loss using the same ink
-// (win) / faint (loss) pair TradeCard uses for R numbers in History, rather
-// than a red/green heatmap.
+// weekday row, sliding day grid) but rendered inline in the dashboard flow
+// instead of as a portal/overlay. Always lays out a fixed 6-row/42-cell grid
+// (same as DateField) so cell size never shifts between months — a 4-week
+// February and a 6-week month occupy the same space. Days are colored
+// win/loss using the same ink (win) / faint (loss) pair TradeCard uses for
+// R numbers in History, rather than a red/green heatmap, and only days that
+// actually have trade data get a border/fill — empty days are just a number.
 function TradeCalendarMonth({ trades }) {
   const C = useTheme();
   const dailyMap = useMemo(() => computeDailyR(trades), [trades]);
@@ -197,20 +211,22 @@ function TradeCalendarMonth({ trades }) {
   }, []);
   const [viewYear, setViewYear] = useState(initial.getFullYear());
   const [viewMonth, setViewMonth] = useState(initial.getMonth());
+  const [slideDir, setSlideDir] = useState(1);
 
   const daysCount = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
-  const rows = Math.ceil((daysCount + firstDay) / 7);
   const cells = [
     ...Array(firstDay).fill(null),
     ...Array.from({ length: daysCount }, (_, i) => i + 1),
   ];
-  while (cells.length < rows * 7) cells.push(null);
+  while (cells.length < CAL_CELLS) cells.push(null);
 
   function prevMonth() {
+    setSlideDir(-1);
     if (viewMonth === 0) { setViewMonth(11); setViewYear((y) => y - 1); } else setViewMonth((m) => m - 1);
   }
   function nextMonth() {
+    setSlideDir(1);
     if (viewMonth === 11) { setViewMonth(0); setViewYear((y) => y + 1); } else setViewMonth((m) => m + 1);
   }
 
@@ -227,39 +243,57 @@ function TradeCalendarMonth({ trades }) {
           <ChevronRight size={18} />
         </button>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, marginBottom: 4 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, marginBottom: 2 }}>
         {CAL_WEEKDAYS.map((w, i) => (
           <div key={i} style={{ textAlign: "center", fontFamily: SANS, fontSize: 11, fontWeight: 600, color: C.muted, padding: "2px 0" }}>{w}</div>
         ))}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
-        {cells.map((d, i) => {
-          if (!d) return <div key={i} style={{ aspectRatio: "1" }} />;
-          const iso = `${viewYear}-${calPad(viewMonth + 1)}-${calPad(d)}`;
-          const data = dailyMap.get(iso);
-          let bg = "transparent";
-          let border = `1px solid ${C.lineSoft}`;
-          let textColor = C.inkSoft;
-          if (data && data.total > 0) { bg = C.ink; border = `1px solid ${C.ink}`; textColor = C.bg; }
-          else if (data && data.total < 0) { bg = C.faint; border = `1px solid ${C.faint}`; textColor = C.ink; }
-          else if (data) { bg = C.lineSoft; border = `1px solid ${C.line}`; textColor = C.ink; }
-          const title = data
-            ? `${fmtDateDisplay(iso)} \u00b7 ${fmtR(data.total)} \u00b7 ${data.count} trade${data.count === 1 ? "" : "s"}`
-            : fmtDateDisplay(iso);
-          return (
-            <div
-              key={i}
-              title={title}
-              style={{
-                aspectRatio: "1", display: "flex", alignItems: "center", justifyContent: "center",
-                background: bg, border, borderRadius: 0, color: textColor,
-                fontFamily: MONO, fontSize: 12, fontWeight: 600,
-              }}
-            >
-              {d}
-            </div>
-          );
-        })}
+      <div style={{ position: "relative", overflow: "hidden" }}>
+        <AnimatePresence initial={false} custom={slideDir} mode="popLayout">
+          <motion.div
+            key={`${viewYear}-${viewMonth}`}
+            custom={slideDir}
+            variants={calSlideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            style={{
+              width: "100%",
+              display: "grid", gridTemplateColumns: "repeat(7, 1fr)",
+              gridAutoRows: "1fr", gridTemplateRows: `repeat(${CAL_ROWS}, 1fr)`,
+              gap: 4,
+            }}
+          >
+            {cells.map((d, i) => {
+              if (!d) return <div key={i} style={{ aspectRatio: "1" }} />;
+              const iso = `${viewYear}-${calPad(viewMonth + 1)}-${calPad(d)}`;
+              const data = dailyMap.get(iso);
+              let bg = "transparent";
+              let border = "1px solid transparent";
+              let textColor = C.inkSoft;
+              if (data && data.total > 0) { bg = C.ink; border = `1px solid ${C.ink}`; textColor = C.bg; }
+              else if (data && data.total < 0) { bg = C.faint; border = `1px solid ${C.faint}`; textColor = C.ink; }
+              else if (data) { bg = C.lineSoft; border = `1px solid ${C.line}`; textColor = C.ink; }
+              const title = data
+                ? `${fmtDateDisplay(iso)} \u00b7 ${fmtR(data.total)} \u00b7 ${data.count} trade${data.count === 1 ? "" : "s"}`
+                : fmtDateDisplay(iso);
+              return (
+                <div
+                  key={i}
+                  title={title}
+                  style={{
+                    aspectRatio: "1", display: "flex", alignItems: "center", justifyContent: "center",
+                    background: bg, border, borderRadius: 0, color: textColor,
+                    fontFamily: MONO, fontSize: 12, fontWeight: 600,
+                  }}
+                >
+                  {d}
+                </div>
+              );
+            })}
+          </motion.div>
+        </AnimatePresence>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 14, fontFamily: SANS, fontSize: 10.5, color: C.muted }}>
         <div style={{ width: 12, height: 12, borderRadius: 0, background: C.faint, border: `1px solid ${C.faint}` }} />
