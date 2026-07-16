@@ -10,6 +10,15 @@
       html, body {
         touch-action: pan-x pan-y;
       }
+      /* Default to black instead of the browser's white canvas so there's
+         no white flash before the app (and its black loading screen) mounts. */
+      html, body {
+        background: #000000;
+        margin: 0;
+      }
+      #root {
+        min-height: 100vh;
+      }
     </style>
     <title>R Journal</title>
   </head>
