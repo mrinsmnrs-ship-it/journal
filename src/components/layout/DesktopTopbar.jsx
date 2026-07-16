@@ -3,9 +3,7 @@ import React from "react";
 import { useTheme } from "../../theme/tokens.js";
 import TopbarActions from "../common/TopbarActions.jsx";
 
-export default function DesktopTopbar({
-  themeMode, onToggleTheme, onLogout, userEmail, isLoggedIn,
-}) {
+export default function DesktopTopbar({ onLogout, userEmail, isLoggedIn }) {
   const C = useTheme();
   return (
     <div className="desktop-topbar">
@@ -22,7 +20,7 @@ export default function DesktopTopbar({
             {userEmail}
           </span>
         )}
-        <TopbarActions themeMode={themeMode} onToggleTheme={onToggleTheme} onLogout={onLogout} isLoggedIn={isLoggedIn} />
+        <TopbarActions onLogout={onLogout} isLoggedIn={isLoggedIn} />
       </div>
     </div>
   );
