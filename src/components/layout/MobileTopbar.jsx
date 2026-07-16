@@ -1,11 +1,9 @@
 // src/components/layout/MobileTopbar.jsx
-// Top bar shown on mobile only (hidden on desktop via .mobile-topbar CSS,
-// see src/styles/mobile.js). Holds branding, theme toggle, and logout.
 import React from "react";
 import { useTheme } from "../../theme/tokens.js";
 import TopbarActions from "../common/TopbarActions.jsx";
 
-export default function MobileTopbar({ themeMode, onToggleTheme, onLogout }) {
+export default function MobileTopbar({ themeMode, onToggleTheme, onLogout, isLoggedIn }) {
   const C = useTheme();
   return (
     <div className="mobile-topbar">
@@ -15,7 +13,7 @@ export default function MobileTopbar({ themeMode, onToggleTheme, onLogout }) {
           <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
         </span>
       </div>
-      <TopbarActions themeMode={themeMode} onToggleTheme={onToggleTheme} onLogout={onLogout} />
+      <TopbarActions themeMode={themeMode} onToggleTheme={onToggleTheme} onLogout={onLogout} isLoggedIn={isLoggedIn} />
     </div>
   );
 }
