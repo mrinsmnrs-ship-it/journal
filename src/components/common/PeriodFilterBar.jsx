@@ -15,16 +15,15 @@ export default function PeriodFilterBar({ period, setPeriod, customRange, setCus
   return (
     <div className="period-filter-header" style={{ background: C.bg, borderBottom: `1px solid ${C.line}` }}>
       <div className="period-filter-header-inner">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 9, marginBottom: 9 }}>
-          {PERIODS.slice(0, 3).map((p) => (
-            <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 9, marginBottom: 0 }}>
+          {PERIODS.map((p) => (
+            <div key={p.key} style={{ flex: "1 1 0", minWidth: 90 }}>
+              <Chip label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
+            </div>
           ))}
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 9 }}>
-          {PERIODS.slice(3).map((p) => (
-            <Chip key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
-          ))}
-          <Chip label="Custom Range" active={period === "custom"} onClick={() => setPeriod("custom")} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
+          <div style={{ flex: "1 1 0", minWidth: 90 }}>
+            <Chip label="Custom Range" active={period === "custom"} onClick={() => setPeriod("custom")} activeColor={C.clayOnWhite} activeBg={C.clayWash} />
+          </div>
         </div>
         {period === "custom" && (
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
