@@ -30,7 +30,7 @@ function AnimatedStat({ value, decimals = 0, prefix = "", suffix = "", separator
   return (
     <>
       {v > 0 ? prefix : ""}
-      <CountUp to={v} decimals={decimals} separator={separator} duration={0.4} />
+      <CountUp to={v} decimals={decimals} separator={separator} duration={0.8} />
       {suffix}
     </>
   );
@@ -39,29 +39,56 @@ function AnimatedStat({ value, decimals = 0, prefix = "", suffix = "", separator
 // Shared boxed-list style used by Summary, Performance by Symbol, and
 // Trader Scorecard so all three read as one consistent visual language
 // (a bordered panel of stacked rows) instead of three different chart types.
-// `layout` makes the box animate smoothly to its new height whenever the
-// number of rows inside changes (e.g. Performance by Symbol showing more
-// or fewer symbols after switching the period filter), instead of the box
-// snapping straight to the new size.
+//
+// Animates its own height to match its content (e.g. Performance by Symbol
+// showing more or fewer symbols after switching the period filter) instead
+// of snapping straight to the new size. This measures the real rendered
+// height with ResizeObserver and eases a plain CSS `height` transition to
+// it — deliberately NOT framer-motion's `layout` animation, which caused
+// visible jitter here when combined with the rows' own enter/exit fades
+// (both trying to measure and animate the same area at once).
 function BarBox({ children }) {
   const C = useTheme();
+  const innerRef = useRef(null);
+  const [height, setHeight] = useState(null);
+
+  useEffect(() => {
+    const el = innerRef.current;
+    if (!el) return undefined;
+
+    // Set the starting height immediately (no transition) so the box
+    // doesn't animate in from 0 on first mount.
+    setHeight(el.offsetHeight);
+
+    const ro = new ResizeObserver(() => {
+      if (innerRef.current) setHeight(innerRef.current.offsetHeight);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return (
-    <motion.div
-      layout
-      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+    <div
       style={{
         width: "100%", background: C.paperSoftStat, border: `1px solid ${C.line}`,
-        borderRadius: 0, padding: "6px 10px", boxShadow: C.shadowCard, overflow: "hidden",
+        borderRadius: 0, boxShadow: C.shadowCard, overflow: "hidden",
+        height: height == null ? "auto" : `${height}px`,
+        transition: height == null ? "none" : "height 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
       }}
     >
-      {children}
-    </motion.div>
+      <div ref={innerRef} style={{ padding: "6px 10px" }}>
+        {children}
+      </div>
+    </div>
   );
 }
 
 // One row: label on the left, a filled track in the middle (omitted when
 // `percent` isn't given, e.g. a raw count like Total Trades), and the
 // display value on the right. `sub` is optional smaller text below the row.
+// Wrapped in motion.div purely for the opacity fade (enter/exit inside
+// AnimatePresence) — no `layout` prop, so it doesn't fight with BarBox's
+// own height transition above.
 function BarRow({ label, percent, display, isFirst, sub }) {
   const C = useTheme();
   const hasBar = percent !== undefined && percent !== null;
@@ -72,7 +99,6 @@ function BarRow({ label, percent, display, isFirst, sub }) {
   if (!hasBar) {
     return (
       <motion.div
-        layout="position"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -98,7 +124,6 @@ function BarRow({ label, percent, display, isFirst, sub }) {
 
   return (
     <motion.div
-      layout="position"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -309,7 +334,7 @@ function SymbolPerformanceBars({ trades }) {
 
   return (
     <BarBox>
-      <AnimatePresence mode="popLayout" initial={false}>
+      <AnimatePresence initial={false}>
         {statsData.map((item, i) => (
           // Keyed by rank position, not by symbol name. Ranking is sorted by
           // totalR, so switching the period filter can put a different
