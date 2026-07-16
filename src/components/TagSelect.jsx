@@ -126,8 +126,8 @@ export default function TagSelect({ value, onChange, options, onAddOption, onDel
                       style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         border: `1px solid ${C.line}`, borderRadius: 0, padding: "8px 10px",
-                        background: opt.value === value ? C.btnAccentWash : C.paperSoft,
-                        color: opt.value === value ? C.btnAccentText : C.ink,
+                        background: C.paperSoft,
+                        color: C.ink,
                         fontSize: 14, fontWeight: 600, fontFamily: SANS, cursor: "pointer",
                       }}
                     >
@@ -211,5 +211,5 @@ export default function TagSelect({ value, onChange, options, onAddOption, onDel
       {createPortal(popupContent, document.body)}
     </div>
   );
-                }
-                            
+              }
+                          
