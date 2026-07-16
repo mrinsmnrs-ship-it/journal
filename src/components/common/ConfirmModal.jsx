@@ -91,7 +91,7 @@ export default function ConfirmModal({
                 onClick={() => { onClose(); onConfirm(); }}
                 style={{
                   flex: 1, padding: "10px 0", borderRadius: 0,
-                  border: "none", background: C.rustRed,
+                  border: "none", background: C.popupDangerRed,
                   color: "#ffffff", fontFamily: SANS, fontSize: 14, fontWeight: 700,
                   cursor: "pointer",
                 }}
