@@ -104,6 +104,7 @@ export default function TagSelect({ value, onChange, options, onAddOption, onDel
               <input
                 type="text"
                 autoFocus
+                className="tagselect-search-input"
                 placeholder={placeholder}
                 value={query}
                 onChange={(e) => setQuery(norm(e.target.value))}
@@ -113,6 +114,7 @@ export default function TagSelect({ value, onChange, options, onAddOption, onDel
                   textTransform: uppercase ? "uppercase" : "none",
                 }}
               />
+              <style>{`.tagselect-search-input:focus { border-color: ${C.inputBorder} !important; box-shadow: none !important; }`}</style>
             </div>
             <div style={{ padding: "12px 14px 14px 14px", overflowY: "auto", flex: 1, minHeight: 0 }}>
               {filtered.length > 0 && (
@@ -136,7 +138,7 @@ export default function TagSelect({ value, onChange, options, onAddOption, onDel
                             type="button"
                             onClick={(e) => confirmDeleteNow(e, opt.value)}
                             style={{
-                              border: "none", background: "transparent", color: C.rustRed,
+                              border: "none", background: "transparent", color: C.popupDangerRed,
                               fontSize: 12, fontWeight: 700, fontFamily: SANS, cursor: "pointer", padding: "2px 4px",
                             }}
                           >Delete</button>
@@ -209,4 +211,5 @@ export default function TagSelect({ value, onChange, options, onAddOption, onDel
       {createPortal(popupContent, document.body)}
     </div>
   );
-}
+      }
+                          
