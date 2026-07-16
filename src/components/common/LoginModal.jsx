@@ -8,7 +8,6 @@ import {
 } from "firebase/auth";
 import { auth } from "../../firebase.js";
 import { useTheme, SANS } from "../../theme/tokens.js";
-import "../../PillToggle.css";
 
 function friendlyError(code) {
   switch (code) {
@@ -31,7 +30,6 @@ export default function LoginModal({ open, onClose }) {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [busy, setBusy] = useState(false);
-  const [pressed, setPressed] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -127,8 +125,6 @@ export default function LoginModal({ open, onClose }) {
               .login-modal-input::placeholder { color: ${C.faint}; }
               .login-modal-input { transition: border-color .12s ease, box-shadow .12s ease; box-shadow: none; }
               .login-modal-input:focus { outline: none; border-color: ${C.clay} !important; box-shadow: 0 0 0 3px ${C.clayWash} !important; }
-              .login-modal-submit { transition: box-shadow .12s ease; }
-              .login-modal-submit:hover:not(:disabled) { box-shadow: ${C.shadowRaised}; }
             `}</style>
 
             <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 4, color: C.ink }}>
@@ -146,22 +142,16 @@ export default function LoginModal({ open, onClose }) {
                   key={m}
                   type="button"
                   onClick={() => switchMode(m)}
-                  data-active={mode === m}
-                  className="pill-toggle"
                   style={{
                     flex: 1, border: "none", borderRadius: 0, padding: "9px 0",
                     fontFamily: SANS, fontSize: 13.5, fontWeight: 700, cursor: "pointer",
-                    background: "transparent",
-                    "--pill-fill": C.paper,
-                    "--pill-base-text": C.muted,
-                    "--pill-active-text": C.ink,
+                    background: mode === m ? C.paper : "transparent",
+                    color: mode === m ? C.ink : C.muted,
+                    boxShadow: mode === m ? C.shadowRaised : "none",
+                    transition: "background-color 0.15s ease, color 0.15s ease",
                   }}
                 >
-                  <span className="pill-toggle-fill" style={{ boxShadow: C.shadowRaised }} />
-                  <span className="pill-toggle-label-stack">
-                    <span className="pill-toggle-label-base">{m === "login" ? "Log In" : "Sign Up"}</span>
-                    <span className="pill-toggle-label-active">{m === "login" ? "Log In" : "Sign Up"}</span>
-                  </span>
+                  {m === "login" ? "Log In" : "Sign Up"}
                 </button>
               ))}
             </div>
@@ -228,28 +218,15 @@ export default function LoginModal({ open, onClose }) {
               <button
                 type="submit"
                 disabled={busy}
-                data-active={pressed && !busy}
-                onMouseDown={() => setPressed(true)}
-                onMouseUp={() => setPressed(false)}
-                onMouseLeave={() => setPressed(false)}
-                onTouchStart={() => setPressed(true)}
-                onTouchEnd={() => setPressed(false)}
-                className="pill-toggle login-modal-submit"
                 style={{
                   width: "100%", padding: "13px 0", borderRadius: 0, border: "none",
-                  background: C.btnAccent, fontWeight: 700, fontSize: 15,
+                  background: C.btnAccent, color: "#FFFFFF", fontWeight: 700, fontSize: 15,
                   cursor: busy ? "not-allowed" : "pointer", opacity: busy ? 0.6 : 1,
                   boxShadow: C.shadowCard,
-                  "--pill-fill": C.clayDeep,
-                  "--pill-base-text": "#FFFFFF",
-                  "--pill-active-text": "#FFFFFF",
+                  transition: "background-color 0.15s ease, color 0.15s ease",
                 }}
               >
-                <span className="pill-toggle-fill" />
-                <span className="pill-toggle-label-stack">
-                  <span className="pill-toggle-label-base">{busy ? "Please wait..." : mode === "login" ? "Log In" : "Sign Up"}</span>
-                  <span className="pill-toggle-label-active">{busy ? "Please wait..." : mode === "login" ? "Log In" : "Sign Up"}</span>
-                </span>
+                {busy ? "Please wait..." : mode === "login" ? "Log In" : "Sign Up"}
               </button>
             </form>
           </motion.div>
@@ -259,4 +236,4 @@ export default function LoginModal({ open, onClose }) {
   );
 
   return createPortal(content, document.body);
-                    }
+}
