@@ -213,19 +213,20 @@ async function toggleTheme() {
               {!loaded ? (
                 <div style={{ color: C.faint, fontSize: 14 }}>Loading…</div>
               ) : isDesktop ? (
-                <div className="desktop-columns">
-                  <div className="desktop-column">
-                    <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
+                <>
+                  <PeriodFilterBar period={dashboardPeriod} setPeriod={setDashboardPeriod} customRange={dashboardCustomRange} setCustomRange={setDashboardCustomRange} />
+                  <div className="desktop-columns">
+                    <div className="desktop-column">
+                      <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
+                    </div>
+                    <div className="desktop-column">
+                      <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => {}} period={dashboardPeriod} customRange={dashboardCustomRange} />
+                    </div>
+                    <div className="desktop-column">
+                      <Dashboard trades={trades} period={dashboardPeriod} customRange={dashboardCustomRange} />
+                    </div>
                   </div>
-                  <div className="desktop-column">
-                    <PeriodFilterBar period={journalPeriod} setPeriod={setJournalPeriod} customRange={journalCustomRange} setCustomRange={setJournalCustomRange} />
-                    <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => {}} period={journalPeriod} customRange={journalCustomRange} />
-                  </div>
-                  <div className="desktop-column">
-                    <PeriodFilterBar period={dashboardPeriod} setPeriod={setDashboardPeriod} customRange={dashboardCustomRange} setCustomRange={setDashboardCustomRange} />
-                    <Dashboard trades={trades} period={dashboardPeriod} customRange={dashboardCustomRange} />
-                  </div>
-                </div>
+                </>
               ) : tab === "log" ? (
                 <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
               ) : tab === "journal" ? (
