@@ -50,6 +50,23 @@ export function getDesktopStyles(C, SANS) {
         padding: 0 24px; box-sizing: border-box;
       }
 
+      /* All 3 pages shown side by side on desktop (Log Trade / History /
+         Dashboard) instead of one at a time — same components as mobile,
+         just laid out in a row. Needs a lot more width than the single-page
+         880px container, so it overrides main-area-inner's max-width. */
+      .main-area-inner.desktop-columns-mode {
+        max-width: 1560px;
+      }
+      .desktop-columns {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+        align-items: start;
+      }
+      .desktop-column {
+        min-width: 0;
+      }
+
       .period-filter-header {
         padding: 16px 0 14px;
       }
