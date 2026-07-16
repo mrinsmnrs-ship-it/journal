@@ -261,7 +261,7 @@ export default function RiskRPanel({ form, updateForm }) {
                       <RotateCcw size={13} />
                     </button>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, marginBottom: 6 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 22, marginBottom: 6 }}>
                     <div style={{ width: 16, flexShrink: 0 }} />
                     <div style={{
                       flex: 1, fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
