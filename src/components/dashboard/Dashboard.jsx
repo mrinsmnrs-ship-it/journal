@@ -7,6 +7,7 @@ import {
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
 } from "recharts";
+import { motion, AnimatePresence } from "motion/react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { SANS, SERIF, MONO, useTheme } from "../../theme/tokens.js";
 import { fmtR } from "../../utils/format.js";
@@ -16,6 +17,7 @@ import {
 } from "../../utils/stats.js";
 import Counter from "../../Counter.jsx";
 import CountUp from "../../CountUp.jsx";
+import TextScramble from "../../TextScramble.jsx";
 
 // ---- Dashboard ----
 
@@ -28,7 +30,7 @@ function AnimatedStat({ value, decimals = 0, prefix = "", suffix = "", separator
   return (
     <>
       {v > 0 ? prefix : ""}
-      <CountUp to={v} decimals={decimals} separator={separator} duration={0.8} />
+      <CountUp to={v} decimals={decimals} separator={separator} duration={0.4} />
       {suffix}
     </>
   );
@@ -37,12 +39,23 @@ function AnimatedStat({ value, decimals = 0, prefix = "", suffix = "", separator
 // Shared boxed-list style used by Summary, Performance by Symbol, and
 // Trader Scorecard so all three read as one consistent visual language
 // (a bordered panel of stacked rows) instead of three different chart types.
+// `layout` makes the box animate smoothly to its new height whenever the
+// number of rows inside changes (e.g. Performance by Symbol showing more
+// or fewer symbols after switching the period filter), instead of the box
+// snapping straight to the new size.
 function BarBox({ children }) {
   const C = useTheme();
   return (
-    <div style={{ width: "100%", background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 0, padding: "6px 10px", boxShadow: C.shadowCard }}>
+    <motion.div
+      layout
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        width: "100%", background: C.paperSoftStat, border: `1px solid ${C.line}`,
+        borderRadius: 0, padding: "6px 10px", boxShadow: C.shadowCard, overflow: "hidden",
+      }}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
@@ -58,7 +71,14 @@ function BarRow({ label, percent, display, isFirst, sub }) {
   // stacking label above value.
   if (!hasBar) {
     return (
-      <div style={{ padding: "12px 4px", borderTop: isFirst ? "none" : `1px solid ${C.lineSoft}` }}>
+      <motion.div
+        layout="position"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.25 }}
+        style={{ padding: "12px 4px", borderTop: isFirst ? "none" : `1px solid ${C.lineSoft}` }}
+      >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
           <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 13, color: C.ink, textAlign: "left" }}>
             {label}
@@ -72,12 +92,19 @@ function BarRow({ label, percent, display, isFirst, sub }) {
             {sub}
           </div>
         )}
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div style={{ padding: "12px 4px", borderTop: isFirst ? "none" : `1px solid ${C.lineSoft}` }}>
+    <motion.div
+      layout="position"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+      style={{ padding: "12px 4px", borderTop: isFirst ? "none" : `1px solid ${C.lineSoft}` }}
+    >
       <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 13, color: C.ink, textAlign: "left" }}>
         {label}
       </div>
@@ -98,7 +125,7 @@ function BarRow({ label, percent, display, isFirst, sub }) {
           {sub}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 function EquityCurve({ trades }) {
@@ -282,23 +309,32 @@ function SymbolPerformanceBars({ trades }) {
 
   return (
     <BarBox>
-      {statsData.map((item, i) => (
-        <BarRow
-          key={item.symbol}
-          isFirst={i === 0}
-          label={item.symbol}
-          percent={item.winRate}
-          display={<AnimatedStat value={item.winRate} decimals={0} suffix="%" />}
-          sub={
-            <>
-              <span style={{ color: item.totalR > 0 ? C.ink : C.faint, fontWeight: 700 }}>
-                <AnimatedStat value={item.totalR} decimals={2} prefix="+" suffix="R" />
-              </span>
-              {" "}&middot; {item.count} trade{item.count === 1 ? "" : "s"}
-            </>
-          }
-        />
-      ))}
+      <AnimatePresence mode="popLayout" initial={false}>
+        {statsData.map((item, i) => (
+          // Keyed by rank position, not by symbol name. Ranking is sorted by
+          // totalR, so switching the period filter can put a different
+          // symbol at the same row — keying by symbol would unmount/remount
+          // that row and make the volume bar snap straight to its new width
+          // instead of transitioning. Keying by position keeps the same DOM
+          // node, so the bar's width transition and the symbol name's
+          // scramble animation both play smoothly on every change.
+          <BarRow
+            key={i}
+            isFirst={i === 0}
+            label={<TextScramble text={item.symbol} duration={0.5} />}
+            percent={item.winRate}
+            display={<AnimatedStat value={item.winRate} decimals={0} suffix="%" />}
+            sub={
+              <>
+                <span style={{ color: item.totalR > 0 ? C.ink : C.faint, fontWeight: 700 }}>
+                  <AnimatedStat value={item.totalR} decimals={2} prefix="+" suffix="R" />
+                </span>
+                {" "}&middot; {item.count} trade{item.count === 1 ? "" : "s"}
+              </>
+            }
+          />
+        ))}
+      </AnimatePresence>
     </BarBox>
   );
 }
