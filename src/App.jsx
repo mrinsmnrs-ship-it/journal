@@ -2,12 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
 import { loadUserData, saveUserData } from "./store";
-import AuthScreen from "./AuthScreen.jsx";
 import { getAppStyles } from "./styles/index.js";
 
-// ---- Design tokens, util tanggal/format/stats ----
-// tinggal di file masing-masing (lihat src/theme, src/utils) supaya file
-// ini tidak lagi jadi satu file raksasa berisi semuanya.
 import {
   SANS, DESKTOP_BREAKPOINT, NAV,
   ThemeContext, getPageBackground, THEME_ORDER, LIGHT, DARK,
@@ -16,10 +12,6 @@ import { uid, fileToCompressedDataURL } from "./utils/format.js";
 import { todayISO } from "./utils/date.js";
 import { computeStats } from "./utils/stats.js";
 
-// ---- Layout: desktop topbar+bottom nav / mobile topbar+marquee live in
-// their own files under components/layout, mobile vs desktop nav under
-// components/nav (see also src/styles/desktop.js + src/styles/mobile.js
-// for their CSS) ----
 import DesktopTopbar from "./components/layout/DesktopTopbar.jsx";
 import MobileTopbar from "./components/layout/MobileTopbar.jsx";
 import PerfMarquee from "./components/layout/PerfMarquee.jsx";
@@ -28,14 +20,13 @@ import PeriodFilterBar from "./components/common/PeriodFilterBar.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import OrientationGuard from "./components/layout/OrientationGuard.jsx";
 
-// ---- Pages ----
 import LogTradeForm from "./components/trade/LogTradeForm.jsx";
 import JournalList from "./components/JournalList.jsx";
 import Dashboard from "./components/dashboard/Dashboard.jsx";
 import CircularText from "./components/common/CircularText.jsx";
 
 export default function App() {
-  const [user, setUser] = useState(undefined); // undefined = checking, null = logged out
+  const [user, setUser] = useState(undefined);
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u));
     return unsub;
@@ -47,11 +38,9 @@ export default function App() {
       </div>
     );
   }
-  if (!user) return <AuthScreen />;
   return <RJournal user={user} />;
 }
 
-// ---- App ----
 function RJournal({ user }) {
   const [tab, setTab] = useState("log");
   const navRefs = useRef({});
@@ -77,6 +66,7 @@ function RJournal({ user }) {
   const [journalCustomRange, setJournalCustomRange] = useState({ from: "", to: "" });
 
   useEffect(() => {
+    if (!user) { setLoaded(true); return; }
     (async () => {
       const data = await loadUserData(user.uid);
       setTrades(data.trades);
@@ -84,7 +74,7 @@ function RJournal({ user }) {
       setSymbolOptions(data.symbolOptions);
       setLoaded(true);
     })();
-  }, [user.uid]);
+  }, [user]);
 
   useEffect(() => {
     function updateIsDesktop() {
@@ -95,11 +85,6 @@ function RJournal({ user }) {
     return () => window.removeEventListener("resize", updateIsDesktop);
   }, []);
 
-  // Fix: tinggi viewport mobile dihitung ulang lewat JS (bukan hanya
-  // mengandalkan 100dvh), karena sejumlah browser/WebView Android masih
-  // salah menghitung dvh saat address bar muncul/hilang — akibatnya
-  // elemen di bagian paling bawah (bottom nav) bisa terdorong keluar
-  // layar dan tak terjangkau karena overflow di-hidden.
   useEffect(() => {
     function setAppHeight() {
       const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
@@ -114,10 +99,10 @@ function RJournal({ user }) {
     };
   }, []);
 
-  async function toggleTheme() {
+async function toggleTheme() {
     const next = THEME_ORDER[(THEME_ORDER.indexOf(themeMode) + 1) % THEME_ORDER.length];
     setThemeMode(next);
-    await saveUserData(user.uid, { theme: next });
+    if (user) await saveUserData(user.uid, { theme: next });
   }
   function updateForm(key, val) { setForm((f) => ({ ...f, [key]: val })); }
   function toggleEmotion(e) {
@@ -127,12 +112,12 @@ function RJournal({ user }) {
     if (!opt || symbolOptions.some((o) => o.value === opt)) return;
     const next = [...symbolOptions, { value: opt, createdAt: Date.now() }];
     setSymbolOptions(next);
-    await saveUserData(user.uid, { symbolOptions: next });
+    if (user) await saveUserData(user.uid, { symbolOptions: next });
   }
   async function deleteSymbolOption(opt) {
     const next = symbolOptions.filter((o) => o.value !== opt);
     setSymbolOptions(next);
-    await saveUserData(user.uid, { symbolOptions: next });
+    if (user) await saveUserData(user.uid, { symbolOptions: next });
   }
   const canSave = form.symbol.trim() && form.direction && form.rActual !== "";
   async function handleSave() {
@@ -148,7 +133,7 @@ function RJournal({ user }) {
     };
     const next = [trade, ...trades];
     setTrades(next);
-    await saveUserData(user.uid, { trades: next });
+    if (user) await saveUserData(user.uid, { trades: next });
     setForm({ date: todayISO(), symbol: "", direction: "", reason: "", riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "", images: [] });
     setTab("journal");
   }
@@ -174,10 +159,10 @@ function RJournal({ user }) {
     const next = trades.filter((t) => t.id !== id);
     setTrades(next);
     try {
-      await saveUserData(user.uid, { trades: next });
+      if (user) await saveUserData(user.uid, { trades: next });
     } catch (err) {
       console.error("Gagal menghapus trade:", err);
-      setTrades(prev); // rollback biar UI tidak beda dengan data tersimpan
+      setTrades(prev);
       alert("Gagal menghapus trade. Coba lagi (lihat console untuk detail error).");
     }
   }
@@ -186,15 +171,12 @@ function RJournal({ user }) {
   }
 
   const stats = useMemo(() => computeStats(trades), [trades]);
-
   const NAV_DESKTOP = NAV;
 
   useEffect(() => {
     function updateNavIndicator() {
       const el = navRefs.current[tab];
-      if (el) {
-        setNavIndicator({ left: el.offsetLeft, width: el.offsetWidth });
-      }
+      if (el) setNavIndicator({ left: el.offsetLeft, width: el.offsetWidth });
     }
     updateNavIndicator();
     window.addEventListener("resize", updateNavIndicator);
@@ -205,18 +187,12 @@ function RJournal({ user }) {
     function updateDesktopNavIndicator() {
       const activeKey = desktopNavRefs.current[tab] ? tab : "log";
       const el = desktopNavRefs.current[activeKey];
-      if (el) {
-        setDesktopNavIndicator({
-          left: el.offsetLeft,
-          width: el.offsetWidth,
-        });
-      }
+      if (el) setDesktopNavIndicator({ left: el.offsetLeft, width: el.offsetWidth });
     }
     updateDesktopNavIndicator();
     window.addEventListener("resize", updateDesktopNavIndicator);
     return () => window.removeEventListener("resize", updateDesktopNavIndicator);
   }, [tab, isDesktop]);
-
   const C = themeMode === "dark" ? DARK : LIGHT;
 
   return (
@@ -234,10 +210,11 @@ function RJournal({ user }) {
             themeMode={themeMode}
             onToggleTheme={toggleTheme}
             onLogout={handleLogout}
-            userEmail={user.email}
+            userEmail={user?.email}
+            isLoggedIn={!!user}
           />
 
-          <MobileTopbar themeMode={themeMode} onToggleTheme={toggleTheme} onLogout={handleLogout} />
+          <MobileTopbar themeMode={themeMode} onToggleTheme={toggleTheme} onLogout={handleLogout} isLoggedIn={!!user} />
 
           <PerfMarquee stats={stats} />
 
@@ -250,7 +227,6 @@ function RJournal({ user }) {
             />
           )}
 
-          {/* Main content */}
           <div className="main-area" style={{ overflowX: "hidden" }}>
             <div className="main-area-inner">
               {!loaded ? (
@@ -270,7 +246,6 @@ function RJournal({ user }) {
           </div>
         </div>
 
-        {/* Bottom nav (mobile) */}
         <MobileDockNav
           items={NAV}
           activeKey={tab}
@@ -280,13 +255,10 @@ function RJournal({ user }) {
           accentColor={C.btnAccent}
         />
 
-        {/* Decorative spinning badge — desktop only, see .circular-text-dock CSS */}
         <div className="circular-text-dock">
           <CircularText text="STAY DISCIPLINED * STAY CONSISTENT *" onHover="speedUp" spinDuration={20} />
         </div>
 
-        {/* Muncul otomatis lewat CSS saat HP dimiringkan ke landscape,
-            lihat .orientation-lock-overlay di src/styles/base.js */}
         <OrientationGuard />
       </div>
     </ThemeContext.Provider>
