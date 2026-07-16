@@ -2,10 +2,8 @@
 import React from "react";
 import { useTheme } from "../../theme/tokens.js";
 import TopbarActions from "../common/TopbarActions.jsx";
-import DesktopTopNav from "../nav/DesktopTopNav.jsx";
 
 export default function DesktopTopbar({
-  navItems, activeKey, onSelect, registerItemRef, indicator, accentColor,
   themeMode, onToggleTheme, onLogout, userEmail, isLoggedIn,
 }) {
   const C = useTheme();
@@ -17,15 +15,6 @@ export default function DesktopTopbar({
           <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
         </span>
       </div>
-
-      <DesktopTopNav
-        items={navItems}
-        activeKey={activeKey}
-        onSelect={onSelect}
-        registerItemRef={registerItemRef}
-        indicator={indicator}
-        accentColor={accentColor}
-      />
 
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
         {userEmail && (
