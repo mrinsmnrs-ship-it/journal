@@ -1,99 +1,233 @@
-// ============================================================================
-// theme/tokens.js
-// -----------------------------------------------------------------------------
-// Semua "design token" aplikasi: warna (LIGHT/DARK), shadow, font, breakpoint,
-// daftar menu nav, daftar emosi, dan periode filter dashboard.
-// Juga menyediakan ThemeContext + hook useTheme() supaya semua komponen bisa
-// baca warna tema aktif tanpa harus lewat props satu-satu (prop drilling).
-// ============================================================================
-import { createContext, useContext } from "react";
-import { Sun, Moon, PencilLine, BookOpen, LayoutDashboard } from "lucide-react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "./firebase";
+import { loadUserData, saveUserData } from "./store";
+import { getAppStyles } from "./styles/index.js";
 
-export const SHADOW_LIGHT = {
-  shadowCard: "none",
-  shadowRaised: "0 1px 0 rgba(31,35,40,0.04)",
-  shadowPopover: "0 8px 24px rgba(140,149,159,0.2)",
-  shadowModal: "0 8px 24px rgba(140,149,159,0.18)",
-};
-export const SHADOW_DARK = {
-  shadowCard: "none",
-  shadowRaised: "none",
-  shadowPopover: "0 8px 24px rgba(1,4,9,0.85)",
-  shadowModal: "0 8px 24px rgba(1,4,9,0.55)",
-};
+import {
+  SANS, DESKTOP_BREAKPOINT, NAV,
+  ThemeContext, getPageBackground, DARK,
+} from "./theme/tokens.js";
+import { uid, fileToCompressedDataURL } from "./utils/format.js";
+import { todayISO } from "./utils/date.js";
+import { computeStats } from "./utils/stats.js";
 
-export const LIGHT = {
-  bg: "#ffffff", paper: "#ffffff", paperSoft: "#f6f8fa",
-  paperSoftLight: "#f6f8fa", paperSoftStat: "#f6f8fa",
-  ink: "#1f2328", inkSoft: "#57606a", muted: "#57606a", faint: "#6e7781",
-  line: "#d0d7de", lineSoft: "#d8dee4",
-  clay: "#044df5", clayDeep: "#0339b8", clayWash: "#e1eafe", clayOnWhite: "#044df5",
-  sage: "#1a7f37", sageWash: "#dafbe1", sageOnWhite: "#1a7f37",
-  rustRed: "#d1242f", rustWash: "#ffebe9", rustOnWhite: "#d1242f", dangerBg: "#d1242f",
-  popupDangerRed: "#ef4444",
-  amber: "#9a6700", amberWash: "#fff8c5", amberOnWhite: "#9a6700",
-  inputBg: "#ffffff", inputText: "#1f2328", inputPlaceholder: "#6e7781", inputBorder: "#d0d7de",
-  btnAccent: "#044df5", btnAccentBorder: "#044df5", btnAccentWash: "#e1eafe",
-  btnAccentText: "#044df5", btnAccentTextActive: "#ffffff",
-  navActiveBg: "rgba(4, 77, 245, 0.1)",
-  ...SHADOW_LIGHT,
-};
-export const DARK = {
-  bg: "#0d1117", paper: "#0d1117", paperSoft: "#161b22",
-  paperSoftLight: "#161b22", paperSoftStat: "#161b22",
-  ink: "#e6edf3", inkSoft: "#848d97", muted: "#848d97", faint: "#6e7681",
-  line: "#30363d", lineSoft: "#21262d",
-  clay: "#044df5", clayDeep: "#0339b8", clayWash: "rgba(4,77,245,0.15)", clayOnWhite: "#044df5",
-  sage: "#3fb950", sageWash: "rgba(46,160,67,0.15)", sageOnWhite: "#3fb950",
-  rustRed: "#f85149", rustWash: "rgba(248,81,73,0.15)", rustOnWhite: "#f85149", dangerBg: "#f85149",
-  popupDangerRed: "#ef4444",
-  amber: "#d29922", amberWash: "rgba(187,128,9,0.15)", amberOnWhite: "#d29922",
-  inputBg: "#0d1117", inputText: "#e6edf3", inputPlaceholder: "#6e7681", inputBorder: "#30363d",
-  btnAccent: "#044df5", btnAccentBorder: "#044df5", btnAccentWash: "rgba(4,77,245,0.15)",
-  btnAccentText: "#044df5", btnAccentTextActive: "#ffffff",
-  navActiveBg: "rgba(4, 77, 245, 0.15)",
-  ...SHADOW_DARK,
-};
+import DesktopTopbar from "./components/layout/DesktopTopbar.jsx";
+import MobileTopbar from "./components/layout/MobileTopbar.jsx";
+import PerfMarquee from "./components/layout/PerfMarquee.jsx";
+import MobileDockNav from "./components/nav/MobileDockNav.jsx";
+import PeriodFilterBar from "./components/common/PeriodFilterBar.jsx";
+import Footer from "./components/layout/Footer.jsx";
+import OrientationGuard from "./components/layout/OrientationGuard.jsx";
 
-export const GITHUB_SANS = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif";
-export const GITHUB_MONO = "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace";
-export const CHAT_FONT = GITHUB_SANS;
-export const LOGO_FONT = "'Inter', sans-serif"; // reserved for the "Aftermath" wordmark only — logo tetap beda dari UI
-export const LABEL_FONT = GITHUB_SANS; // label field ikut sistem font GitHub juga
-export const SERIF = CHAT_FONT; // font disatukan dengan halaman lain
-export const SANS = CHAT_FONT;  // font disatukan dengan halaman lain
-export const MONO = GITHUB_MONO; // dipakai untuk angka/data ala GitHub (diff, code)
-export const NAV = [
-  { key: "log", label: "Log Trade", icon: PencilLine },
-  { key: "journal", label: "History", icon: BookOpen },
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-];
+import LogTradeForm from "./components/trade/LogTradeForm.jsx";
+import JournalList from "./components/JournalList.jsx";
+import Dashboard from "./components/dashboard/Dashboard.jsx";
 
-export const DESKTOP_BREAKPOINT = 820;
-
-export function getPageBackground(themeMode, C) {
-  return { backgroundColor: C.bg };
+export default function App() {
+  const [user, setUser] = useState(undefined);
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+    return unsub;
+  }, []);
+  if (user === undefined) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: SANS, color: "#000000" }}>
+        Loading…
+      </div>
+    );
+  }
+  return <RJournal user={user} />;
 }
 
-export const EMOTIONS = ["Calm", "Confident", "Hesitant", "Bored", "FOMO", "Revenge", "Anxious"];
-export const POSITIVE_EMOTIONS = new Set(["Calm", "Confident"]);
-export const NEGATIVE_EMOTIONS = new Set(["Hesitant", "Bored", "FOMO", "Revenge", "Anxious"]);
+function RJournal({ user }) {
+  const [tab, setTab] = useState("log");
+  const navRefs = useRef({});
+  const [navIndicator, setNavIndicator] = useState({ left: 0, width: 0 });
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== "undefined" ? window.innerWidth > DESKTOP_BREAKPOINT : true
+  );
+  const [trades, setTrades] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+  const [symbolOptions, setSymbolOptions] = useState([]);
+  const [form, setForm] = useState({
+    date: todayISO(), symbol: "", direction: "", reason: "",
+    riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "",
+    images: [],
+  });
+  const [imageUploading, setImageUploading] = useState(false);
+  const [dashboardPeriod, setDashboardPeriod] = useState("all");
+  const [dashboardCustomRange, setDashboardCustomRange] = useState({ from: "", to: "" });
+  const [journalPeriod, setJournalPeriod] = useState("all");
+  const [journalCustomRange, setJournalCustomRange] = useState({ from: "", to: "" });
 
-// Context tema: dipasang sekali di App.jsx lewat <ThemeContext.Provider>,
-// lalu dibaca di mana saja lewat useTheme().
-export const ThemeContext = createContext(LIGHT);
-export function useTheme() { return useContext(ThemeContext); }
+  useEffect(() => {
+    if (!user) { setLoaded(true); return; }
+    (async () => {
+      const data = await loadUserData(user.uid);
+      setTrades(data.trades);
+      setSymbolOptions(data.symbolOptions);
+      setLoaded(true);
+    })();
+  }, [user]);
 
-export const PERIODS = [
-  { key: "all", label: "All Time" },
-  { key: "week", label: "This Week" },
-  { key: "month", label: "This Month" },
-  { key: "year", label: "This Year" },
-];
+  useEffect(() => {
+    function updateIsDesktop() {
+      setIsDesktop(window.innerWidth > DESKTOP_BREAKPOINT);
+    }
+    updateIsDesktop();
+    window.addEventListener("resize", updateIsDesktop);
+    return () => window.removeEventListener("resize", updateIsDesktop);
+  }, []);
 
-// Urutan & metadata tombol ganti tema (dipakai ThemeToggle).
-export const THEME_ORDER = ["light", "dark"];
-export const THEME_META = {
-  light: { label: "Light", Icon: Sun },
-  dark: { label: "Dark", Icon: Moon },
-};
+  useEffect(() => {
+    function setAppHeight() {
+      const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      document.documentElement.style.setProperty("--app-vh", `${h}px`);
+    }
+    setAppHeight();
+    window.addEventListener("resize", setAppHeight);
+    window.visualViewport?.addEventListener("resize", setAppHeight);
+    return () => {
+      window.removeEventListener("resize", setAppHeight);
+      window.visualViewport?.removeEventListener("resize", setAppHeight);
+    };
+  }, []);
+
+  function updateForm(key, val) { setForm((f) => ({ ...f, [key]: val })); }
+  function toggleEmotion(e) {
+    setForm((f) => ({ ...f, emotion: f.emotion === e ? "" : e }));
+  }
+  async function addSymbolOption(opt) {
+    if (!opt || symbolOptions.some((o) => o.value === opt)) return;
+    const next = [...symbolOptions, { value: opt, createdAt: Date.now() }];
+    setSymbolOptions(next);
+    if (user) await saveUserData(user.uid, { symbolOptions: next });
+  }
+  async function deleteSymbolOption(opt) {
+    const next = symbolOptions.filter((o) => o.value !== opt);
+    setSymbolOptions(next);
+    if (user) await saveUserData(user.uid, { symbolOptions: next });
+  }
+  const canSave = form.symbol.trim() && form.direction && form.rActual !== "";
+  async function handleSave() {
+    if (!canSave) return;
+    const trade = {
+      id: uid(), date: form.date || todayISO(), symbol: form.symbol.trim().toUpperCase(),
+      direction: form.direction, reason: form.reason.trim(),
+      riskPct: form.riskPct === "" ? null : Number(form.riskPct),
+      rPlanned: form.rPlanned === "" ? null : Number(form.rPlanned),
+      rActual: Number(form.rActual), rules: form.rules || null,
+      emotion: form.emotion, notes: form.notes.trim(), createdAt: Date.now(),
+      images: form.images || [],
+    };
+    const next = [trade, ...trades];
+    setTrades(next);
+    if (user) await saveUserData(user.uid, { trades: next });
+    setForm({ date: todayISO(), symbol: "", direction: "", reason: "", riskPct: "", rPlanned: "", rActual: "", rules: "", emotion: "", notes: "", images: [] });
+    setTab("journal");
+  }
+  async function addImages(files) {
+    if (!files || files.length === 0) return;
+    setImageUploading(true);
+    try {
+      const remaining = Math.max(0, 8 - (form.images || []).length);
+      const toProcess = Array.from(files).slice(0, remaining);
+      const encoded = await Promise.all(toProcess.map((f) => fileToCompressedDataURL(f)));
+      setForm((f) => ({ ...f, images: [...(f.images || []), ...encoded].slice(0, 8) }));
+    } catch (err) {
+      console.error("Failed to read image:", err);
+    } finally {
+      setImageUploading(false);
+    }
+  }
+  function removeImage(index) {
+    setForm((f) => ({ ...f, images: (f.images || []).filter((_, i) => i !== index) }));
+  }
+  async function handleDelete(id) {
+    const prev = trades;
+    const next = trades.filter((t) => t.id !== id);
+    setTrades(next);
+    try {
+      if (user) await saveUserData(user.uid, { trades: next });
+    } catch (err) {
+      console.error("Failed to delete trade:", err);
+      setTrades(prev);
+      alert("Failed to delete trade. Please try again (check the console for error details).");
+    }
+  }
+  async function handleLogout() {
+    await signOut(auth);
+  }
+
+  const stats = useMemo(() => computeStats(trades), [trades]);
+
+  useEffect(() => {
+    function updateNavIndicator() {
+      const el = navRefs.current[tab];
+      if (el) setNavIndicator({ left: el.offsetLeft, width: el.offsetWidth });
+    }
+    updateNavIndicator();
+    window.addEventListener("resize", updateNavIndicator);
+    return () => window.removeEventListener("resize", updateNavIndicator);
+  }, [tab]);
+
+  const C = DARK;
+
+  return (
+    <ThemeContext.Provider value={C}>
+      <div className="app-root" style={{ ...getPageBackground(C), minHeight: isDesktop ? "100vh" : undefined, color: C.ink, fontFamily: SANS }}>
+        <style>{getAppStyles(C, SANS)}</style>
+        <div className="app-shell">
+          <DesktopTopbar
+            onLogout={handleLogout}
+            userEmail={user?.email}
+            isLoggedIn={!!user}
+          />
+
+          <MobileTopbar onLogout={handleLogout} isLoggedIn={!!user} />
+
+          <PerfMarquee stats={stats} />
+
+          {(tab === "journal" || tab === "dashboard") && (
+            <PeriodFilterBar
+              period={tab === "journal" ? journalPeriod : dashboardPeriod}
+              setPeriod={tab === "journal" ? setJournalPeriod : setDashboardPeriod}
+              customRange={tab === "journal" ? journalCustomRange : dashboardCustomRange}
+              setCustomRange={tab === "journal" ? setJournalCustomRange : setDashboardCustomRange}
+            />
+          )}
+
+          <div className="main-area" style={{ overflowX: "hidden" }}>
+            <div className="main-area-inner">
+              {!loaded ? (
+                <div style={{ color: C.faint, fontSize: 14 }}>Loading…</div>
+              ) : tab === "log" ? (
+                <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
+              ) : tab === "journal" ? (
+                <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} period={journalPeriod} customRange={journalCustomRange} />
+              ) : tab === "dashboard" ? (
+                <Dashboard trades={trades} period={dashboardPeriod} customRange={dashboardCustomRange} />
+              ) : (
+                <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
+              )}
+
+              <Footer />
+            </div>
+          </div>
+        </div>
+
+        <MobileDockNav
+          items={NAV}
+          activeKey={tab}
+          onSelect={setTab}
+          registerItemRef={(key, el) => { navRefs.current[key] = el; }}
+          indicator={navIndicator}
+          accentColor={C.btnAccent}
+        />
+
+        <OrientationGuard />
+      </div>
+    </ThemeContext.Provider>
+  );
+}
