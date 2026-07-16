@@ -21,8 +21,8 @@ export const SHADOW_DARK = {
 // Only the blue accent keeps its color; win/loss/warning colors (sage /
 // rustRed / amber) are kept as-is since they carry meaning, not just style.
 export const DARK = {
-  bg: "#131313", paper: "#131313", paperSoft: "#1c1c1c",
-  paperSoftLight: "#1c1c1c", paperSoftStat: "#1c1c1c",
+  bg: "#131313", paper: "#131313", paperSoft: "#131313",
+  paperSoftLight: "#131313", paperSoftStat: "#131313",
   ink: "#eaeaea", inkSoft: "#9a9a9a", muted: "#9a9a9a", faint: "#707070",
   line: "#333333", lineSoft: "#242424",
   clay: "#044df5", clayDeep: "#0339b8", clayWash: "rgba(4,77,245,0.15)", clayOnWhite: "#044df5",
