@@ -41,10 +41,10 @@ export default function JournalList({ trades, onDelete, onGoLog, period, customR
       <div style={{ marginTop: 30, textAlign: "center", color: C.muted }}>
         <div style={{ fontSize: 16, marginBottom: 16 }}>No trades logged yet.</div>
         <button onClick={onGoLog} style={{
-          display: "inline-flex", alignItems: "center", gap: 8, background: C.clayWash,
-          border: `1px solid ${C.clay}`, color: C.clayOnWhite, borderRadius: 0, padding: "12px 20px",
-          fontWeight: 700, fontSize: 15, cursor: "pointer",
-        }}><Plus size={18} /> Log your first trade</button>
+          display: "inline-flex", alignItems: "center", gap: 8, background: "transparent",
+          border: `1px dashed ${C.line}`, color: C.inkSoft, borderRadius: 0, padding: "12px 20px",
+          fontWeight: 600, fontSize: 13, cursor: "pointer",
+        }}><Plus size={16} /> Log your first trade</button>
       </div>
     );
   }
