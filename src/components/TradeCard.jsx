@@ -34,7 +34,7 @@ export default function TradeCard({ t, onDelete }) {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <div style={{ fontWeight: 700, fontSize: 19 }}>{t.symbol}</div>
+          <div style={{ fontWeight: 700, fontSize: 19, fontFamily: SANS }}>{t.symbol}</div>
           <div style={{ fontFamily: SANS, fontSize: 10, color: C.faint }}>{t.date}</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -102,7 +102,7 @@ export default function TradeCard({ t, onDelete }) {
             )}
             {canDelete && (
               <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{
-                marginTop: 15, background: "transparent", border: "none", color: C.faint, fontSize: 10,
+                marginTop: 15, background: "transparent", border: "none", color: C.faint, fontSize: 10, fontFamily: SANS,
                 display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: 0,
               }}><Trash2 size={11} /> Delete</button>
             )}
