@@ -37,7 +37,7 @@ export default class ErrorBoundary extends React.Component {
             padding: 24,
             textAlign: "center",
             fontFamily:
-              "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+              "'Source Code Pro', ui-monospace, monospace",
             color: "#1a1a1a",
             background: "#ffffff",
           }}
