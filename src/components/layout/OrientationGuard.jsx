@@ -13,7 +13,6 @@
 // browsernya mendukung (best-effort, dibungkus try/catch).
 import React, { useEffect } from "react";
 import { useTheme, SANS } from "../../theme/tokens.js";
-import BrandMark from "../../BrandMark.jsx";
 
 export default function OrientationGuard() {
   const C = useTheme();
@@ -38,10 +37,9 @@ export default function OrientationGuard() {
       className="orientation-lock-overlay"
       style={{ background: C.bg, color: C.ink, fontFamily: SANS }}
     >
-      <BrandMark style={{ width: 48, height: 48, color: C.faint, marginBottom: 4 }} />
-      <div style={{ fontSize: 15, fontWeight: 700 }}>Putar HP kembali ke posisi tegak</div>
+      <div style={{ fontSize: 15, fontWeight: 700 }}>Rotate your phone back to portrait</div>
       <div style={{ fontSize: 13, color: C.faint, maxWidth: 260 }}>
-        Aplikasi ini dirancang untuk tampilan portrait saja.
+        This app is designed for portrait view only.
       </div>
     </div>
   );
