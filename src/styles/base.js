@@ -27,6 +27,12 @@ export function getBaseStyles(C, SANS) {
     .app-footer-mobile { display: none; }
     .circular-text-dock { display: none; }
 
+    /* Period filter chips (All Time / This Week / ... / Custom Range):
+       default is the original 2-row layout (3 chips, then 2). Desktop
+       overrides this into a single row — see desktop.js. */
+    .period-chip-row-1 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 9px; }
+    .period-chip-row-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
+
     .chat-mode { height: var(--app-vh, 100dvh); overflow: hidden; }
     .chat-mode .main-area {
       display: flex; flex-direction: column; overflow: hidden;
