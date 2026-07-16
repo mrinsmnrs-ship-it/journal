@@ -9,7 +9,7 @@ export function getBaseStyles(C, SANS) {
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
     * { box-sizing: border-box; }
     html, body { margin:0; height: 100%; background: ${C.bg}; }
-    button { -webkit-tap-highlight-color: transparent; transition: transform .1s ease; outline: none; }
+    button { -webkit-tap-highlight-color: transparent; transition: transform .1s ease; outline: none; font-family: inherit; }
     button:active:not(:disabled) { transform: scale(0.96); }
     .no-press, .no-press:active { transform: none !important; }
     input::placeholder, textarea::placeholder { color: ${C.inputPlaceholder}; }
