@@ -7,7 +7,6 @@ import {
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
 } from "recharts";
-import { motion, AnimatePresence } from "motion/react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { SANS, SERIF, MONO, useTheme } from "../../theme/tokens.js";
 import { fmtR } from "../../utils/format.js";
@@ -17,7 +16,6 @@ import {
 } from "../../utils/stats.js";
 import Counter from "../../Counter.jsx";
 import CountUp from "../../CountUp.jsx";
-import TextScramble from "../../TextScramble.jsx";
 
 // ---- Dashboard ----
 
@@ -39,46 +37,11 @@ function AnimatedStat({ value, decimals = 0, prefix = "", suffix = "", separator
 // Shared boxed-list style used by Summary, Performance by Symbol, and
 // Trader Scorecard so all three read as one consistent visual language
 // (a bordered panel of stacked rows) instead of three different chart types.
-//
-// Animates its own height to match its content (e.g. Performance by Symbol
-// showing more or fewer symbols after switching the period filter) instead
-// of snapping straight to the new size. This measures the real rendered
-// height with ResizeObserver and eases a plain CSS `height` transition to
-// it — deliberately NOT framer-motion's `layout` animation, which caused
-// visible jitter here when combined with the rows' own enter/exit fades
-// (both trying to measure and animate the same area at once).
 function BarBox({ children }) {
   const C = useTheme();
-  const innerRef = useRef(null);
-  const [height, setHeight] = useState(null);
-
-  useEffect(() => {
-    const el = innerRef.current;
-    if (!el) return undefined;
-
-    // Set the starting height immediately (no transition) so the box
-    // doesn't animate in from 0 on first mount.
-    setHeight(el.offsetHeight);
-
-    const ro = new ResizeObserver(() => {
-      if (innerRef.current) setHeight(innerRef.current.offsetHeight);
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
   return (
-    <div
-      style={{
-        width: "100%", background: C.paperSoftStat, border: `1px solid ${C.line}`,
-        borderRadius: 0, boxShadow: C.shadowCard, overflow: "hidden",
-        height: height == null ? "auto" : `${height}px`,
-        transition: height == null ? "none" : "height 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
-      }}
-    >
-      <div ref={innerRef} style={{ padding: "6px 10px" }}>
-        {children}
-      </div>
+    <div style={{ width: "100%", background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 0, padding: "6px 10px", boxShadow: C.shadowCard }}>
+      {children}
     </div>
   );
 }
@@ -86,9 +49,6 @@ function BarBox({ children }) {
 // One row: label on the left, a filled track in the middle (omitted when
 // `percent` isn't given, e.g. a raw count like Total Trades), and the
 // display value on the right. `sub` is optional smaller text below the row.
-// Wrapped in motion.div purely for the opacity fade (enter/exit inside
-// AnimatePresence) — no `layout` prop, so it doesn't fight with BarBox's
-// own height transition above.
 function BarRow({ label, percent, display, isFirst, sub }) {
   const C = useTheme();
   const hasBar = percent !== undefined && percent !== null;
@@ -98,13 +58,7 @@ function BarRow({ label, percent, display, isFirst, sub }) {
   // stacking label above value.
   if (!hasBar) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.25 }}
-        style={{ padding: "12px 4px", borderTop: isFirst ? "none" : `1px solid ${C.lineSoft}` }}
-      >
+      <div style={{ padding: "12px 4px", borderTop: isFirst ? "none" : `1px solid ${C.lineSoft}` }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
           <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 13, color: C.ink, textAlign: "left" }}>
             {label}
@@ -118,18 +72,12 @@ function BarRow({ label, percent, display, isFirst, sub }) {
             {sub}
           </div>
         )}
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.25 }}
-      style={{ padding: "12px 4px", borderTop: isFirst ? "none" : `1px solid ${C.lineSoft}` }}
-    >
+    <div style={{ padding: "12px 4px", borderTop: isFirst ? "none" : `1px solid ${C.lineSoft}` }}>
       <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 13, color: C.ink, textAlign: "left" }}>
         {label}
       </div>
@@ -150,7 +98,7 @@ function BarRow({ label, percent, display, isFirst, sub }) {
           {sub}
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }
 function EquityCurve({ trades }) {
@@ -326,40 +274,46 @@ function CalendarHeatmap({ trades, year }) {
   );
 }
 
-function SymbolPerformanceBars({ trades }) {
+function SymbolPerformanceBars({ trades, filteredTrades }) {
   const C = useTheme();
-  const statsData = useMemo(() => computeSymbolStats(trades), [trades]);
+  // The row set and order come from ALL trades ever logged (not the
+  // period filter), so the box always lists every symbol the person has
+  // traded and never reorders or resizes when the period changes. Only
+  // the numbers per row come from the period-filtered trades — a symbol
+  // with no activity in the current period just shows 0.
+  const allSymbols = useMemo(() => computeSymbolStats(trades), [trades]);
+  const periodStats = useMemo(() => {
+    const map = new Map();
+    computeSymbolStats(filteredTrades).forEach((s) => map.set(s.symbol, s));
+    return map;
+  }, [filteredTrades]);
 
-  if (statsData.length === 0) return null;
+  if (allSymbols.length === 0) return null;
 
   return (
     <BarBox>
-      <AnimatePresence initial={false}>
-        {statsData.map((item, i) => (
-          // Keyed by rank position, not by symbol name. Ranking is sorted by
-          // totalR, so switching the period filter can put a different
-          // symbol at the same row — keying by symbol would unmount/remount
-          // that row and make the volume bar snap straight to its new width
-          // instead of transitioning. Keying by position keeps the same DOM
-          // node, so the bar's width transition and the symbol name's
-          // scramble animation both play smoothly on every change.
+      {allSymbols.map((item, i) => {
+        const period = periodStats.get(item.symbol);
+        const totalR = period ? period.totalR : 0;
+        const winRate = period ? period.winRate : 0;
+        const count = period ? period.count : 0;
+        return (
           <BarRow
-            key={i}
+            key={item.symbol}
             isFirst={i === 0}
-            label={<TextScramble text={item.symbol} duration={0.5} />}
-            percent={item.winRate}
-            display={<AnimatedStat value={item.winRate} decimals={0} suffix="%" />}
+            label={item.symbol}
+            display={<AnimatedStat value={winRate} decimals={0} suffix="%" />}
             sub={
               <>
-                <span style={{ color: item.totalR > 0 ? C.ink : C.faint, fontWeight: 700 }}>
-                  <AnimatedStat value={item.totalR} decimals={2} prefix="+" suffix="R" />
+                <span style={{ color: totalR > 0 ? C.ink : C.faint, fontWeight: 700 }}>
+                  <AnimatedStat value={totalR} decimals={2} prefix="+" suffix="R" />
                 </span>
-                {" "}&middot; {item.count} trade{item.count === 1 ? "" : "s"}
+                {" "}&middot; {count} trade{count === 1 ? "" : "s"}
               </>
             }
           />
-        ))}
-      </AnimatePresence>
+        );
+      })}
     </BarBox>
   );
 }
@@ -488,7 +442,7 @@ export default function Dashboard({ trades, period, customRange }) {
               <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Performance by Symbol</div>
               <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Total R per symbol, sorted by most profitable</div>
             </div>
-            <SymbolPerformanceBars trades={filteredTrades} />
+            <SymbolPerformanceBars trades={trades} filteredTrades={filteredTrades} />
           </div>
 
           {availableYears.length > 0 && (
