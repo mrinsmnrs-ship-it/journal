@@ -3,7 +3,7 @@ import React from "react";
 import { useTheme } from "../../theme/tokens.js";
 import TopbarActions from "../common/TopbarActions.jsx";
 
-export default function MobileTopbar({ onLogout, isLoggedIn }) {
+export default function MobileTopbar({ onLogout, isLoggedIn, onOpenLogin }) {
   const C = useTheme();
   return (
     <div className="mobile-topbar">
@@ -13,7 +13,7 @@ export default function MobileTopbar({ onLogout, isLoggedIn }) {
           <span style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontWeight: 500, letterSpacing: "-0.05em", marginLeft: "0.05em", color: C.ink }}>Journey</span>
         </span>
       </div>
-      <TopbarActions onLogout={onLogout} isLoggedIn={isLoggedIn} />
+      <TopbarActions onLogout={onLogout} isLoggedIn={isLoggedIn} onOpenLogin={onOpenLogin} />
     </div>
   );
 }
