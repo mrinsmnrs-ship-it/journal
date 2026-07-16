@@ -34,10 +34,10 @@ const FIELD_LIMITS = {
 
 export default function RiskRPanel({ form, updateForm }) {
   const C = useTheme();
-  const [activeField, setActiveField] = useState("rActual");
+  const [activeField, setActiveField] = useState(null);
   const [partialOpen, setPartialOpen] = useState(false);
   const [partialRows, setPartialRows] = useState([{ a: "0", b: "0" }]);
-  const [partialTarget, setPartialTarget] = useState("0:a");
+  const [partialTarget, setPartialTarget] = useState(null);
 
   // Total R = jumlah kontribusi tiap baris (Partial R x Qty%), bukan
   // input manual lagi -- otomatis mengikuti isi baris di bawahnya.
@@ -46,14 +46,15 @@ export default function RiskRPanel({ form, updateForm }) {
   ) / 100;
 
   const adjust = (delta) => {
-    const current = Number(form[activeField]) || 0;
-    const { min, max } = FIELD_LIMITS[activeField];
+    const field = activeField || "rActual";
+    const current = Number(form[field]) || 0;
+    const { min, max } = FIELD_LIMITS[field];
     const next = Math.min(max, Math.max(min, Math.round((current + delta) * 100) / 100));
-    updateForm(activeField, String(next));
+    updateForm(field, String(next));
   };
 
   const adjustPartial = (delta) => {
-    const [idxStr, col] = partialTarget.split(":");
+    const [idxStr, col] = (partialTarget || "0:a").split(":");
     const idx = Number(idxStr);
     setPartialRows((rows) => rows.map((row, i) => {
       if (i !== idx) return row;
@@ -68,7 +69,7 @@ export default function RiskRPanel({ form, updateForm }) {
 
   const resetPartial = () => {
     setPartialRows([{ a: "0", b: "0" }]);
-    setPartialTarget("0:a");
+    setPartialTarget(null);
   };
 
   const deletePartialRow = (idx) => {
@@ -76,7 +77,7 @@ export default function RiskRPanel({ form, updateForm }) {
       const next = rows.filter((_, i) => i !== idx);
       return next.length ? next : [{ a: "0", b: "0" }];
     });
-    setPartialTarget("0:a");
+    setPartialTarget(null);
   };
 
   return (
@@ -322,4 +323,5 @@ export default function RiskRPanel({ form, updateForm }) {
       )}
     </div>
   );
-}
+                               }
+                      
