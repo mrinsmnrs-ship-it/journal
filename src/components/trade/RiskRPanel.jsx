@@ -170,7 +170,7 @@ export default function RiskRPanel({ form, updateForm }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
               style={{
                 position: "fixed", inset: 0, zIndex: 29,
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -180,10 +180,10 @@ export default function RiskRPanel({ form, updateForm }) {
             >
               <motion.div
                 onClick={(e) => e.stopPropagation()}
-                initial={{ opacity: 0, scale: 0.94 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.94 }}
-                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
                 style={{
                   width: "min(85vw, 280px)", maxWidth: 280, maxHeight: "80vh",
                   display: "flex", flexDirection: "column",
