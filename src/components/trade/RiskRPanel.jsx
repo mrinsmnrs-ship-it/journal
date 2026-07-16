@@ -202,12 +202,26 @@ export default function RiskRPanel({ form, updateForm }) {
                       width: "100%", boxSizing: "border-box", background: C.paperSoft,
                       border: `1px solid ${C.line}`,
                       borderRadius: 0, height: 40, padding: "0 12px",
-                      display: "flex", alignItems: "center", justifyContent: "center",
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 1,
                       color: C.inputText, fontFamily: SANS, fontSize: 14, fontWeight: 600,
                       marginBottom: 12,
                     }}
                   >
-                    {partialTotal}
+                    {partialTotal < 0 && (
+                      <span style={{ fontSize: 14, fontWeight: 600, color: C.inputText, lineHeight: 1 }}>&minus;</span>
+                    )}
+                    <Counter
+                      value={Math.abs(partialTotal)}
+                      places={[10, 1, ".", 0.1]}
+                      fontSize={14}
+                      padding={1}
+                      gap={1}
+                      horizontalPadding={0}
+                      textColor={C.inputText}
+                      fontWeight={600}
+                      topGradientStyle={{ display: "none" }}
+                      bottomGradientStyle={{ display: "none" }}
+                    />
                   </div>
                   <div style={{ display: "flex", gap: 6, marginBottom: 16, alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", gap: 6 }}>
@@ -247,12 +261,12 @@ export default function RiskRPanel({ form, updateForm }) {
                       <RotateCcw size={13} />
                     </button>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, marginBottom: 6 }}>
                     <div style={{ width: 16, flexShrink: 0 }} />
                     <div style={{
                       flex: 1, fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
                       color: C.muted, textTransform: "capitalize", textAlign: "left",
-                    }}>Partial R</div>
+                    }}>R Partial</div>
                     <div style={{
                       flex: 1, fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
                       color: C.muted, textTransform: "capitalize", textAlign: "left",
@@ -269,6 +283,8 @@ export default function RiskRPanel({ form, updateForm }) {
                       {["a", "b"].map((col) => {
                         const target = `${idx}:${col}`;
                         const active = partialTarget === target;
+                        const numeric = Number(row[col]) || 0;
+                        const isNegative = numeric < 0;
                         return (
                           <button
                             key={col}
@@ -278,11 +294,25 @@ export default function RiskRPanel({ form, updateForm }) {
                               flex: 1, boxSizing: "border-box", background: C.inputBg,
                               border: `1px solid ${active ? C.btnAccentBorder : C.inputBorder}`,
                               borderRadius: 0, height: 36, padding: "0 8px", cursor: "pointer",
-                              display: "flex", alignItems: "center", justifyContent: "center",
+                              display: "flex", alignItems: "center", justifyContent: "center", gap: 1,
                               color: C.inputText, fontFamily: SANS, fontSize: 13, fontWeight: 600,
                             }}
                           >
-                            {row[col]}
+                            {isNegative && (
+                              <span style={{ fontSize: 13, fontWeight: 600, color: C.inputText, lineHeight: 1 }}>&minus;</span>
+                            )}
+                            <Counter
+                              value={Math.abs(numeric)}
+                              places={[10, 1, ".", 0.1]}
+                              fontSize={13}
+                              padding={1}
+                              gap={1}
+                              horizontalPadding={0}
+                              textColor={C.inputText}
+                              fontWeight={600}
+                              topGradientStyle={{ display: "none" }}
+                              bottomGradientStyle={{ display: "none" }}
+                            />
                           </button>
                         );
                       })}
@@ -324,4 +354,3 @@ export default function RiskRPanel({ form, updateForm }) {
     </div>
   );
                                }
-                      
