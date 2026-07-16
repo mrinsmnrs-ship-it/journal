@@ -5,7 +5,7 @@ import { loadUserData, saveUserData } from "./store";
 import { getAppStyles } from "./styles/index.js";
 
 import {
-  SANS, DESKTOP_BREAKPOINT, NAV,
+  SANS, DESKTOP_BREAKPOINT, NAV, NAV_DESKTOP,
   ThemeContext, getPageBackground, THEME_ORDER, LIGHT, DARK,
 } from "./theme/tokens.js";
 import { uid, fileToCompressedDataURL } from "./utils/format.js";
@@ -23,6 +23,7 @@ import OrientationGuard from "./components/layout/OrientationGuard.jsx";
 import LogTradeForm from "./components/trade/LogTradeForm.jsx";
 import JournalList from "./components/JournalList.jsx";
 import Dashboard from "./components/dashboard/Dashboard.jsx";
+import ChartPage from "./components/chart/ChartPage.jsx";
 import CircularText from "./components/common/CircularText.jsx";
 
 export default function App() {
@@ -171,7 +172,6 @@ async function toggleTheme() {
   }
 
   const stats = useMemo(() => computeStats(trades), [trades]);
-  const NAV_DESKTOP = NAV;
 
   useEffect(() => {
     function updateNavIndicator() {
@@ -237,6 +237,8 @@ async function toggleTheme() {
                 <JournalList trades={trades} onDelete={handleDelete} onGoLog={() => setTab("log")} period={journalPeriod} customRange={journalCustomRange} />
               ) : tab === "dashboard" ? (
                 <Dashboard trades={trades} period={dashboardPeriod} customRange={dashboardCustomRange} />
+              ) : tab === "chart" ? (
+                <ChartPage symbolOptions={symbolOptions} themeMode={themeMode} />
               ) : (
                 <LogTradeForm form={form} updateForm={updateForm} toggleEmotion={toggleEmotion} handleSave={handleSave} canSave={canSave} symbolOptions={symbolOptions} onAddSymbolOption={addSymbolOption} onDeleteSymbolOption={deleteSymbolOption} onAddImages={addImages} onRemoveImage={removeImage} imageUploading={imageUploading} />
               )}
