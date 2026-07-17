@@ -8,7 +8,6 @@ import useInputStyle from "../common/useInputStyle.js";
 import DateField from "../DateField.jsx";
 import TagSelect from "../TagSelect.jsx";
 import RiskRPanel from "./RiskRPanel.jsx";
-import EmotionSlider from "../../EmotionSlider.jsx";
 
 export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, symbolOptions, onAddSymbolOption, onDeleteSymbolOption, onAddImages, onRemoveImage, imageUploading, isLoggedIn = true, onRequestLogin }) {
   const C = useTheme();
@@ -70,20 +69,7 @@ export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSa
           ))}
         </div>
       </Field>
-      <Field label="Reason / Setup">
-        <input type="text" placeholder="Breakout retest, reversal, ..." value={form.reason} onChange={(e) => updateForm("reason", e.target.value)} style={{ ...inputStyle, height: 40, padding: "0 16px" }} />
-      </Field>
       <RiskRPanel form={form} updateForm={updateForm} />
-      <Field label="Rules Compliance">
-        <div style={{ display: "flex", gap: 12 }}>
-          {["Yes", "No"].map((r) => (
-            <PillToggle key={r} label={r} active={form.rules === r} onClick={() => updateForm("rules", r)} />
-          ))}
-        </div>
-      </Field>
-      <Field label="Emotions">
-        <EmotionSlider value={form.emotion} onChange={(e) => updateForm("emotion", e)} theme={C} />
-      </Field>
       <Field label="Notes">
         <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
       </Field>
