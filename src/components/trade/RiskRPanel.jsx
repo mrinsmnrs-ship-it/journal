@@ -19,15 +19,13 @@ import Counter from "../../Counter.jsx";
 // buttons to adjust whichever field is currently selected — no need for
 // three separate +/- controls.
 const R_FIELDS = [
-  { key: "riskPct", label: "Risk" },
   { key: "rPlanned", label: "R Planned" },
   { key: "rActual", label: "R Actual" },
 ];
 
-// Risk & R Planned tidak boleh negatif (0-100). R Actual boleh negatif
+// R Planned tidak boleh negatif (0-100). R Actual boleh negatif
 // (rugi) tapi dibatasi -100 sampai 100 supaya tidak salah pencet kebablasan.
 const FIELD_LIMITS = {
-  riskPct: { min: 0, max: 100 },
   rPlanned: { min: 0, max: 100 },
   rActual: { min: -100, max: 100 },
 };
