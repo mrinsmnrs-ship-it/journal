@@ -1,6 +1,6 @@
 // src/components/dashboard/Dashboard.jsx
 // Performance dashboard: stat cards, equity curve, R-per-trade bar chart,
-// symbol performance, trader scorecard (radar), and trade calendar heatmap.
+// symbol performance, and trade calendar heatmap.
 // Shared between mobile and desktop layouts (styled responsively via CSS).
 import React, { useState, useMemo } from "react";
 import {
@@ -396,20 +396,6 @@ export default function Dashboard({ trades, period, customRange }) {
               <BarRow label="Expectancy" display={<AnimatedStat value={stats.expectancy} decimals={2} prefix="+" suffix="R" />} />
               <BarRow label="Avg Win" display={<AnimatedStat value={stats.avgWin} decimals={2} prefix="+" suffix="R" />} />
               <BarRow label="Avg Loss" display={<AnimatedStat value={stats.avgLoss} decimals={2} suffix="R" />} />
-            </BarBox>
-          </div>
-
-          <div style={{ marginBottom: 22 }}>
-            <div style={{ padding: "0 4px", marginBottom: 16 }}>
-              <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trader Scorecard</div>
-              <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Score 0–100 per dimension</div>
-            </div>
-            <BarBox>
-              {stats.scorecard
-                .filter((s) => s.metric !== "Win Rate")
-                .map((s, i) => (
-                  <BarRow key={s.metric} isFirst={i === 0} label={s.metric} percent={s.value} display={<AnimatedStat value={s.value} decimals={0} suffix="%" />} />
-                ))}
             </BarBox>
           </div>
 
