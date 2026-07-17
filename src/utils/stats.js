@@ -33,14 +33,15 @@ export function computeSymbolStats(trades) {
   const map = new Map();
   trades.forEach((t) => {
     const sym = t.symbol || "\u2014";
-    const cur = map.get(sym) || { symbol: sym, totalR: 0, count: 0, wins: 0 };
+    const cur = map.get(sym) || { symbol: sym, totalR: 0, count: 0, wins: 0, losses: 0 };
     cur.totalR += t.rActual;
     cur.count += 1;
     if (t.rActual > 0) cur.wins += 1;
+    if (t.rActual < 0) cur.losses += 1;
     map.set(sym, cur);
   });
   return Array.from(map.values())
-    .map((s) => ({ ...s, totalR: Math.round(s.totalR * 100) / 100, winRate: s.count ? (s.wins / s.count) * 100 : 0 }))
+    .map((s) => ({ ...s, totalR: Math.round(s.totalR * 100) / 100, winRate: (s.wins + s.losses) ? (s.wins / (s.wins + s.losses)) * 100 : 0 }))
     .sort((a, b) => b.totalR - a.totalR);
 }
 
@@ -57,7 +58,11 @@ export function computeStats(trades) {
   const wins = trades.filter((t) => t.rActual > 0);
   const losses = trades.filter((t) => t.rActual < 0);
   const totalR = trades.reduce((s, t) => s + t.rActual, 0);
-  const winRate = (wins.length / total) * 100;
+  // Win rate cuma dihitung dari trade yang menang/kalah -- BE (rActual === 0)
+  // dikeluarkan dari pembagi supaya tidak ikut menurunkan persentase
+  // seolah-olah dihitung kalah.
+  const decisiveCount = wins.length + losses.length;
+  const winRate = decisiveCount ? (wins.length / decisiveCount) * 100 : 0;
   const expectancy = totalR / total;
   const avgWin = wins.length ? wins.reduce((s, t) => s + t.rActual, 0) / wins.length : 0;
   const avgLoss = losses.length ? losses.reduce((s, t) => s + t.rActual, 0) / losses.length : 0;
