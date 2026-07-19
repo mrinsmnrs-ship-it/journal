@@ -80,28 +80,29 @@ export default function RiskRPanel({ form, updateForm }) {
 
   return (
     <div style={{ marginBottom: 22 }}>
-      <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
+      <div style={{ marginBottom: 6 }}>
         {R_FIELDS.map(({ key, label }) => {
           const active = activeField === key;
           const raw = form[key];
           const numeric = raw === "" || raw === undefined || raw === null || isNaN(Number(raw)) ? 0 : Number(raw);
           const isNegative = numeric < 0;
           return (
-            <div key={key} style={{ flex: 1 }}>
-              <div style={{
-                fontFamily: LABEL_FONT, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em",
-                color: C.muted, marginBottom: 9, textTransform: "capitalize",
-              }}>{label}</div>
-              <button
-                type="button"
-                onClick={() => setActiveField(key)}
-                style={{
-                  width: "100%", boxSizing: "border-box", background: C.inputBg,
-                  border: `1px solid ${active ? C.btnAccentBorder : C.inputBorder}`,
-                  borderRadius: 0, height: 40, padding: "0 6px", cursor: "pointer",
-                  display: "flex", justifyContent: "center", alignItems: "center", gap: 1,
-                }}
-              >
+            <button
+              key={key}
+              type="button"
+              onClick={() => setActiveField(key)}
+              style={{
+                width: "100%", boxSizing: "border-box", background: "transparent",
+                border: "none", borderBottom: `1px solid ${active ? C.btnAccentBorder : C.line}`,
+                borderRadius: 0, padding: "14px 0", cursor: "pointer",
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+              }}
+            >
+              <span style={{
+                fontFamily: LABEL_FONT, fontSize: 13, fontWeight: 600, letterSpacing: "0.01em",
+                color: C.muted,
+              }}>{label}</span>
+              <span style={{ display: "flex", alignItems: "center", gap: 1 }}>
                 {isNegative && (
                   <span style={{ fontSize: 14, fontWeight: 600, color: C.inputText, lineHeight: 1 }}>&minus;</span>
                 )}
@@ -117,8 +118,8 @@ export default function RiskRPanel({ form, updateForm }) {
                   topGradientStyle={{ display: "none" }}
                   bottomGradientStyle={{ display: "none" }}
                 />
-              </button>
-            </div>
+              </span>
+            </button>
           );
         })}
       </div>
