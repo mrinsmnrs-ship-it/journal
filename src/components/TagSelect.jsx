@@ -199,11 +199,11 @@ export default function TagSelect({ value, onChange, options, onAddOption, onDel
         disabled={disabled}
         onClick={openMenu}
         style={{
-          width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
-          borderRadius: 0, height: 40, padding: "0 16px", color: value ? C.inputText : C.faint,
-          fontFamily: SANS, fontSize: 16, textTransform: uppercase ? "uppercase" : "none",
-          textAlign: "left", cursor: disabled ? "not-allowed" : "pointer", display: "flex", alignItems: "center",
-          opacity: disabled ? 0.5 : 1, boxShadow: "none",
+          width: "100%", boxSizing: "border-box", background: "transparent", border: "none",
+          borderRadius: 0, height: 40, padding: 0, color: value ? C.inputText : C.faint,
+          fontFamily: SANS, fontSize: 15, textTransform: uppercase ? "uppercase" : "none",
+          textAlign: "right", cursor: disabled ? "not-allowed" : "pointer", display: "flex", alignItems: "center",
+          justifyContent: "flex-end", opacity: disabled ? 0.5 : 1, boxShadow: "none",
         }}
       >
         {value || placeholder}
