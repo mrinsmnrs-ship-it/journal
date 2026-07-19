@@ -149,9 +149,9 @@ export default function DateField({ value, onChange, align = "left" }) {
         className="no-press"
         onClick={() => setOpen((o) => !o)}
         style={{
-          width: "100%", boxSizing: "border-box", background: C.inputBg, border: `1px solid ${C.inputBorder}`,
-          borderRadius: 0, height: 40, padding: "0 16px", color: C.inputText, fontFamily: SANS, fontSize: 16,
-          textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center",
+          width: "100%", boxSizing: "border-box", background: "transparent", border: "none",
+          borderRadius: 0, height: 40, padding: 0, color: C.inputText, fontFamily: SANS, fontSize: 15,
+          textAlign: "right", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "flex-end",
           boxShadow: "none",
         }}
       >
