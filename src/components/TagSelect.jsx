@@ -200,8 +200,8 @@ export default function TagSelect({ value, onChange, options, onAddOption, onDel
         onClick={openMenu}
         style={{
           width: "100%", boxSizing: "border-box", background: "transparent", border: "none",
-          borderRadius: 0, height: 40, padding: 0, color: value ? C.inputText : C.faint,
-          fontFamily: SANS, fontSize: 15, textTransform: uppercase ? "uppercase" : "none",
+          borderRadius: 0, padding: 0, margin: 0, color: value ? C.inputText : C.faint,
+          fontFamily: SANS, fontSize: 15, lineHeight: 1.3, textTransform: uppercase ? "uppercase" : "none",
           textAlign: "right", cursor: disabled ? "not-allowed" : "pointer", display: "flex", alignItems: "center",
           justifyContent: "flex-end", opacity: disabled ? 0.5 : 1, boxShadow: "none",
         }}
