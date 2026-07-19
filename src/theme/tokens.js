@@ -39,9 +39,10 @@ export const DARK = {
 
 export const GITHUB_SANS = "'Geist Pixel', ui-monospace, monospace";
 export const GITHUB_MONO = "'Geist Pixel', ui-monospace, monospace";
-export const CHAT_FONT = GITHUB_SANS;
+export const INTER = "'Inter', ui-sans-serif, system-ui, sans-serif"; // font utama UI (revisi: ganti dari Geist Pixel ke Inter)
+export const CHAT_FONT = INTER;
 export const LOGO_FONT = "'Press Start 2P', cursive"; // reserved for the "Aftermath Journey" wordmark only — logo tetap beda dari UI
-export const LABEL_FONT = GITHUB_SANS; // label field ikut sistem font GitHub juga
+export const LABEL_FONT = INTER; // label field ikut Inter juga
 export const SERIF = CHAT_FONT; // font disatukan dengan halaman lain
 export const SANS = CHAT_FONT;  // font disatukan dengan halaman lain
 export const MONO = GITHUB_MONO; // dipakai untuk angka/data ala GitHub (diff, code)
