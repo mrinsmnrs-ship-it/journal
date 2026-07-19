@@ -1,9 +1,8 @@
 // src/components/trade/LogTradeForm.jsx
 import React, { useRef } from "react";
-import { Plus, X, Lock } from "lucide-react";
+import { Plus, X, Lock, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTheme, SANS } from "../../theme/tokens.js";
 import Field from "../common/Field.jsx";
-import PillToggle from "../common/PillToggle.jsx";
 import DateField from "../DateField.jsx";
 import TagSelect from "../TagSelect.jsx";
 import RiskRPanel from "./RiskRPanel.jsx";
@@ -61,10 +60,29 @@ export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSa
         />
       </Field>
       <Field label="Direction">
-        <div style={{ display: "flex", gap: 12 }}>
-          {["Long", "Short"].map((d) => (
-            <PillToggle key={d} label={d} active={form.direction === d} onClick={() => updateForm("direction", d)} />
-          ))}
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <button
+            type="button"
+            onClick={() => updateForm("direction", form.direction === "Long" ? "Short" : "Long")}
+            aria-label="Previous"
+            style={{
+              background: "transparent", border: "none", padding: 2, margin: 0,
+              color: C.faint, cursor: "pointer", display: "flex", alignItems: "center",
+            }}
+          ><ChevronLeft size={16} /></button>
+          <span style={{
+            fontFamily: SANS, fontSize: 15, fontWeight: 600, color: C.inputText,
+            minWidth: 46, textAlign: "center",
+          }}>{form.direction}</span>
+          <button
+            type="button"
+            onClick={() => updateForm("direction", form.direction === "Long" ? "Short" : "Long")}
+            aria-label="Next"
+            style={{
+              background: "transparent", border: "none", padding: 2, margin: 0,
+              color: C.faint, cursor: "pointer", display: "flex", alignItems: "center",
+            }}
+          ><ChevronRight size={16} /></button>
         </div>
       </Field>
       <RiskRPanel form={form} updateForm={updateForm} />
@@ -82,7 +100,7 @@ export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSa
           }}
         />
       </Field>
-      <div style={{ marginTop: -10, marginBottom: 22, marginLeft: -5, marginRight: -5, display: "flex", flexWrap: "wrap" }}>
+      <div style={{ marginTop: 20, marginBottom: 22, marginLeft: -5, marginRight: -5, display: "flex", flexWrap: "wrap" }}>
         {(form.images || []).map((src, i) => (
           <div key={i} style={{ width: "25%", boxSizing: "border-box", padding: "0 5px 10px" }}>
             <div style={{ position: "relative", width: "100%", aspectRatio: "1" }}>
