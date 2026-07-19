@@ -4,14 +4,12 @@ import { Plus, X, Lock } from "lucide-react";
 import { useTheme, SANS } from "../../theme/tokens.js";
 import Field from "../common/Field.jsx";
 import PillToggle from "../common/PillToggle.jsx";
-import useInputStyle from "../common/useInputStyle.js";
 import DateField from "../DateField.jsx";
 import TagSelect from "../TagSelect.jsx";
 import RiskRPanel from "./RiskRPanel.jsx";
 
 export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, symbolOptions, onAddSymbolOption, onDeleteSymbolOption, onAddImages, onRemoveImage, imageUploading, isLoggedIn = true, onRequestLogin }) {
   const C = useTheme();
-  const inputStyle = useInputStyle();
   const fileInputRef = useRef(null);
 
   if (!isLoggedIn) {
@@ -70,8 +68,19 @@ export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSa
         </div>
       </Field>
       <RiskRPanel form={form} updateForm={updateForm} />
-      <Field label="Notes">
-        <textarea placeholder="Additional notes..." value={form.notes} onChange={(e) => updateForm("notes", e.target.value)} rows={3} style={{ ...inputStyle, resize: "none" }} />
+      <Field label="Notes" stacked>
+        <textarea
+          placeholder="Additional notes..."
+          value={form.notes}
+          onChange={(e) => updateForm("notes", e.target.value)}
+          rows={3}
+          style={{
+            width: "100%", boxSizing: "border-box", background: "transparent",
+            border: "none", borderRadius: 0, padding: 0,
+            color: C.inputText, fontFamily: SANS, fontSize: 15, outline: "none",
+            boxShadow: "none", resize: "none",
+          }}
+        />
       </Field>
       <div style={{ marginTop: -10, marginBottom: 22, marginLeft: -5, marginRight: -5, display: "flex", flexWrap: "wrap" }}>
         {(form.images || []).map((src, i) => (
