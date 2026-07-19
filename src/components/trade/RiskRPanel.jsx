@@ -10,7 +10,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { RotateCcw, Trash2 } from "lucide-react";
+import { RotateCcw, Trash2, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from "lucide-react";
 import { useTheme, SANS, LABEL_FONT } from "../../theme/tokens.js";
 import Counter from "../../Counter.jsx";
 
@@ -32,7 +32,6 @@ const FIELD_LIMITS = {
 
 export default function RiskRPanel({ form, updateForm }) {
   const C = useTheme();
-  const [activeField, setActiveField] = useState(null);
   const [partialOpen, setPartialOpen] = useState(false);
   const [partialRows, setPartialRows] = useState([{ a: "0", b: "0" }]);
   const [partialTarget, setPartialTarget] = useState(null);
@@ -43,12 +42,11 @@ export default function RiskRPanel({ form, updateForm }) {
     partialRows.reduce((sum, row) => sum + (Number(row.a) || 0) * (Number(row.b) || 0) / 100, 0) * 100
   ) / 100;
 
-  const adjust = (delta) => {
-    const field = activeField || "rActual";
-    const current = Number(form[field]) || 0;
-    const { min, max } = FIELD_LIMITS[field];
+  const adjustField = (key, delta) => {
+    const current = Number(form[key]) || 0;
+    const { min, max } = FIELD_LIMITS[key];
     const next = Math.min(max, Math.max(min, Math.round((current + delta) * 100) / 100));
-    updateForm(field, String(next));
+    updateForm(key, String(next));
   };
 
   const adjustPartial = (delta) => {
@@ -82,76 +80,38 @@ export default function RiskRPanel({ form, updateForm }) {
     <div style={{ marginBottom: 22 }}>
       <div style={{
         width: "100%", boxSizing: "border-box", display: "flex", alignItems: "center",
-        justifyContent: "space-between", gap: 16, padding: "14px 0",
-        borderBottom: `1px solid ${C.line}`, marginBottom: 6,
+        justifyContent: "space-between", gap: 12, padding: "14px 0", flexWrap: "wrap",
+        borderBottom: `1px solid ${C.line}`, marginBottom: 14,
       }}>
         <span style={{
           fontFamily: LABEL_FONT, fontSize: 13, fontWeight: 600, letterSpacing: "0.01em",
           color: C.muted, flexShrink: 0,
         }}>R Planned / R Actual</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {R_FIELDS.map(({ key }, idx) => {
-            const active = activeField === key;
             const raw = form[key];
             const numeric = raw === "" || raw === undefined || raw === null || isNaN(Number(raw)) ? 0 : Number(raw);
-            const isNegative = numeric < 0;
-            const valueColor = active ? C.btnAccentText : C.inputText;
+            const arrowBtnStyle = {
+              background: "transparent", border: "none", padding: 2, margin: 0,
+              color: C.faint, cursor: "pointer", display: "flex", alignItems: "center",
+            };
             return (
-              <span key={key} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                {idx > 0 && <span style={{ fontSize: 14, color: C.faint, lineHeight: 1 }}>/</span>}
-                <button
-                  type="button"
-                  onClick={() => setActiveField(key)}
-                  style={{
-                    background: "transparent", border: "none", padding: 0, margin: 0,
-                    cursor: "pointer", display: "flex", alignItems: "center", gap: 1,
-                  }}
-                >
-                  {isNegative && (
-                    <span style={{ fontSize: 14, fontWeight: 600, color: valueColor, lineHeight: 1 }}>&minus;</span>
-                  )}
-                  <Counter
-                    value={Math.abs(numeric)}
-                    places={[10, 1, ".", 0.1]}
-                    fontSize={14}
-                    padding={1}
-                    gap={1}
-                    horizontalPadding={0}
-                    textColor={valueColor}
-                    fontWeight={600}
-                    topGradientStyle={{ display: "none" }}
-                    bottomGradientStyle={{ display: "none" }}
-                  />
-                </button>
+              <span key={key} style={{ display: "flex", alignItems: "center", gap: 1 }}>
+                {idx > 0 && <span style={{ fontSize: 14, color: C.faint, lineHeight: 1, margin: "0 7px 0 0" }}>/</span>}
+                <button type="button" onClick={() => adjustField(key, -1)} aria-label="Decrease 1" style={arrowBtnStyle}><ChevronsLeft size={14} /></button>
+                <button type="button" onClick={() => adjustField(key, -0.1)} aria-label="Decrease 0.1" style={arrowBtnStyle}><ChevronLeft size={14} /></button>
+                <span style={{
+                  fontFamily: SANS, fontSize: 14, fontWeight: 600, color: C.inputText,
+                  minWidth: 36, textAlign: "center",
+                }}>{numeric.toFixed(1)}</span>
+                <button type="button" onClick={() => adjustField(key, 0.1)} aria-label="Increase 0.1" style={arrowBtnStyle}><ChevronRight size={14} /></button>
+                <button type="button" onClick={() => adjustField(key, 1)} aria-label="Increase 1" style={arrowBtnStyle}><ChevronsRight size={14} /></button>
               </span>
             );
           })}
         </span>
       </div>
-      <div style={{ display: "flex", gap: 6, justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", gap: 6 }}>
-          {[
-            { label: "-0.1", delta: -0.1 },
-            { label: "-", delta: -1 },
-            { label: "+", delta: 1 },
-            { label: "+0.1", delta: 0.1 },
-          ].map(({ label, delta }) => (
-            <button
-              key={label}
-              type="button"
-              onClick={() => adjust(delta)}
-              style={{
-                width: 30, height: 26, padding: 0, borderRadius: 0,
-                border: `1px solid ${C.line}`, background: C.paperSoft,
-                color: C.inkSoft, fontWeight: 600, fontSize: 10, cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontFamily: SANS, lineHeight: 1,
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <button
           type="button"
           onClick={() => setPartialOpen(true)}
