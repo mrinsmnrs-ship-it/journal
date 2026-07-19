@@ -80,48 +80,53 @@ export default function RiskRPanel({ form, updateForm }) {
 
   return (
     <div style={{ marginBottom: 22 }}>
-      <div style={{ marginBottom: 6 }}>
-        {R_FIELDS.map(({ key, label }) => {
-          const active = activeField === key;
-          const raw = form[key];
-          const numeric = raw === "" || raw === undefined || raw === null || isNaN(Number(raw)) ? 0 : Number(raw);
-          const isNegative = numeric < 0;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setActiveField(key)}
-              style={{
-                width: "100%", boxSizing: "border-box", background: "transparent",
-                border: "none", borderBottom: `1px solid ${active ? C.btnAccentBorder : C.line}`,
-                borderRadius: 0, padding: "14px 0", cursor: "pointer",
-                display: "flex", justifyContent: "space-between", alignItems: "center",
-              }}
-            >
-              <span style={{
-                fontFamily: LABEL_FONT, fontSize: 13, fontWeight: 600, letterSpacing: "0.01em",
-                color: C.muted,
-              }}>{label}</span>
-              <span style={{ display: "flex", alignItems: "center", gap: 1 }}>
-                {isNegative && (
-                  <span style={{ fontSize: 14, fontWeight: 600, color: C.inputText, lineHeight: 1 }}>&minus;</span>
-                )}
-                <Counter
-                  value={Math.abs(numeric)}
-                  places={[10, 1, ".", 0.1]}
-                  fontSize={14}
-                  padding={1}
-                  gap={1}
-                  horizontalPadding={0}
-                  textColor={C.inputText}
-                  fontWeight={600}
-                  topGradientStyle={{ display: "none" }}
-                  bottomGradientStyle={{ display: "none" }}
-                />
+      <div style={{
+        width: "100%", boxSizing: "border-box", display: "flex", alignItems: "center",
+        justifyContent: "space-between", gap: 16, padding: "14px 0",
+        borderBottom: `1px solid ${C.line}`, marginBottom: 6,
+      }}>
+        <span style={{
+          fontFamily: LABEL_FONT, fontSize: 13, fontWeight: 600, letterSpacing: "0.01em",
+          color: C.muted, flexShrink: 0,
+        }}>R Planned / R Actual</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {R_FIELDS.map(({ key }, idx) => {
+            const active = activeField === key;
+            const raw = form[key];
+            const numeric = raw === "" || raw === undefined || raw === null || isNaN(Number(raw)) ? 0 : Number(raw);
+            const isNegative = numeric < 0;
+            const valueColor = active ? C.btnAccentText : C.inputText;
+            return (
+              <span key={key} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {idx > 0 && <span style={{ fontSize: 14, color: C.faint, lineHeight: 1 }}>/</span>}
+                <button
+                  type="button"
+                  onClick={() => setActiveField(key)}
+                  style={{
+                    background: "transparent", border: "none", padding: 0, margin: 0,
+                    cursor: "pointer", display: "flex", alignItems: "center", gap: 1,
+                  }}
+                >
+                  {isNegative && (
+                    <span style={{ fontSize: 14, fontWeight: 600, color: valueColor, lineHeight: 1 }}>&minus;</span>
+                  )}
+                  <Counter
+                    value={Math.abs(numeric)}
+                    places={[10, 1, ".", 0.1]}
+                    fontSize={14}
+                    padding={1}
+                    gap={1}
+                    horizontalPadding={0}
+                    textColor={valueColor}
+                    fontWeight={600}
+                    topGradientStyle={{ display: "none" }}
+                    bottomGradientStyle={{ display: "none" }}
+                  />
+                </button>
               </span>
-            </button>
-          );
-        })}
+            );
+          })}
+        </span>
       </div>
       <div style={{ display: "flex", gap: 6, justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", gap: 6 }}>
