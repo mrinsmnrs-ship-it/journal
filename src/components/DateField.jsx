@@ -150,9 +150,9 @@ export default function DateField({ value, onChange, align = "left" }) {
         onClick={() => setOpen((o) => !o)}
         style={{
           width: "100%", boxSizing: "border-box", background: "transparent", border: "none",
-          borderRadius: 0, height: 40, padding: 0, color: C.inputText, fontFamily: SANS, fontSize: 15,
-          textAlign: "right", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "flex-end",
-          boxShadow: "none",
+          borderRadius: 0, padding: 0, margin: 0, color: C.inputText, fontFamily: SANS, fontSize: 15,
+          lineHeight: 1.3, textAlign: "right", cursor: "pointer", display: "flex", alignItems: "center",
+          justifyContent: "flex-end", boxShadow: "none",
         }}
       >
         {value ? fmtDateDisplay(value) : "Select date"}
