@@ -78,40 +78,37 @@ export default function RiskRPanel({ form, updateForm }) {
 
   return (
     <div style={{ marginBottom: 22 }}>
-      <div style={{
-        width: "100%", boxSizing: "border-box", display: "flex", alignItems: "center",
-        justifyContent: "space-between", gap: 12, padding: "14px 0", flexWrap: "wrap",
-        borderBottom: `1px solid ${C.line}`, marginBottom: 14,
-      }}>
-        <span style={{
-          fontFamily: LABEL_FONT, fontSize: 13, fontWeight: 600, letterSpacing: "0.01em",
-          color: C.muted, flexShrink: 0,
-        }}>R Planned / R Actual</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {R_FIELDS.map(({ key }, idx) => {
-            const raw = form[key];
-            const numeric = raw === "" || raw === undefined || raw === null || isNaN(Number(raw)) ? 0 : Number(raw);
-            const arrowBtnStyle = {
-              background: "transparent", border: "none", padding: 2, margin: 0,
-              color: C.faint, cursor: "pointer", display: "flex", alignItems: "center",
-            };
-            return (
-              <span key={key} style={{ display: "flex", alignItems: "center", gap: 1 }}>
-                {idx > 0 && <span style={{ fontSize: 14, color: C.faint, lineHeight: 1, margin: "0 7px 0 0" }}>/</span>}
-                <button type="button" onClick={() => adjustField(key, -1)} aria-label="Decrease 1" style={arrowBtnStyle}><ChevronsLeft size={14} /></button>
-                <button type="button" onClick={() => adjustField(key, -0.1)} aria-label="Decrease 0.1" style={arrowBtnStyle}><ChevronLeft size={14} /></button>
-                <span style={{
-                  fontFamily: SANS, fontSize: 14, fontWeight: 600, color: C.inputText,
-                  minWidth: 36, textAlign: "center",
-                }}>{numeric.toFixed(1)}</span>
-                <button type="button" onClick={() => adjustField(key, 0.1)} aria-label="Increase 0.1" style={arrowBtnStyle}><ChevronRight size={14} /></button>
-                <button type="button" onClick={() => adjustField(key, 1)} aria-label="Increase 1" style={arrowBtnStyle}><ChevronsRight size={14} /></button>
-              </span>
-            );
-          })}
-        </span>
-      </div>
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+      {R_FIELDS.map(({ key, label }) => {
+        const raw = form[key];
+        const numeric = raw === "" || raw === undefined || raw === null || isNaN(Number(raw)) ? 0 : Number(raw);
+        const arrowBtnStyle = {
+          background: "transparent", border: "none", padding: 2, margin: 0,
+          color: C.faint, cursor: "pointer", display: "flex", alignItems: "center",
+        };
+        return (
+          <div key={key} style={{
+            width: "100%", boxSizing: "border-box", display: "flex", alignItems: "center",
+            justifyContent: "space-between", gap: 12, padding: "14px 0",
+            borderBottom: `1px solid ${C.line}`,
+          }}>
+            <span style={{
+              fontFamily: LABEL_FONT, fontSize: 13, fontWeight: 600, letterSpacing: "0.01em",
+              color: C.muted, flexShrink: 0,
+            }}>{label}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <button type="button" onClick={() => adjustField(key, -1)} aria-label="Decrease 1" style={arrowBtnStyle}><ChevronsLeft size={14} /></button>
+              <button type="button" onClick={() => adjustField(key, -0.1)} aria-label="Decrease 0.1" style={arrowBtnStyle}><ChevronLeft size={14} /></button>
+              <span style={{
+                fontFamily: SANS, fontSize: 14, fontWeight: 600, color: C.inputText,
+                minWidth: 36, textAlign: "center",
+              }}>{numeric.toFixed(1)}</span>
+              <button type="button" onClick={() => adjustField(key, 0.1)} aria-label="Increase 0.1" style={arrowBtnStyle}><ChevronRight size={14} /></button>
+              <button type="button" onClick={() => adjustField(key, 1)} aria-label="Increase 1" style={arrowBtnStyle}><ChevronsRight size={14} /></button>
+            </span>
+          </div>
+        );
+      })}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 14 }}>
         <button
           type="button"
           onClick={() => setPartialOpen(true)}
@@ -152,7 +149,7 @@ export default function RiskRPanel({ form, updateForm }) {
                   width: "min(85vw, 280px)", maxWidth: 280, maxHeight: "80vh",
                   display: "flex", flexDirection: "column",
                   color: C.ink,
-                  background: C.paperSoftLight, border: `1px solid ${C.line}`, borderRadius: 0,
+                  background: C.paperSoftLight, border: "none", borderRadius: 0,
                   boxShadow: C.shadowModal,
                 }}
               >
@@ -164,7 +161,7 @@ export default function RiskRPanel({ form, updateForm }) {
                   <div
                     style={{
                       width: "100%", boxSizing: "border-box", background: C.inputBg,
-                      border: `1px solid ${C.line}`,
+                      border: "none", borderBottom: `1px solid ${C.line}`,
                       borderRadius: 0, height: 40, padding: "0 12px",
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 1,
                       color: C.inputText, fontFamily: SANS, fontSize: 14, fontWeight: 600,
@@ -258,7 +255,7 @@ export default function RiskRPanel({ form, updateForm }) {
                             onClick={() => setPartialTarget(target)}
                             style={{
                               flex: 1, boxSizing: "border-box", background: C.inputBg,
-                              border: `1px solid ${active ? C.btnAccentBorder : C.inputBorder}`,
+                              border: "none", borderBottom: `1px solid ${active ? C.btnAccentBorder : C.inputBorder}`,
                               borderRadius: 0, height: 36, padding: "0 8px", cursor: "pointer",
                               display: "flex", alignItems: "center", justifyContent: "center", gap: 1,
                               color: C.inputText, fontFamily: SANS, fontSize: 13, fontWeight: 600,
