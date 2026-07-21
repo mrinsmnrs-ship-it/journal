@@ -1,167 +1,215 @@
-// src/components/trade/LogTradeForm.jsx
-import React, { useRef } from "react";
-import { Plus, X, Lock, ChevronLeft, ChevronRight } from "lucide-react";
-import { useTheme, SANS } from "../../theme/tokens.js";
-import Field from "../common/Field.jsx";
-import DateField from "../DateField.jsx";
-import TagSelect from "../TagSelect.jsx";
-import RiskRPanel from "./RiskRPanel.jsx";
+// src/components/TagSelect.jsx
+// ---- Notion-style creatable select: pick an existing tag or type to
+// create a new one, so you don't have to retype the same symbol/model
+// every time. Opens as a centered popup (same "mobile style" modal as
+// DateField) instead of an inline dropdown, and each option row has its
+// own delete (×) button so old/typo'd tags can be cleaned up. ----
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "motion/react";
+import { X } from "lucide-react";
+import { SANS, useTheme } from "../theme/tokens.js";
+import Tag from "./common/Tag.jsx";
+import useInputStyle from "./common/useInputStyle.js";
 
-export default function LogTradeForm({ form, updateForm, toggleEmotion, handleSave, canSave, symbolOptions, onAddSymbolOption, onDeleteSymbolOption, onAddImages, onRemoveImage, imageUploading, isLoggedIn = true, onRequestLogin }) {
+export default function TagSelect({ value, onChange, options, onAddOption, onDeleteOption, placeholder, uppercase, disabled }) {
   const C = useTheme();
-  const fileInputRef = useRef(null);
+  const inputStyle = useInputStyle();
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
-  if (!isLoggedIn) {
-    return (
-      <div style={{
-        background: C.paperSoftLight, borderRadius: 0, padding: "48px 24px", width: "100%",
-        maxWidth: "100%", boxSizing: "border-box", border: `1px solid ${C.line}`, boxShadow: C.shadowCard,
-        display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 14,
-      }}>
-        <div style={{
-          width: 48, height: 48, borderRadius: "50%", background: C.paperSoft,
-          display: "flex", alignItems: "center", justifyContent: "center", border: `1px solid ${C.line}`,
-        }}>
-          <Lock size={20} color={C.faint} />
-        </div>
-        <div style={{ fontSize: 17, fontWeight: 700, color: C.ink, fontFamily: SANS }}>Log in to add a trade</div>
-        <div style={{ fontSize: 13.5, color: C.muted, maxWidth: 320, lineHeight: 1.5, fontFamily: SANS }}>
-          Create a free account or log in first so your trades are saved and synced to your journal.
-        </div>
-        <button
-          type="button"
-          onClick={onRequestLogin}
-          style={{
-            marginTop: 6, padding: "12px 28px", borderRadius: 0, border: "none",
-            background: C.btnAccent, color: C.btnAccentTextActive, fontFamily: SANS, fontWeight: 700, fontSize: 14.5,
-            cursor: "pointer", boxShadow: C.shadowCard,
-          }}
-        >
-          Log In / Sign Up
-        </button>
-      </div>
-    );
+  const norm = (s) => (uppercase ? s.toUpperCase() : s);
+  const trimmedQuery = query.trim();
+  const filtered = options.filter((o) => o.value.toLowerCase().includes(trimmedQuery.toLowerCase()));
+  const exactMatch = options.some((o) => o.value.toLowerCase() === trimmedQuery.toLowerCase());
+
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prevOverflow; };
+  }, [open]);
+
+  function openMenu() {
+    if (disabled) return;
+    setQuery("");
+    setConfirmDelete(null);
+    setOpen(true);
+  }
+  function closeMenu() {
+    setOpen(false);
+    setConfirmDelete(null);
+  }
+  function select(opt) {
+    onChange(opt);
+    closeMenu();
+  }
+  function createAndSelect() {
+    const v = norm(trimmedQuery);
+    if (!v) return;
+    if (!options.some((o) => o.value.toLowerCase() === v.toLowerCase())) onAddOption(v);
+    onChange(v);
+    closeMenu();
+  }
+  function handleKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (exactMatch) select(options.find((o) => o.value.toLowerCase() === trimmedQuery.toLowerCase()).value);
+      else createAndSelect();
+    } else if (e.key === "Escape") {
+      closeMenu();
+    }
+  }
+  function requestDelete(e, opt) {
+    e.stopPropagation();
+    setConfirmDelete(opt);
+  }
+  function confirmDeleteNow(e, opt) {
+    e.stopPropagation();
+    onDeleteOption?.(opt);
+    if (opt === value) onChange("");
+    setConfirmDelete(null);
   }
 
-  return (
-    <div style={{ background: C.paperSoftLight, borderRadius: 0, padding: 24, width: "100%", maxWidth: "100%", boxSizing: "border-box", fontSize: 16 }}>
-      <Field label="Date">
-        <DateField value={form.date} onChange={(d) => updateForm("date", d)} />
-      </Field>
-      <Field label="Symbol">
-        <TagSelect
-          value={form.symbol}
-          onChange={(v) => updateForm("symbol", v)}
-          options={symbolOptions}
-          onAddOption={onAddSymbolOption}
-          onDeleteOption={onDeleteSymbolOption}
-          placeholder="EURUSD, XAUUSD, ..."
-          uppercase
-        />
-      </Field>
-      <Field label="Direction">
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <button
-            type="button"
-            onClick={() => updateForm("direction", form.direction === "Long" ? "Short" : "Long")}
-            aria-label="Previous"
-            style={{
-              background: "transparent", border: "none", padding: 2, margin: 0,
-              color: C.faint, cursor: "pointer", display: "flex", alignItems: "center",
-            }}
-          ><ChevronLeft size={16} /></button>
-          <span style={{
-            fontFamily: SANS, fontSize: 15, fontWeight: 600, color: C.inputText,
-            minWidth: 46, textAlign: "center",
-          }}>{form.direction}</span>
-          <button
-            type="button"
-            onClick={() => updateForm("direction", form.direction === "Long" ? "Short" : "Long")}
-            aria-label="Next"
-            style={{
-              background: "transparent", border: "none", padding: 2, margin: 0,
-              color: C.faint, cursor: "pointer", display: "flex", alignItems: "center",
-            }}
-          ><ChevronRight size={16} /></button>
-        </div>
-      </Field>
-      <RiskRPanel form={form} updateForm={updateForm} />
-      <Field label="Notes" stacked>
-        <textarea
-          placeholder="Additional notes..."
-          value={form.notes}
-          onChange={(e) => updateForm("notes", e.target.value)}
-          rows={3}
+  const popupContent = (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          onClick={closeMenu}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
           style={{
-            width: "100%", boxSizing: "border-box", background: "transparent",
-            border: "none", borderRadius: 0, padding: 0,
-            color: C.inputText, fontFamily: SANS, fontSize: 15, outline: "none",
-            boxShadow: "none", resize: "none",
+            position: "fixed", inset: 0, zIndex: 29,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: 16, boxSizing: "border-box",
+            background: "rgba(0,0,0,0.35)",
           }}
-        />
-      </Field>
-      <div style={{ marginTop: 20, marginBottom: 22, marginLeft: -5, marginRight: -5, display: "flex", flexWrap: "wrap" }}>
-        {(form.images || []).map((src, i) => (
-          <div key={i} style={{ width: "25%", boxSizing: "border-box", padding: "0 5px 10px" }}>
-            <div style={{ position: "relative", width: "100%", aspectRatio: "1" }}>
-              <img src={src} alt="" style={{
-                width: "100%", height: "100%", objectFit: "cover", border: `1px solid ${C.line}`, borderRadius: 0,
-                display: "block",
-              }} />
-              <button
-                type="button"
-                onClick={() => onRemoveImage(i)}
-                aria-label="Remove image"
+        >
+          <motion.div
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            style={{
+              width: "min(88vw, 320px)", maxWidth: 320, maxHeight: "min(80vh, 440px)",
+              display: "flex", flexDirection: "column", color: C.ink,
+              background: C.paperSoftLight, border: "none", borderRadius: 0,
+              boxShadow: C.shadowModal,
+            }}>
+            <div style={{ padding: "14px 14px 12px 14px", flexShrink: 0, borderBottom: `1px solid ${C.line}` }}>
+              <input
+                type="text"
+                autoFocus
+                className="tagselect-search-input"
+                placeholder={placeholder}
+                value={query}
+                onChange={(e) => setQuery(norm(e.target.value))}
+                onKeyDown={handleKeyDown}
                 style={{
-                  position: "absolute", top: -7, right: -7, width: 20, height: 20, borderRadius: "50%",
-                  background: C.ink, color: C.paper, border: `1px solid ${C.paper}`,
-                  display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0,
+                  ...inputStyle, border: "none", borderBottom: `1px solid ${C.inputBorder}`,
+                  height: 40, padding: "0 2px",
+                  textTransform: uppercase ? "uppercase" : "none",
                 }}
-              ><X size={12} /></button>
+              />
+              <style>{`.tagselect-search-input:focus { border-bottom-color: ${C.inputBorder} !important; box-shadow: none !important; }`}</style>
             </div>
-          </div>
-        ))}
-        {(form.images || []).length < 8 && (
-          <div style={{ width: "25%", boxSizing: "border-box", padding: "0 5px 10px" }}>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={imageUploading}
-              aria-label="Add image"
-              style={{
-                width: "100%", aspectRatio: "1", border: `1px dashed ${C.line}`, borderRadius: 0,
-                background: C.inputBg, color: C.muted, display: "flex", alignItems: "center", justifyContent: "center",
-                cursor: imageUploading ? "wait" : "pointer",
-              }}
-            >
-              <Plus size={22} />
-            </button>
-          </div>
-        )}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(e) => { onAddImages(e.target.files); e.target.value = ""; }}
-          style={{ display: "none" }}
-        />
-      </div>
+            <div style={{ padding: "12px 14px 14px 14px", overflowY: "auto", flex: 1, minHeight: 0 }}>
+              {filtered.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {filtered.map((opt) => (
+                    <div
+                      key={opt.value}
+                      onClick={() => select(opt.value)}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        border: "none", borderBottom: `1px solid ${C.line}`, borderRadius: 0, padding: "8px 10px",
+                        background: C.paperSoft,
+                        color: C.ink,
+                        fontSize: 14, fontWeight: 600, fontFamily: SANS, cursor: "pointer",
+                      }}
+                    >
+                      <span>{opt.value}</span>
+                      {(confirmDelete === opt.value ? (
+                        <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <button
+                            type="button"
+                            onClick={(e) => confirmDeleteNow(e, opt.value)}
+                            style={{
+                              border: "none", background: "transparent", color: C.popupDangerRed,
+                              fontSize: 12, fontWeight: 700, fontFamily: SANS, cursor: "pointer", padding: "2px 4px",
+                            }}
+                          >Delete</button>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setConfirmDelete(null); }}
+                            style={{
+                              border: "none", background: "transparent", color: C.muted,
+                              fontSize: 12, fontFamily: SANS, cursor: "pointer", padding: "2px 4px",
+                            }}
+                          >Cancel</button>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => requestDelete(e, opt.value)}
+                          style={{
+                            border: "none", background: "transparent", color: C.muted,
+                            cursor: "pointer", padding: 2, display: "flex", flexShrink: 0,
+                          }}
+                          aria-label={`Delete ${opt.value}`}
+                        ><X size={15} /></button>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {trimmedQuery && !exactMatch && (
+                <button
+                  type="button"
+                  onClick={createAndSelect}
+                  style={{
+                    width: "100%", textAlign: "left", border: "none", background: "transparent",
+                    color: C.muted, fontSize: 13, fontFamily: SANS, cursor: "pointer",
+                    padding: "8px 4px", marginTop: filtered.length > 0 ? 6 : 0,
+                  }}
+                >
+                  + Create "{norm(trimmedQuery)}"
+                </button>
+              )}
+              {filtered.length === 0 && !trimmedQuery && (
+                <div style={{ color: C.faint, fontSize: 13, fontFamily: SANS, padding: "6px 4px" }}>
+                  Start typing to create an option.
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  return (
+    <div style={{ position: "relative" }}>
       <button
         type="button"
-        onClick={handleSave}
-        disabled={!canSave}
+        className="no-press"
+        disabled={disabled}
+        onClick={openMenu}
         style={{
-          width: "100%", padding: "16px 0", borderRadius: 0, border: "none",
-          background: canSave ? C.btnAccent : C.lineSoft,
-          color: canSave ? C.btnAccentTextActive : C.faint,
-          fontFamily: SANS, fontWeight: 700, fontSize: 17, cursor: canSave ? "pointer" : "not-allowed",
-          boxShadow: canSave ? C.shadowCard : "none",
-          transition: "background-color 0.15s ease, color 0.15s ease",
+          width: "100%", boxSizing: "border-box", background: "transparent", border: "none",
+          borderRadius: 0, padding: 0, margin: 0, color: value ? C.inputText : C.faint,
+          fontFamily: SANS, fontSize: 15, lineHeight: 1.3, textTransform: uppercase ? "uppercase" : "none",
+          textAlign: "right", cursor: disabled ? "not-allowed" : "pointer", display: "flex", alignItems: "center",
+          justifyContent: "flex-end", opacity: disabled ? 0.5 : 1, boxShadow: "none",
         }}
       >
-        Save Trade
+        {value || placeholder}
       </button>
-          </div>
+      {createPortal(popupContent, document.body)}
+    </div>
   );
-}
+              }
