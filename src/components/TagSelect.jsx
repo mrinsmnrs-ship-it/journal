@@ -97,7 +97,7 @@ export default function TagSelect({ value, onChange, options, onAddOption, onDel
             style={{
               width: "min(88vw, 320px)", maxWidth: 320, maxHeight: "min(80vh, 440px)",
               display: "flex", flexDirection: "column", color: C.ink,
-              background: C.paperSoftLight, border: `1px solid ${C.line}`, borderRadius: 0,
+              background: C.paperSoftLight, border: "none", borderRadius: 0,
               boxShadow: C.shadowModal,
             }}>
             <div style={{ padding: "14px 14px 12px 14px", flexShrink: 0, borderBottom: `1px solid ${C.line}` }}>
@@ -110,11 +110,12 @@ export default function TagSelect({ value, onChange, options, onAddOption, onDel
                 onChange={(e) => setQuery(norm(e.target.value))}
                 onKeyDown={handleKeyDown}
                 style={{
-                  ...inputStyle, height: 40, padding: "0 14px",
+                  ...inputStyle, border: "none", borderBottom: `1px solid ${C.inputBorder}`,
+                  height: 40, padding: "0 2px",
                   textTransform: uppercase ? "uppercase" : "none",
                 }}
               />
-              <style>{`.tagselect-search-input:focus { border-color: ${C.inputBorder} !important; box-shadow: none !important; }`}</style>
+              <style>{`.tagselect-search-input:focus { border-bottom-color: ${C.inputBorder} !important; box-shadow: none !important; }`}</style>
             </div>
             <div style={{ padding: "12px 14px 14px 14px", overflowY: "auto", flex: 1, minHeight: 0 }}>
               {filtered.length > 0 && (
@@ -125,7 +126,7 @@ export default function TagSelect({ value, onChange, options, onAddOption, onDel
                       onClick={() => select(opt.value)}
                       style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
-                        border: `1px solid ${C.line}`, borderRadius: 0, padding: "8px 10px",
+                        border: "none", borderBottom: `1px solid ${C.line}`, borderRadius: 0, padding: "8px 10px",
                         background: C.paperSoft,
                         color: C.ink,
                         fontSize: 14, fontWeight: 600, fontFamily: SANS, cursor: "pointer",
