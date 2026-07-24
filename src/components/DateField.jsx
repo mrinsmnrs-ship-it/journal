@@ -18,9 +18,9 @@ const calendarSlideVariants = {
   exit: (dir) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0 }),
 };
 
-export default function DateField({ value, onChange, align = "left" }) {
+export default function DateField({ value, onChange, align = "left", autoOpen = false }) {
   const C = useTheme();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(autoOpen);
   const wrapperRef = useRef(null);
   const initial = value ? new Date(value + "T00:00:00") : new Date();
   const [viewYear, setViewYear] = useState(initial.getFullYear());
