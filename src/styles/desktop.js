@@ -58,13 +58,6 @@ export function getDesktopStyles(C, SANS) {
         padding: 0 24px; box-sizing: border-box;
       }
 
-      /* Collapse the mobile 2-row chip grid into a single row on desktop
-         (display:contents unwraps the row divs so their chips become
-         direct flex items of the wrap, without touching the mobile CSS). */
-      .period-filter-chips-wrap { display: flex; gap: 9px; flex-wrap: nowrap; }
-      .period-chip-row-1, .period-chip-row-2 { display: contents; }
-      .period-filter-chips-wrap button { flex: 1 1 0; min-width: 0; }
-
       .perf-marquee {
         display: block; flex-shrink: 0;
         overflow: hidden; white-space: nowrap;
