@@ -68,8 +68,8 @@ export const ThemeContext = createContext(DARK);
 export function useTheme() { return useContext(ThemeContext); }
 
 export const PERIODS = [
-  { key: "all", label: "All Time" },
-  { key: "week", label: "This Week" },
-  { key: "month", label: "This Month" },
-  { key: "year", label: "This Year" },
+  { key: "all", label: "All" },
+  { key: "week", label: "W" },
+  { key: "month", label: "M" },
+  { key: "year", label: "Y" },
 ];
