@@ -40,7 +40,7 @@ function AnimatedStat({ value, decimals = 0, prefix = "", suffix = "", separator
 function BarBox({ children }) {
   const C = useTheme();
   return (
-    <div style={{ width: "100%", background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 0, padding: "6px 10px", boxShadow: C.shadowCard }}>
+    <div style={{ width: "100%", background: C.paperSoftStat, borderBottom: `1px solid ${C.line}`, borderRadius: 0, padding: "6px 10px" }}>
       {children}
     </div>
   );
@@ -412,7 +412,7 @@ export default function Dashboard({ trades, period, customRange }) {
               <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 20, letterSpacing: "-0.01em", color: C.ink }}>Trade Calendar</div>
               <div style={{ fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 0 }}>Daily P&amp;L</div>
             </div>
-            <div style={{ width: "100%", background: C.paperSoftStat, border: `1px solid ${C.line}`, borderRadius: 0, padding: "16px 18px", boxShadow: C.shadowCard }}>
+            <div style={{ width: "100%", background: C.paperSoftStat, borderBottom: `1px solid ${C.line}`, borderRadius: 0, padding: "16px 18px" }}>
               <TradeCalendarMonth trades={trades} />
             </div>
           </div>
