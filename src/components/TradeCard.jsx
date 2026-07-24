@@ -5,18 +5,12 @@ import { SANS, useTheme } from "../theme/tokens.js";
 import { fmtR } from "../utils/format.js";
 import ImageLightbox from "./ImageLightbox.jsx";
 
-const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-
 export default function TradeCard({ t, onDelete }) {
   const C = useTheme();
   const [expanded, setExpanded] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState(null);
   const win = t.rActual > 0;
   const hasDetails = t.reason || t.direction || t.rules || t.emotion || t.notes || (t.images && t.images.length > 0);
-  // Trade yang sudah tersimpan di Journal cuma boleh dihapus dalam 7 hari
-  // sejak dicatat — setelahnya jadi catatan permanen. Trade lama tanpa
-  // `createdAt` (dicatat sebelum aturan ini ada) dianggap sudah lewat masa itu.
-  const canDelete = t.createdAt ? Date.now() - t.createdAt < ONE_WEEK_MS : false;
 
   return (
     <div style={{
@@ -100,12 +94,10 @@ export default function TradeCard({ t, onDelete }) {
                 ))}
               </div>
             )}
-            {canDelete && (
-              <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{
-                marginTop: 15, background: "transparent", border: "none", color: C.faint, fontSize: 10, fontFamily: SANS,
-                display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: 0,
-              }}><Trash2 size={11} /> Delete</button>
-            )}
+            <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{
+              marginTop: 15, background: "transparent", border: "none", color: C.faint, fontSize: 10, fontFamily: SANS,
+              display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: 0,
+            }}><Trash2 size={11} /> Delete</button>
           </div>
         </div>
       </div>
