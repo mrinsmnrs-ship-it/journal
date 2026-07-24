@@ -20,8 +20,8 @@ export default function TradeCard({ t, onDelete }) {
 
   return (
     <div style={{
-      background: C.paperSoftLight, border: `1px solid ${C.line}`,
-      borderRadius: 0, boxShadow: C.shadowCard, overflow: "hidden",
+      background: C.paperSoftLight, borderBottom: `1px solid ${C.line}`,
+      borderRadius: 0, overflow: "hidden",
     }}>
       <button
         type="button"
@@ -64,13 +64,13 @@ export default function TradeCard({ t, onDelete }) {
               ].filter(Boolean);
               if (rows.length === 0) return null;
               return (
-                <div style={{ marginTop: 4, border: `1px solid ${C.line}`, borderRadius: 0 }}>
+                <div style={{ marginTop: 4, borderTop: `1px solid ${C.line}`, borderRadius: 0 }}>
                   {rows.map((row, i) => (
                     <div
                       key={row.label}
                       style={{
                         display: "flex", padding: "10px 12px", gap: 12,
-                        borderTop: i === 0 ? "none" : `1px solid ${C.line}`,
+                        borderTop: i === 0 ? "none" : `1px solid ${C.lineSoft}`,
                       }}
                     >
                       <div style={{
@@ -92,7 +92,7 @@ export default function TradeCard({ t, onDelete }) {
                       type="button"
                       className="no-press"
                       onClick={(e) => { e.stopPropagation(); setLightboxSrc(src); }}
-                      style={{ display: "block", width: "100%", aspectRatio: "1", padding: 0, border: `1px solid ${C.line}`, background: "transparent", cursor: "pointer" }}
+                      style={{ display: "block", width: "100%", aspectRatio: "1", padding: 0, border: "none", background: "transparent", cursor: "pointer" }}
                     >
                       <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                     </button>
