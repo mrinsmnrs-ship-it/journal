@@ -43,18 +43,14 @@ export default function PeriodFilterBar({ period, setPeriod, customRange, setCus
             <PeriodItem key={p.key} label={p.label} active={period === p.key} onClick={() => setPeriod(p.key)} C={C} />
           ))}
           <PeriodItem label="Custom" active={period === "custom"} onClick={() => setPeriod("custom")} C={C} />
-        </div>
-        {period === "custom" && (
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
-            <div style={{ flex: 1, minWidth: 120 }}>
-              <DateField value={customRange.from} onChange={(d) => setCustomRange((r) => ({ ...r, from: d }))} />
-            </div>
-            <span style={{ color: C.muted, fontSize: 13, fontFamily: SANS }}>to</span>
-            <div style={{ flex: 1, minWidth: 120 }}>
+          {period === "custom" && (
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+              <DateField value={customRange.from} onChange={(d) => setCustomRange((r) => ({ ...r, from: d }))} autoOpen />
+              <span style={{ color: C.muted, fontSize: 13, fontFamily: SANS, flexShrink: 0 }}>to</span>
               <DateField value={customRange.to} onChange={(d) => setCustomRange((r) => ({ ...r, to: d }))} align="right" />
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
