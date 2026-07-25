@@ -12,7 +12,7 @@
 // comes from the normal global button:active scale in base.js.
 import React from "react";
 import { SANS, PERIODS, useTheme } from "../../theme/tokens.js";
-import DateField from "../DateField.jsx";
+import CustomRangeField from "./CustomRangeField.jsx";
 
 function PeriodItem({ label, active, onClick, C }) {
   return (
@@ -44,11 +44,13 @@ export default function PeriodFilterBar({ period, setPeriod, customRange, setCus
           ))}
           <PeriodItem label="Custom" active={period === "custom"} onClick={() => setPeriod("custom")} C={C} />
           {period === "custom" && (
-            <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-              <DateField value={customRange.from} onChange={(d) => setCustomRange((r) => ({ ...r, from: d }))} autoOpen />
-              <span style={{ color: C.muted, fontSize: 13, fontFamily: SANS, flexShrink: 0 }}>to</span>
-              <DateField value={customRange.to} onChange={(d) => setCustomRange((r) => ({ ...r, to: d }))} align="right" />
-            </div>
+            <CustomRangeField
+              from={customRange.from}
+              to={customRange.to}
+              onChangeFrom={(d) => setCustomRange((r) => ({ ...r, from: d }))}
+              onChangeTo={(d) => setCustomRange((r) => ({ ...r, to: d }))}
+              autoOpen
+            />
           )}
         </div>
       </div>
