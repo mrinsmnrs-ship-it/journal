@@ -9,7 +9,7 @@ import {
 } from "recharts";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { SANS, SERIF, MONO, useTheme } from "../../theme/tokens.js";
+import { SANS, SERIF, useTheme } from "../../theme/tokens.js";
 import { fmtR } from "../../utils/format.js";
 import { parseISO, startOfWeek, startOfMonth, startOfYear, clamp, fmtDateDisplay } from "../../utils/date.js";
 import {
@@ -63,12 +63,12 @@ function BarRow({ label, percent, display, isFirst, sub }) {
           <div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 13, color: C.ink, textAlign: "left" }}>
             {label}
           </div>
-          <span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 12, color: C.ink, flexShrink: 0 }}>
+          <span style={{ fontFamily: SANS, fontWeight: 700, fontSize: 12, color: C.ink, flexShrink: 0 }}>
             {display}
           </span>
         </div>
         {sub && (
-          <div style={{ fontFamily: MONO, fontSize: 11, color: C.muted, marginTop: 5 }}>
+          <div style={{ fontFamily: SANS, fontSize: 11, color: C.muted, marginTop: 5 }}>
             {sub}
           </div>
         )}
@@ -89,12 +89,12 @@ function BarRow({ label, percent, display, isFirst, sub }) {
               state, not the bold/vivid pressed one. */}
           <div style={{ width: `${clamp(percent, 0, 100)}%`, height: "100%", background: C.ink, opacity: 0.7, transition: "width 0.7s cubic-bezier(.4,0,.2,1)" }} />
         </div>
-        <span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 12, color: C.ink, minWidth: 44, textAlign: "right", flexShrink: 0 }}>
+        <span style={{ fontFamily: SANS, fontWeight: 700, fontSize: 12, color: C.ink, minWidth: 44, textAlign: "right", flexShrink: 0 }}>
           {display}
         </span>
       </div>
       {sub && (
-        <div style={{ fontFamily: MONO, fontSize: 11, color: C.muted, marginTop: 5 }}>
+        <div style={{ fontFamily: SANS, fontSize: 11, color: C.muted, marginTop: 5 }}>
           {sub}
         </div>
       )}
@@ -118,7 +118,7 @@ function EquityCurve({ trades }) {
           </defs>
           <CartesianGrid stroke={C.lineSoft} strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="index" tick={{ fontFamily: SANS, fontSize: 11, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
-          <YAxis tick={{ fontFamily: MONO, fontSize: 11, fill: C.muted }} axisLine={false} tickLine={false} width={40} />
+          <YAxis tick={{ fontFamily: SANS, fontSize: 11, fill: C.muted }} axisLine={false} tickLine={false} width={40} />
           <Tooltip
             contentStyle={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 0, fontFamily: SANS, fontSize: 12 }}
             labelFormatter={(v, payload) => (payload && payload[0] ? `${payload[0].payload.symbol} \u00b7 ${fmtDateDisplay(payload[0].payload.date)}` : v)}
@@ -157,7 +157,7 @@ function TradeRBarChart({ trades }) {
         <BarChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: -12 }}>
           <CartesianGrid stroke={C.lineSoft} strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="index" tick={{ fontFamily: SANS, fontSize: 11, fill: C.muted }} axisLine={{ stroke: C.line }} tickLine={false} />
-          <YAxis tick={{ fontFamily: MONO, fontSize: 11, fill: C.muted }} axisLine={false} tickLine={false} width={40} />
+          <YAxis tick={{ fontFamily: SANS, fontSize: 11, fill: C.muted }} axisLine={false} tickLine={false} width={40} />
           <Tooltip content={<TradeRTooltip />} cursor={{ fill: C.line, opacity: 0.18 }} />
           <ReferenceLine y={0} stroke={C.line} />
           <Bar dataKey="r" radius={0}>
@@ -285,7 +285,7 @@ function TradeCalendarMonth({ trades }) {
                   style={{
                     aspectRatio: "1", display: "flex", alignItems: "center", justifyContent: "center",
                     background: bg, border, borderRadius: 0, color: textColor,
-                    fontFamily: MONO, fontSize: 12, fontWeight: 600,
+                    fontFamily: SANS, fontSize: 12, fontWeight: 600,
                   }}
                 >
                   {d}
