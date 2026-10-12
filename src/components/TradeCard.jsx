@@ -63,16 +63,16 @@ export default function TradeCard({ t, onDelete }) {
                     <div
                       key={row.label}
                       style={{
-                        display: "flex", padding: "10px 12px", gap: 12,
+                        display: "flex", alignItems: "baseline", padding: "10px 12px", gap: 12,
                         borderTop: i === 0 ? "none" : `1px solid ${C.lineSoft}`,
                       }}
                     >
                       <div style={{
-                        width: 84, flexShrink: 0, fontFamily: SANS, fontSize: 11,
-                        fontWeight: 700, color: C.faint, textTransform: "uppercase",
-                        letterSpacing: "0.04em", paddingTop: 1,
+                        width: 84, flexShrink: 0, fontFamily: SANS, fontSize: 12, lineHeight: 1.4,
+                        fontWeight: 600, color: C.faint, textTransform: "uppercase",
+                        letterSpacing: "0.04em",
                       }}>{row.label}</div>
-                      <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.4 }}>{row.value}</div>
+                      <div style={{ fontFamily: SANS, fontSize: 13, fontWeight: 500, color: C.inkSoft, lineHeight: 1.4 }}>{row.value}</div>
                     </div>
                   ))}
                 </div>
