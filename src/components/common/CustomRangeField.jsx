@@ -120,7 +120,6 @@ export default function CustomRangeField({ from, to, onChangeFrom, onChangeTo, a
                   background: "transparent", border: "none", padding: "2px 0", cursor: "pointer",
                   fontFamily: SANS, fontSize: 14, fontWeight: which === "from" ? 700 : 500,
                   color: which === "from" ? C.ink : C.muted,
-                  borderBottom: which === "from" ? `2px solid ${C.ink}` : "2px solid transparent",
                 }}
               >
                 {from ? fmtDateDisplay(from) : "Select date"}
@@ -133,7 +132,6 @@ export default function CustomRangeField({ from, to, onChangeFrom, onChangeTo, a
                   background: "transparent", border: "none", padding: "2px 0", cursor: "pointer",
                   fontFamily: SANS, fontSize: 14, fontWeight: which === "to" ? 700 : 500,
                   color: which === "to" ? C.ink : C.muted,
-                  borderBottom: which === "to" ? `2px solid ${C.ink}` : "2px solid transparent",
                 }}
               >
                 {to ? fmtDateDisplay(to) : "Select date"}
