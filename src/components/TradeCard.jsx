@@ -69,8 +69,7 @@ export default function TradeCard({ t, onDelete }) {
                     >
                       <div style={{
                         width: 84, flexShrink: 0, fontFamily: SANS, fontSize: 12, lineHeight: 1.4,
-                        fontWeight: 600, color: C.faint, textTransform: "uppercase",
-                        letterSpacing: "0.04em",
+                        fontWeight: 600, color: C.faint,
                       }}>{row.label}</div>
                       <div style={{ fontFamily: SANS, fontSize: 13, fontWeight: 500, color: C.inkSoft, lineHeight: 1.4 }}>{row.value}</div>
                     </div>
