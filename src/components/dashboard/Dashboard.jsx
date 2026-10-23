@@ -243,9 +243,9 @@ function TradeCalendarMonth({ trades }) {
           <ChevronRight size={18} />
         </button>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, marginBottom: 2 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
         {CAL_WEEKDAYS.map((w, i) => (
-          <div key={i} style={{ textAlign: "center", fontFamily: SANS, fontSize: 11, fontWeight: 600, color: C.muted, padding: "2px 0" }}>{w}</div>
+          <div key={i} style={{ aspectRatio: "1", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: SANS, fontSize: 11, fontWeight: 600, color: C.muted }}>{w}</div>
         ))}
       </div>
       <div style={{ position: "relative", overflow: "hidden" }}>
