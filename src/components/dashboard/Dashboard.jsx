@@ -271,7 +271,7 @@ function TradeCalendarMonth({ trades }) {
               const data = dailyMap.get(iso);
               let bg = "transparent";
               let border = "1px solid transparent";
-              let textColor = C.inkSoft;
+              let textColor = C.ink;
               if (data && data.total > 0) { bg = C.ink; border = `1px solid ${C.ink}`; textColor = C.bg; }
               else if (data && data.total < 0) { bg = C.faint; border = `1px solid ${C.faint}`; textColor = C.ink; }
               else if (data) { bg = C.lineSoft; border = `1px solid ${C.line}`; textColor = C.ink; }
@@ -285,7 +285,7 @@ function TradeCalendarMonth({ trades }) {
                   style={{
                     aspectRatio: "1", display: "flex", alignItems: "center", justifyContent: "center",
                     background: bg, border, borderRadius: 0, color: textColor,
-                    fontFamily: SANS, fontSize: 12, fontWeight: 600,
+                    fontFamily: SANS, fontSize: 12, fontWeight: 300,
                   }}
                 >
                   {d}
