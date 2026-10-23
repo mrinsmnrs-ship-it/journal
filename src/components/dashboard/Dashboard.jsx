@@ -335,8 +335,8 @@ function SymbolPerformanceBars({ trades, filteredTrades }) {
             label={item.symbol}
             display={
               <span style={{ display: "inline-flex", justifyContent: "space-between", alignItems: "baseline", minWidth: 104 }}>
-                <span>Winrate:</span>
-                <span style={{ textAlign: "right" }}><AnimatedStat value={winRate} decimals={0} suffix="%" /></span>
+                <span>Win Rate:</span>
+                <span style={{ textAlign: "right" }}><AnimatedStat value={winRate} decimals={1} suffix="%" /></span>
               </span>
             }
             sub={
