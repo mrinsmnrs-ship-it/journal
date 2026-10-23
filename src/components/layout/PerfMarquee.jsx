@@ -24,8 +24,6 @@ export default function PerfMarquee({ stats }) {
             <span style={{ color: C.line }}>&middot;</span>
             <span style={{ padding: "0 14px" }}>Avg Loss {fmtR(stats.avgLoss)}</span>
             <span style={{ color: C.line }}>&middot;</span>
-            <span style={{ padding: "0 14px" }}>Discipline {Math.round(stats.disciplineScore)}%</span>
-            <span style={{ color: C.line }}>&middot;</span>
             <span style={{ padding: "0 14px" }}>Risk Consistency {Math.round(stats.riskConsistency)}%</span>
           </span>
         ))}
